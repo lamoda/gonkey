@@ -1,0 +1,427 @@
+- name: >
+    1) Returns all the list of all breeds and sub-breeds
+  method: GET
+  path: /api/breeds/list/all
+  comparisonParams:
+    ignoreArraysOrdering: true
+  response:
+    200: >
+      {
+        "status": "success",
+        "message": {
+          "affenpinscher": [],
+          "african": [],
+          "airedale": [],
+          "akita": [],
+          "appenzeller": [],
+          "basenji": [],
+          "beagle": [],
+          "bluetick": [],
+          "borzoi": [],
+          "bouvier": [],
+          "boxer": [],
+          "brabancon": [],
+          "briard": [],
+          "bulldog": [
+            "boston",
+            "english",
+            "french"
+          ],
+          "bullterrier": [
+            "staffordshire"
+          ],
+          "cairn": [],
+          "cattledog": [
+            "australian"
+          ],
+          "chihuahua": [],
+          "chow": [],
+          "clumber": [],
+          "cockapoo": [],
+          "collie": [
+            "border"
+          ],
+          "coonhound": [],
+          "corgi": [
+            "cardigan"
+          ],
+          "cotondetulear": [],
+          "dachshund": [],
+          "dalmatian": [],
+          "dane": [
+            "great"
+          ],
+          "deerhound": [
+            "scottish"
+          ],
+          "dhole": [],
+          "dingo": [],
+          "doberman": [],
+          "elkhound": [
+            "norwegian"
+          ],
+          "entlebucher": [],
+          "eskimo": [],
+          "frise": [
+            "bichon"
+          ],
+          "germanshepherd": [],
+          "greyhound": [
+            "italian"
+          ],
+          "groenendael": [],
+          "hound": [
+            "afghan",
+            "basset",
+            "blood",
+            "english",
+            "ibizan",
+            "walker"
+          ],
+          "husky": [],
+          "keeshond": [],
+          "kelpie": [],
+          "komondor": [],
+          "kuvasz": [],
+          "labrador": [],
+          "leonberg": [],
+          "lhasa": [],
+          "malamute": [],
+          "malinois": [],
+          "maltese": [],
+          "mastiff": [
+            "bull",
+            "english",
+            "tibetan"
+          ],
+          "mexicanhairless": [],
+          "mix": [],
+          "mountain": [
+            "bernese",
+            "swiss"
+          ],
+          "newfoundland": [],
+          "otterhound": [],
+          "papillon": [],
+          "pekinese": [],
+          "pembroke": [],
+          "pinscher": [
+            "miniature"
+          ],
+          "pointer": [
+            "german",
+            "germanlonghair"
+          ],
+          "pomeranian": [],
+          "poodle": [
+            "miniature",
+            "standard",
+            "toy"
+          ],
+          "pug": [],
+          "puggle": [],
+          "pyrenees": [],
+          "redbone": [],
+          "retriever": [
+            "chesapeake",
+            "curly",
+            "flatcoated",
+            "golden"
+          ],
+          "ridgeback": [
+            "rhodesian"
+          ],
+          "rottweiler": [],
+          "saluki": [],
+          "samoyed": [],
+          "schipperke": [],
+          "schnauzer": [
+            "giant",
+            "miniature"
+          ],
+          "setter": [
+            "english",
+            "gordon",
+            "irish"
+          ],
+          "sheepdog": [
+            "english",
+            "shetland"
+          ],
+          "shiba": [],
+          "shihtzu": [],
+          "spaniel": [
+            "blenheim",
+            "brittany",
+            "cocker",
+            "irish",
+            "japanese",
+            "sussex",
+            "welsh"
+          ],
+          "springer": [
+            "english"
+          ],
+          "stbernard": [],
+          "terrier": [
+            "american",
+            "australian",
+            "bedlington",
+            "border",
+            "dandie",
+            "fox",
+            "irish",
+            "kerryblue",
+            "lakeland",
+            "norfolk",
+            "norwich",
+            "patterdale",
+            "russell",
+            "scottish",
+            "sealyham",
+            "silky",
+            "tibetan",
+            "toy",
+            "westhighland",
+            "wheaten",
+            "yorkshire"
+          ],
+          "vizsla": [],
+          "weimaraner": [],
+          "whippet": [],
+          "wolfhound": [
+            "irish"
+          ]
+        }
+      }
+
+- name: >
+    2) Returns an array of all the images from a breed beagle
+  method: GET
+  path: /api/breed/beagle/images
+  comparisonParams:
+    ignoreArraysOrdering: true
+  response:
+    200: >
+      {
+        "status": "success",
+        "message": [
+          "https://images.dog.ceo/breeds/beagle/n02088364_10108.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10206.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10296.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10354.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10362.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10575.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10585.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10731.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10798.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_10947.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11130.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11136.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11147.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11231.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_1128.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11391.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11458.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11509.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11698.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11711.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11828.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11836.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_11930.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12102.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12124.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12131.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12154.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12178.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12213.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12291.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12303.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12334.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12397.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12405.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12440.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12710.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12713.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12745.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12756.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12794.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12816.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12869.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_129.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12920.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12972.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_12973.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13028.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13050.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13128.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13214.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13236.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13428.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13464.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13477.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13478.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13484.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13572.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13627.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13630.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13682.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13809.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_1384.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13944.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_13981.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14055.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14079.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14095.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14220.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14369.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14394.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14431.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14548.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14613.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14663.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14690.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14702.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14779.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14863.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14892.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14911.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_14968.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15036.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_1507.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15082.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15093.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15111.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15305.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15315.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15370.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15690.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15787.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_15877.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16060.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16065.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_161.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16165.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16207.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16210.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16339.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16493.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16502.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16508.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16519.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16588.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16635.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16689.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16695.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16704.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16721.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16791.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16881.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_16985.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17167.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17170.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17258.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17294.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17314.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17406.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17473.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17474.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17479.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17530.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17534.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17553.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17671.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17689.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17766.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_17935.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_18403.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_18404.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2000.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2019.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2106.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2143.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2360.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2415.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2499.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2502.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2566.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2572.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2652.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2661.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_2840.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_3171.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_3752.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_3758.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4052.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4070.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4237.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_427.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4281.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4473.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4493.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4527.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4706.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4823.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_4879.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5090.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5123.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5147.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5282.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5427.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5572.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5716.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5784.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_5826.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_6089.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_6109.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_6211.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_6358.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_639.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_6547.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_6611.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_6866.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_7247.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_7324.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_769.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_7784.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_7927.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_8443.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_8477.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_852.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_8572.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_8612.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_8713.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_876.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_8820.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_8871.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_9318.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_9520.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_959.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_9650.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_9652.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_9825.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_9849.jpg",
+          "https://images.dog.ceo/breeds/beagle/n02088364_9895.jpg"
+        ]
+      }
+
+- name: >
+    3) Returns an array of all the sub-breeds from a breed
+  method: GET
+  path: /api/breed/spaniel/list
+  comparisonParams:
+    ignoreArraysOrdering: true
+  response:
+    200: >
+      {
+        "status": "success",
+        "message": [
+          "blenheim",
+          "brittany",
+          "cocker",
+          "irish",
+          "japanese",
+          "sussex",
+          "welsh"
+        ]
+      }

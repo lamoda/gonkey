@@ -1,0 +1,13 @@
+\vendor/
+\.idea/
+\.vscode/
+\pkg/
+gonkey
+_vendor*
+Gopkg.lock
+tmpfile*
+/allure-results
+
+# debug
+debug
+**/debug.test
