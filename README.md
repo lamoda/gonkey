@@ -172,8 +172,8 @@ func TestFuncCases(t *testing.T) {
 
 Пример файла:
 
-```
-# comments.yml
+```yaml
+# fixtures/comments.yml
 inherits:
   - another_fixture
   - yet_another_fixture
@@ -223,7 +223,7 @@ tables:
 С помощью шаблонов вы можете наследовать поля из шаблонной записи, каждый раз переопределяя только те поля, которые действительно важны для теста.
 
 Пример определения шаблона:
-```
+```yaml
 templates:
   dummy_client:
     name: Dummy Client Name
@@ -240,7 +240,7 @@ tables:
 ```
 
 Пример использования шаблона в фикстуре:
-```
+```yaml
 templates:
    ...
 tables:
@@ -260,8 +260,8 @@ tables:
 
 Для того, чтобы унаследовать запись, сначала нужно присвоить строке имя с помощью `$name`:
 
-```
-# post.yaml
+```yaml
+# fixtures/post.yaml
 tables:
   posts:
     - $name: regular_post
@@ -273,8 +273,8 @@ tables:
 
 В другом файле фикстур нужно объявить, что определенная строка наследует ранее объявленную запись с помощью `$extend`, так же, как и в случае с шаблоном:
 
-```
-# deleted_post.yaml
+```yaml
+# fixtures/deleted_post.yaml
 inherits:
   - post
 tables:
@@ -295,8 +295,8 @@ tables:
 
 Объявим именованную запись:
 
-```
-# post.yaml
+```yaml
+# fixtures/post.yaml
 tables:
   posts:
     - $name: regular_post
@@ -306,8 +306,8 @@ tables:
 
 Теперь, чтобы связать таблицы `posts` и `comments`, обратимся к записи по имени (`$regular_post`) и укажем поле, из которого следует взять значение (`id`):
 
-```
-# comment.yaml
+```yaml
+# fixtures/comment.yaml
 tables:
   comments:
     - post_id: $regular_post.id
@@ -325,7 +325,7 @@ tables:
 
 Например, такая конструкция вставит текущую дату и время в качестве значения поля:
 
-```
+```yaml
 tables:
   comments:
     - created_at: $eval(NOW())

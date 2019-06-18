@@ -30,11 +30,14 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 		mocksLoader = mocks.NewLoader(params.Mocks)
 	}
 
+	debug := os.Getenv("GONKEY_DEBUG") != ""
+
 	var fixturesLoader *fixtures.Loader
 	if params.DB != nil {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
 			Location: params.FixturesDir,
 			DB:       params.DB,
+			Debug:    debug,
 		})
 	}
 

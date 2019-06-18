@@ -313,22 +313,18 @@ DECLARE
     r record;
 BEGIN
     FOR r IN (
-        SELECT 'SELECT SETVAL(' ||
-               quote_literal(quote_ident(PGT.schemaname) || '.' || quote_ident(S.relname)) ||
-               ', COALESCE(MAX(' || quote_ident(C.attname) || '), 1) ) FROM ' ||
-               quote_ident(PGT.schemaname) || '.' || quote_ident(T.relname) AS q
-        FROM pg_class AS S,
-             pg_depend AS D,
-             pg_class AS T,
-             pg_attribute AS C,
-             pg_tables AS PGT
-        WHERE S.relkind = 'S'
-            AND S.oid = D.objid
-            AND D.refobjid = T.oid
-            AND D.refobjid = C.attrelid
-            AND D.refobjsubid = C.attnum
-            AND T.relname = PGT.tablename
-        ORDER BY S.relname
+        SELECT 'SELECT SETVAL(' || quote_literal(quote_ident(seq_ns.nspname) || '.' || quote_ident(seq.relname))
+            || ', COALESCE(MAX(' || quote_ident(col.attname) || '), 1) ) FROM '
+            || quote_ident(tbl_ns.nspname) || '.' || quote_ident(tbl.relname) AS q
+        FROM pg_class seq
+            JOIN pg_namespace seq_ns ON (seq.relnamespace = seq_ns.oid)
+            JOIN pg_depend dep ON (dep.objid = seq.oid)
+            JOIN pg_class tbl ON (dep.refobjid = tbl.oid)
+            JOIN pg_namespace tbl_ns ON (tbl.relnamespace = tbl_ns.oid)
+            JOIN pg_attribute col ON (col.attrelid = tbl.oid AND dep.refobjsubid = col.attnum)
+        WHERE
+            seq.relkind = 'S'
+        ORDER BY seq.relname
     ) LOOP
         EXECUTE r.q;
     END LOOP;
