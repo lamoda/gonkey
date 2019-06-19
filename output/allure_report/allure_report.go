@@ -10,14 +10,13 @@ import (
 
 	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/output"
-	"stash.lamoda.ru/qa/allure-go-common"
 )
 
 type AllureReportOutput struct {
 	output.OutputInterface
 
 	reportLocation string
-	allure         allure.Allure
+	allure         Allure
 }
 
 func NewOutput(suiteName, reportLocation string) *AllureReportOutput {
@@ -25,7 +24,7 @@ func NewOutput(suiteName, reportLocation string) *AllureReportOutput {
 	if err := os.Mkdir(resultsDir, 0777); err != nil {
 		// likely dir is already exists
 	}
-	a := allure.Allure{
+	a := Allure{
 		Suites:    nil,
 		TargetDir: resultsDir,
 	}
