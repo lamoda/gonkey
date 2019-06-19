@@ -1,6 +1,7 @@
+export GO111MODULE=on
+
 REPO=qa.docker.lamoda.ru
 NAME=gonkey
-
 VERSION=$(shell git describe --tags 2> /dev/null || git rev-parse --short HEAD)
 
 DOCKER_TAG ?= latest
