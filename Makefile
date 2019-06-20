@@ -14,7 +14,7 @@ build: @build
 	docker build --force-rm --pull -t $(REPO)/$(NAME):$(DOCKER_TAG) .
 
 @build:
-	go build -a -o output
+	go build -a -o gonkey
 
 @push:
 	docker push $(REPO)/$(NAME):$(DOCKER_TAG)
