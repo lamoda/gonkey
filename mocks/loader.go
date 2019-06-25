@@ -216,6 +216,9 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 	case "bodyMatchesJSON":
 		*ak = append(*ak, "body")
 		return l.loadBodyMatchesJSONConstraint(def)
+	case "queryMatches":
+		*ak = append(*ak, "expectedQuery")
+		return l.loadQueryMatchesConstraint(def)
 	case "methodIsGET":
 		return &methodConstraint{method: "GET"}, nil
 	case "methodIsPOST":
@@ -241,6 +244,18 @@ func (l *Loader) loadBodyMatchesJSONConstraint(def map[interface{}]interface{}) 
 		return nil, errors.New("`body` must be string")
 	}
 	return newBodyMatchesJSONConstraint(body)
+}
+
+func (l *Loader) loadQueryMatchesConstraint(def map[interface{}]interface{}) (verifier, error) {
+	c, ok := def["expectedQuery"]
+	if !ok {
+		return nil, errors.New("`queryMatches` requires `expectedQuery` key")
+	}
+	query, ok := c.(string)
+	if !ok {
+		return nil, errors.New("`expectedQuery` must be string")
+	}
+	return newQueryConstraint(query)
 }
 
 func (l *Loader) loadMethodIsConstraint(def map[interface{}]interface{}) (verifier, error) {
