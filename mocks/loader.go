@@ -41,13 +41,13 @@ func (l *Loader) loadDefinition(path string, rawDef interface{}) (*definition, e
 	}
 
 	// load request constraints
-	var requestConstraints []requestConstraint
+	var requestConstraints []verifier
 	if constraints, ok := def["requestConstraints"]; ok {
 		constraints, ok := constraints.([]interface{})
 		if !ok || len(constraints) == 0 {
 			return nil, fmt.Errorf("at path %s: `requestConstraints` requires array", path)
 		}
-		requestConstraints = make([]requestConstraint, len(constraints))
+		requestConstraints = make([]verifier, len(constraints))
 		for i, c := range constraints {
 			constraint, err := l.loadConstraint(c)
 			if err != nil {
@@ -186,7 +186,7 @@ func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface
 	return newConstantReplyWithCode([]byte(body), statusCode), nil
 }
 
-func (l *Loader) loadConstraint(definition interface{}) (requestConstraint, error) {
+func (l *Loader) loadConstraint(definition interface{}) (verifier, error) {
 	def, ok := definition.(map[interface{}]interface{})
 	if !ok {
 		return nil, errors.New("must be map")
@@ -209,7 +209,7 @@ func (l *Loader) loadConstraint(definition interface{}) (requestConstraint, erro
 	return c, nil
 }
 
-func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface{}, ak *[]string) (requestConstraint, error) {
+func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface{}, ak *[]string) (verifier, error) {
 	switch kind {
 	case "nop":
 		return &nopConstraint{}, nil
@@ -231,7 +231,7 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 	}
 }
 
-func (l *Loader) loadBodyMatchesJSONConstraint(def map[interface{}]interface{}) (requestConstraint, error) {
+func (l *Loader) loadBodyMatchesJSONConstraint(def map[interface{}]interface{}) (verifier, error) {
 	c, ok := def["body"]
 	if !ok {
 		return nil, errors.New("`bodyMatchesJSON` requires `body` key")
@@ -243,7 +243,7 @@ func (l *Loader) loadBodyMatchesJSONConstraint(def map[interface{}]interface{}) 
 	return newBodyMatchesJSONConstraint(body)
 }
 
-func (l *Loader) loadMethodIsConstraint(def map[interface{}]interface{}) (requestConstraint, error) {
+func (l *Loader) loadMethodIsConstraint(def map[interface{}]interface{}) (verifier, error) {
 	c, ok := def["method"]
 	if !ok {
 		return nil, errors.New("`methodIs` requires `method` key")
@@ -255,7 +255,7 @@ func (l *Loader) loadMethodIsConstraint(def map[interface{}]interface{}) (reques
 	return &methodConstraint{method: method}, nil
 }
 
-func (l *Loader) loadHeaderIsConstraint(def map[interface{}]interface{}) (requestConstraint, error) {
+func (l *Loader) loadHeaderIsConstraint(def map[interface{}]interface{}) (verifier, error) {
 	c, ok := def["header"]
 	if !ok {
 		return nil, errors.New("`headerIs` requires `header` key")

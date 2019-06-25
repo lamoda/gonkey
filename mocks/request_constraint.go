@@ -13,12 +13,12 @@ import (
 	"github.com/lamoda/gonkey/compare"
 )
 
-type requestConstraint interface {
+type verifier interface {
 	Verify(r *http.Request) []error
 }
 
 type nopConstraint struct {
-	requestConstraint
+	verifier
 }
 
 func (c *nopConstraint) Verify(r *http.Request) []error {
@@ -26,12 +26,12 @@ func (c *nopConstraint) Verify(r *http.Request) []error {
 }
 
 type bodyMatchesJSONConstraint struct {
-	requestConstraint
+	verifier
 
 	expectedBody interface{}
 }
 
-func newBodyMatchesJSONConstraint(expected string) (requestConstraint, error) {
+func newBodyMatchesJSONConstraint(expected string) (verifier, error) {
 	var expectedBody interface{}
 	err := json.Unmarshal([]byte(expected), &expectedBody)
 	if err != nil {
@@ -65,7 +65,7 @@ func (c *bodyMatchesJSONConstraint) Verify(r *http.Request) []error {
 }
 
 type methodConstraint struct {
-	requestConstraint
+	verifier
 
 	method string
 }
@@ -78,14 +78,14 @@ func (c *methodConstraint) Verify(r *http.Request) []error {
 }
 
 type headerConstraint struct {
-	requestConstraint
+	verifier
 
 	header string
 	value  string
 	regexp *regexp.Regexp
 }
 
-func newHeaderConstraint(header, value, re string) (requestConstraint, error) {
+func newHeaderConstraint(header, value, re string) (verifier, error) {
 	var reCompiled *regexp.Regexp
 	if re != "" {
 		var err error
