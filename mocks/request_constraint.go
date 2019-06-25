@@ -7,18 +7,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/lamoda/gonkey/compare"
 )
 
-type requestConstraint interface {
+type verifier interface {
 	Verify(r *http.Request) []error
 }
 
 type nopConstraint struct {
-	requestConstraint
+	verifier
 }
 
 func (c *nopConstraint) Verify(r *http.Request) []error {
@@ -26,12 +29,12 @@ func (c *nopConstraint) Verify(r *http.Request) []error {
 }
 
 type bodyMatchesJSONConstraint struct {
-	requestConstraint
+	verifier
 
 	expectedBody interface{}
 }
 
-func newBodyMatchesJSONConstraint(expected string) (requestConstraint, error) {
+func newBodyMatchesJSONConstraint(expected string) (verifier, error) {
 	var expectedBody interface{}
 	err := json.Unmarshal([]byte(expected), &expectedBody)
 	if err != nil {
@@ -65,7 +68,7 @@ func (c *bodyMatchesJSONConstraint) Verify(r *http.Request) []error {
 }
 
 type methodConstraint struct {
-	requestConstraint
+	verifier
 
 	method string
 }
@@ -78,14 +81,14 @@ func (c *methodConstraint) Verify(r *http.Request) []error {
 }
 
 type headerConstraint struct {
-	requestConstraint
+	verifier
 
 	header string
 	value  string
 	regexp *regexp.Regexp
 }
 
-func newHeaderConstraint(header, value, re string) (requestConstraint, error) {
+func newHeaderConstraint(header, value, re string) (verifier, error) {
 	var reCompiled *regexp.Regexp
 	if re != "" {
 		var err error
@@ -114,4 +117,42 @@ func (c *headerConstraint) Verify(r *http.Request) []error {
 		return []error{fmt.Errorf("%s header value %s doesn't match regexp %s", c.header, value, c.regexp)}
 	}
 	return nil
+}
+
+type queryConstraint struct {
+	expectedQuery url.Values
+}
+
+func newQueryConstraint(query string) (*queryConstraint, error) {
+	// user may begin his query with '?', just omit it in this case
+	if strings.HasPrefix(query, "?") {
+		query = query[1:]
+	}
+	pq, err := url.ParseQuery(query)
+	if err != nil {
+		return nil, err
+	}
+
+	return &queryConstraint{expectedQuery: pq}, nil
+}
+
+func (c *queryConstraint) Verify(r *http.Request) (errors []error) {
+	gotQuery := r.URL.Query()
+	for key, want := range c.expectedQuery {
+		got, ok := gotQuery[key]
+		if !ok {
+			errors = append(errors, fmt.Errorf("'%s' parameter is missing in expQuery", key))
+			continue
+		}
+
+		sort.Strings(got)
+		sort.Strings(want)
+		if !reflect.DeepEqual(got, want) {
+			errors = append(errors, fmt.Errorf(
+				"'%s' parameters are not equal.\n Got: %s \n Want: %s", key, got, want,
+			))
+		}
+	}
+
+	return errors
 }

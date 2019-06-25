@@ -10,14 +10,14 @@ const callsNoConstraint = -1
 
 type definition struct {
 	path               string
-	requestConstraints []requestConstraint
+	requestConstraints []verifier
 	replyStrategy      replyStrategy
 	sync.Mutex
 	calls           int
 	callsConstraint int
 }
 
-func newDefinition(path string, constraints []requestConstraint, strategy replyStrategy, callsConstraint int) *definition {
+func newDefinition(path string, constraints []verifier, strategy replyStrategy, callsConstraint int) *definition {
 	return &definition{
 		path:               path,
 		requestConstraints: constraints,

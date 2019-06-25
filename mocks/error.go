@@ -18,7 +18,7 @@ func (e *Error) Error() string {
 
 type RequestConstraintError struct {
 	error
-	Constraint requestConstraint
+	Constraint verifier
 	Request    *http.Request
 }
 
