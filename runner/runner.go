@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -21,7 +20,6 @@ type Config struct {
 	FixturesLoader *fixtures.Loader
 	Mocks          *mocks.Mocks
 	MocksLoader    *mocks.Loader
-	Db             *sql.DB
 }
 
 type Runner struct {

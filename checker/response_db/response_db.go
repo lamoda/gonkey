@@ -165,4 +165,3 @@ func newQuery(dbQuery string, db *sql.DB) ([]string, error) {
 
 	return dbResponse, nil
 }
-

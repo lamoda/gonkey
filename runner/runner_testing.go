@@ -48,7 +48,6 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 			Mocks:          params.Mocks,
 			MocksLoader:    mocksLoader,
 			FixturesLoader: fixturesLoader,
-			Db:             params.DB,
 		},
 		yaml_file.NewLoader(params.TestsDir),
 	)
