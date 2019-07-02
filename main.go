@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/lamoda/gonkey/checker/response_body"
+	"github.com/lamoda/gonkey/checker/response_db"
 	"github.com/lamoda/gonkey/checker/response_schema"
 	"github.com/lamoda/gonkey/fixtures"
 	"github.com/lamoda/gonkey/output/allure_report"
@@ -53,19 +54,24 @@ func main() {
 		log.Fatal(errors.New("no tests location provided"))
 	}
 
-	var fixturesLoader *fixtures.Loader
-	if config.DbDsn != "" && config.FixturesLocation != "" {
-		db, err := sql.Open("postgres", config.DbDsn)
+	var db *sql.DB
+	if config.DbDsn != "" {
+		var err error
+		db, err = sql.Open("postgres", config.DbDsn)
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	var fixturesLoader *fixtures.Loader
+	if db != nil && config.FixturesLocation != "" {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
 			DB:       db,
 			Location: config.FixturesLocation,
 			Debug:    config.Debug,
 		})
-	} else if !(config.DbDsn == "" && config.FixturesLocation == "") {
-		log.Fatal(errors.New("you should specify either both db_dsn and fixtures or none of them"))
+	} else if config.FixturesLocation != "" {
+		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
 	}
 
 	r := runner.New(
@@ -88,6 +94,10 @@ func main() {
 	r.AddCheckers(response_body.NewChecker())
 	if config.SpecPath != "" {
 		r.AddCheckers(response_schema.NewChecker(config.SpecPath))
+	}
+
+	if db != nil {
+		r.AddCheckers(response_db.NewChecker(db))
 	}
 
 	summary, err := r.Run()

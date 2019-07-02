@@ -9,6 +9,8 @@ type Result struct {
 	ResponseStatus      string
 	ResponseContentType string
 	ResponseBody        string
+	DbQuery				string
+	DbResponse			[]string
 	Errors              []error
 	Test                TestInterface
 }
