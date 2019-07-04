@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/lamoda/gonkey/checker/response_body"
+	"github.com/lamoda/gonkey/checker/response_db"
 	"github.com/lamoda/gonkey/fixtures"
 	"github.com/lamoda/gonkey/mocks"
 	"github.com/lamoda/gonkey/output/allure_report"
@@ -60,6 +61,10 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	}
 
 	r.AddCheckers(response_body.NewChecker())
+
+	if params.DB != nil {
+		r.AddCheckers(response_db.NewChecker(params.DB))
+	}
 
 	_, err := r.Run()
 	if err != nil {

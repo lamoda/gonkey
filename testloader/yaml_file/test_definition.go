@@ -15,12 +15,17 @@ type TestDefinition struct {
 	FixtureFiles       []string               `json:"fixtures" yaml:"fixtures"`
 	MocksDefinition    map[string]interface{} `json:"mocks" yaml:"mocks"`
 	PauseValue         int                    `json:"pause" yaml:"pause"`
+	DbQueryTmpl        string                 `json:"dbQuery" yaml:"dbQuery"`
+	DbResponseTmpl     []string               `json:"dbResponse" yaml:"dbResponse"`
 }
 
 type CaseData struct {
 	RequestArgs      map[string]interface{}         `json:"requestArgs" yaml:"requestArgs"`
 	ResponseArgs     map[int]map[string]interface{} `json:"responseArgs" yaml:"responseArgs"`
 	BeforeScriptArgs map[string]interface{}         `json:"beforeScriptArgs" yaml:"beforeScriptArgs"`
+	DbQueryArgs      map[string]interface{}         `json:"dbQueryArgs" yaml:"dbQueryArgs"`
+	DbResponseArgs   map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
+	DbResponse       []string                       `json:"dbResponse" yaml:"dbResponse"`
 }
 
 type comparisonParams struct {

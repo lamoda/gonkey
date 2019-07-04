@@ -15,6 +15,8 @@ type TestInterface interface {
 	BeforeScriptTimeout() int
 	Cookies() map[string]string
 	Headers() map[string]string
+	DbQueryString() string
+	DbResponseJson() []string
 
 	// comparison properties
 	NeedsCheckingValues() bool
