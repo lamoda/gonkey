@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/lamoda/gonkey/models"
-	"github.com/lamoda/gonkey/output"
+	"github.com/keyclaim/gonkey/models"
+	"github.com/keyclaim/gonkey/output"
 )
 
 type AllureReportOutput struct {

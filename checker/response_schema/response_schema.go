@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/lamoda/gonkey/checker"
-	"github.com/lamoda/gonkey/models"
+	"github.com/keyclaim/gonkey/checker"
+	"github.com/keyclaim/gonkey/models"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/loads"

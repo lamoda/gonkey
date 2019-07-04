@@ -1,7 +1,7 @@
 package yaml_file
 
 import (
-	"github.com/lamoda/gonkey/models"
+	"github.com/keyclaim/gonkey/models"
 )
 
 type Test struct {
