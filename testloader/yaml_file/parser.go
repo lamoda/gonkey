@@ -97,6 +97,13 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		}
 		test.BeforeScript, err = executeTmpl(beforeScriptPathTmpl, testCase.BeforeScriptArgs)
 
+		// compile DbQuery body
+		dbQueryTmpl, err := template.New("dbQuery").Parse(testDefinition.DbQueryTmpl)
+		if err != nil {
+			return nil, err
+		}
+		test.DbQuery, err = executeTmpl(dbQueryTmpl, testCase.DbQueryArgs)
+
 		// compile DbResponse
 		if testCase.DbResponse != nil {
 			// compile DbResponseFull has top priority
