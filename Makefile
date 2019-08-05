@@ -1,6 +1,6 @@
 export GO111MODULE=on
 
-REPO=qa.docker.lamoda.ru
+REPO=lamoda
 NAME=gonkey
 VERSION=$(shell git describe --tags 2> /dev/null || git rev-parse --short HEAD)
 

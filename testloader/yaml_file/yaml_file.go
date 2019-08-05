@@ -13,6 +13,7 @@ type YamlFileLoader struct {
 	testloader.LoaderInterface
 
 	testsLocation string
+	fileFilter    string
 }
 
 func NewLoader(testsLocation string) *YamlFileLoader {
@@ -22,7 +23,7 @@ func NewLoader(testsLocation string) *YamlFileLoader {
 }
 
 func (l *YamlFileLoader) Load() (chan models.TestInterface, error) {
-	fileTests, err := parseTestsWithCases(l.testsLocation)
+	fileTests, err := l.parseTestsWithCases(l.testsLocation)
 	if err != nil {
 		return nil, err
 	}
@@ -36,17 +37,24 @@ func (l *YamlFileLoader) Load() (chan models.TestInterface, error) {
 	return ch, nil
 }
 
-func parseTestsWithCases(path string) ([]Test, error) {
+func (l *YamlFileLoader) SetFileFilter(f string) {
+	l.fileFilter = f
+}
+
+func (l *YamlFileLoader) parseTestsWithCases(path string) ([]Test, error) {
 	stat, err := os.Stat(path)
 	if err != nil {
 		return nil, err
 	}
-	return lookupPath(path, stat)
+	return l.lookupPath(path, stat)
 }
 
 // lookupPath recursively walks over the directory and parses YML files it finds
-func lookupPath(path string, fi os.FileInfo) ([]Test, error) {
+func (l *YamlFileLoader) lookupPath(path string, fi os.FileInfo) ([]Test, error) {
 	if !fi.IsDir() {
+		if !l.fitsFilter(path) {
+			return []Test{}, nil
+		}
 		return parseTestDefinitionFile(path)
 	}
 	files, err := ioutil.ReadDir(path)
@@ -55,15 +63,23 @@ func lookupPath(path string, fi os.FileInfo) ([]Test, error) {
 	}
 	var tests []Test
 	for _, fi := range files {
-		if fi.IsDir() || isYmlFile(fi.Name()) {
-			moreTests, err := lookupPath(path+"/"+fi.Name(), fi)
-			if err != nil {
-				return nil, err
-			}
-			tests = append(tests, moreTests...)
+		if !fi.IsDir() && !isYmlFile(fi.Name()) {
+			continue
 		}
+		moreTests, err := l.lookupPath(path+"/"+fi.Name(), fi)
+		if err != nil {
+			return nil, err
+		}
+		tests = append(tests, moreTests...)
 	}
 	return tests, nil
+}
+
+func (l *YamlFileLoader) fitsFilter(fileName string) bool {
+	if l.fileFilter == "" {
+		return true
+	}
+	return strings.Contains(fileName, l.fileFilter)
 }
 
 func isYmlFile(name string) bool {
