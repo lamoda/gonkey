@@ -42,6 +42,9 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 		})
 	}
 
+	yamlLoader := yaml_file.NewLoader(params.TestsDir)
+	yamlLoader.SetFileFilter(os.Getenv("GONKEY_FILE_FILTER"))
+
 	r := New(
 		&Config{
 			Host:           params.Server.URL,
@@ -49,7 +52,7 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 			MocksLoader:    mocksLoader,
 			FixturesLoader: fixturesLoader,
 		},
-		yaml_file.NewLoader(params.TestsDir),
+		yamlLoader,
 	)
 
 	r.AddOutput(testingOutput.NewOutput(t))

@@ -20,25 +20,31 @@ type constantReply struct {
 
 	replyBody  []byte
 	statusCode int
+	headers    map[string]string
 }
 
-func newFileReplyWithCode(filename string, statusCode int) replyStrategy {
+func newFileReplyWithCode(filename string, statusCode int, headers map[string]string) replyStrategy {
 	content, _ := ioutil.ReadFile(filename)
 	r := &constantReply{
 		replyBody:  content,
 		statusCode: statusCode,
+		headers:    headers,
 	}
 	return r
 }
 
-func newConstantReplyWithCode(content []byte, statusCode int) replyStrategy {
+func newConstantReplyWithCode(content []byte, statusCode int, headers map[string]string) replyStrategy {
 	return &constantReply{
 		replyBody:  content,
 		statusCode: statusCode,
+		headers:    headers,
 	}
 }
 
 func (s *constantReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
+	for k, v := range s.headers {
+		w.Header().Add(k, v)
+	}
 	w.WriteHeader(s.statusCode)
 	w.Write(s.replyBody)
 	return nil
