@@ -102,10 +102,10 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 		*ak = append(*ak, "methods")
 		return l.loadMethodVaryStrategy(path, definition)
 	case "file":
-		*ak = append(*ak, "filename", "statusCode")
+		*ak = append(*ak, "filename", "statusCode", "headers")
 		return l.loadFileStrategy(path, definition)
 	case "constant":
-		*ak = append(*ak, "body", "statusCode")
+		*ak = append(*ak, "body", "statusCode", "headers")
 		return l.loadConstantStrategy(path, definition)
 	default:
 		return nil, fmt.Errorf("unknown strategy: %s", strategyName)
@@ -154,8 +154,8 @@ func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interfa
 	return newMethodVaryReply(methods), nil
 }
 
-func (l *Loader) loadFileStrategy(path string, definition map[interface{}]interface{}) (replyStrategy, error) {
-	f, ok := definition["filename"]
+func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+	f, ok := def["filename"]
 	if !ok {
 		return nil, errors.New("`file` requires `filename` key")
 	}
@@ -164,10 +164,14 @@ func (l *Loader) loadFileStrategy(path string, definition map[interface{}]interf
 		return nil, errors.New("`filename` must be string")
 	}
 	statusCode := http.StatusOK
-	if c, ok := definition["statusCode"]; ok {
+	if c, ok := def["statusCode"]; ok {
 		statusCode = c.(int)
 	}
-	return newFileReplyWithCode(filename, statusCode), nil
+	headers, err := l.loadHeaders(def)
+	if err != nil {
+		return nil, err
+	}
+	return newFileReplyWithCode(filename, statusCode, headers), nil
 }
 
 func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
@@ -183,7 +187,34 @@ func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface
 	if c, ok := def["statusCode"]; ok {
 		statusCode = c.(int)
 	}
-	return newConstantReplyWithCode([]byte(body), statusCode), nil
+	headers, err := l.loadHeaders(def)
+	if err != nil {
+		return nil, err
+	}
+	return newConstantReplyWithCode([]byte(body), statusCode, headers), nil
+}
+
+func (l *Loader) loadHeaders(def map[interface{}]interface{}) (map[string]string, error) {
+	var headers map[string]string
+	if h, ok := def["headers"]; ok {
+		hMap, ok := h.(map[interface{}]interface{})
+		if !ok {
+			return nil, errors.New("`headers` must be a map")
+		}
+		headers = make(map[string]string, len(hMap))
+		for k, v := range hMap {
+			key, ok := k.(string)
+			if !ok {
+				return nil, errors.New("`headers` requires string keys")
+			}
+			value, ok := v.(string)
+			if !ok {
+				return nil, errors.New("`headers` requires string values")
+			}
+			headers[key] = value
+		}
+	}
+	return headers, nil
 }
 
 func (l *Loader) loadConstraint(definition interface{}) (verifier, error) {

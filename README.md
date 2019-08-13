@@ -575,7 +575,8 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 
 Параметры:
 - `filename` (обязательный) - имя файла, из которого будет прочитано тело ответа;
-- `statusCode` - HTTP-код ответа, по умолчанию `200`.
+- `statusCode` - HTTP-код ответа, по умолчанию `200`;
+- `headers` - заголовки ответа.
 
 Пример:
 ```yaml
@@ -585,6 +586,8 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
       strategy: file
       filename: responses/service1_success.json
       statusCode: 500
+      headers:
+        Content-Type: application/json
     ...
 ``` 
 
@@ -593,8 +596,9 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 Возвращает заданный ответ.
 
 Параметры:
-- `body` (обязательный) - задает тело ответа
-- `statusCode` - HTTP-код ответа, по умолчанию `200`
+- `body` (обязательный) - задает тело ответа;
+- `statusCode` - HTTP-код ответа, по умолчанию `200`;
+- `headers` - заголовки ответа.
 
 Пример:
 ```yaml
