@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sync"
 )
 
 // возможные состояния светофора
@@ -17,7 +18,8 @@ const (
 
 // структура для хранения состояния светофора
 type trafficLights struct {
-	CurrentLight string `json:"currentLight"`
+	CurrentLight string       `json:"currentLight"`
+	mutex        sync.RWMutex `json:"-"`
 }
 
 // экземпляр светофора
@@ -35,16 +37,23 @@ func main() {
 func initServer() {
 	// метод для получения текущего состояния светофора
 	http.HandleFunc("/light/get", func(w http.ResponseWriter, r *http.Request) {
+		lights.mutex.RLock()
+		defer lights.mutex.RUnlock()
+
 		resp, err := json.Marshal(lights)
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		w.Header().Add("Content-Type", "application/json")
 		w.Write(resp)
 	})
 
 	// метод для установки нового состояния светофора
 	http.HandleFunc("/light/set", func(w http.ResponseWriter, r *http.Request) {
+		lights.mutex.Lock()
+		defer lights.mutex.Unlock()
+
 		request, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Fatal(err)
