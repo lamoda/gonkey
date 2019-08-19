@@ -40,8 +40,6 @@ func newRequest(host string, test models.TestInterface) (*http.Request, error) {
 		request.Header.Set("Content-Type", "application/json")
 	}
 
-	request.Header.Set("Connection", "close")
-
 	return request, nil
 }
 
