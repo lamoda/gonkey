@@ -36,8 +36,9 @@ func newRequest(host string, test models.TestInterface) (*http.Request, error) {
 		request.AddCookie(&http.Cookie{Name: k, Value: v})
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Connection", "close")
+	if request.Header.Get("Content-Type") == "" {
+		request.Header.Set("Content-Type", "application/json")
+	}
 
 	return request, nil
 }
