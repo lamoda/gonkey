@@ -55,6 +55,8 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		test.Request = testDefinition.RequestTmpl
 		test.Responses = testDefinition.ResponseTmpls
 		test.BeforeScript = testDefinition.BeforeScriptParams.PathTmpl
+		test.DbQuery = testDefinition.DbQueryTmpl
+		test.DbResponse = testDefinition.DbResponseTmpl
 		return append(tests, test), nil
 	}
 
@@ -95,6 +97,35 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		}
 		test.BeforeScript, err = executeTmpl(beforeScriptPathTmpl, testCase.BeforeScriptArgs)
 
+		// compile DbQuery body
+		dbQueryTmpl, err := template.New("dbQuery").Parse(testDefinition.DbQueryTmpl)
+		if err != nil {
+			return nil, err
+		}
+		test.DbQuery, err = executeTmpl(dbQueryTmpl, testCase.DbQueryArgs)
+
+		// compile DbResponse
+		if testCase.DbResponse != nil {
+			// DbResponse from test case has top priority
+			test.DbResponse = testCase.DbResponse
+		} else {
+			if len(testDefinition.DbResponseTmpl) != 0 {
+				// compile DbResponse string by string
+				for _, tpl := range testDefinition.DbResponseTmpl {
+					dbResponseTmpl, err := template.New("dbResponse").Parse(tpl)
+					if err != nil {
+						return nil, err
+					}
+					dbResponseString, err := executeTmpl(dbResponseTmpl, testCase.DbResponseArgs)
+					if err != nil {
+						return nil, err
+					}
+					test.DbResponse = append(test.DbResponse, dbResponseString)
+				}
+			} else {
+				test.DbResponse = testDefinition.DbResponseTmpl
+			}
+		}
 		tests = append(tests, test)
 	}
 

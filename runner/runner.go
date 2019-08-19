@@ -47,7 +47,12 @@ func (r *Runner) AddCheckers(c ...checker.CheckerInterface) {
 
 func (r *Runner) Run() (*models.Summary, error) {
 	if r.loader == nil {
-		return &models.Summary{true, 0, 0}, nil
+		s := &models.Summary{
+			Success: true,
+			Failed:  0,
+			Total:   0,
+		}
+		return s, nil
 	}
 
 	loader, err := r.loader.Load()

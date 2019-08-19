@@ -1,0 +1,39 @@
+- name: WHEN set is requested MUST return no response
+  method: POST
+  path: /light/set
+  request: >
+    {
+        "currentLight": "green"
+    }
+  response:
+    200: ''
+
+- name: WHEN incorrect color is passed MUST return error
+  method: POST
+  path: /light/set
+  request: >
+    {
+        "currentLight": "blue"
+    }
+  response:
+    400: >
+        incorrect current light: blue
+
+- name: WHEN color is missing MUST return error
+  method: POST
+  path: /light/set
+  request: >
+    {}
+  response:
+    400: >
+        incorrect current light: 
+
+- name: WHEN get is requested MUST have color untouched
+  method: GET
+  path: /light/get
+  response:
+    200: >
+        {
+            "currentLight": "green"
+        }
+

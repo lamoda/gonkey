@@ -40,9 +40,14 @@ func (m *ServiceMock) StartServer() error {
 
 func (m *ServiceMock) ShutdownServer() {
 	m.server.Shutdown(context.TODO())
+	m.listener = nil
+	m.server = nil
 }
 
 func (m *ServiceMock) ServerAddr() string {
+	if m.listener == nil {
+		panic("mock server " + m.ServiceName + " is not started")
+	}
 	return m.listener.Addr().String()
 }
 

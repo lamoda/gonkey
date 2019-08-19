@@ -575,7 +575,8 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 
 Параметры:
 - `filename` (обязательный) - имя файла, из которого будет прочитано тело ответа;
-- `statusCode` - HTTP-код ответа, по умолчанию `200`.
+- `statusCode` - HTTP-код ответа, по умолчанию `200`;
+- `headers` - заголовки ответа.
 
 Пример:
 ```yaml
@@ -585,6 +586,8 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
       strategy: file
       filename: responses/service1_success.json
       statusCode: 500
+      headers:
+        Content-Type: application/json
     ...
 ``` 
 
@@ -593,8 +596,9 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 Возвращает заданный ответ.
 
 Параметры:
-- `body` (обязательный) - задает тело ответа
-- `statusCode` - HTTP-код ответа, по умолчанию `200`
+- `body` (обязательный) - задает тело ответа;
+- `statusCode` - HTTP-код ответа, по умолчанию `200`;
+- `headers` - заголовки ответа.
 
 Пример:
 ```yaml
@@ -708,17 +712,19 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 ### CMD интерфейс
 
 Перед выполнением http запросов можно выполнить скрипт посредством cmd интерфеса.
-Для этого необходмо указать путь к скрипту. Этот параметр можно параметриховать.
-Также допускается завершение выполнения скрипта по таймауту - этот параметр опционален, но по-умолчанию таймаут будет равен 3 секундам.
-
-#### Запуск скрипта с таймаутом и без
-
 При запуске теста сначала будут загружены фикстуры и запущены моки. Далее произойдет выполнение скрипта, а затем выполнится тест.
+
+#### Описание скрипта
+
+Для описание скрипта нужно указать два параметра:
+
+- `path` (обязательный) - строка, указывает путь к файлу скрипта.
+- `timeout` - время в секундах, отвечает за завершение скрипта по таймауту. По-умолчанию таймаут будет равен `3`.
 
 Пример:
 ```yaml
   ...
-  script:
+  beforeScript:
     path: './cli_scripts/cmd_recalculate.sh'
     # таймаут будет равен 10с
     timeout: 10
@@ -727,9 +733,9 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 
 ```yaml
   ...
-  script:
+  beforeScript:
     path: './cli_scripts/cmd_recalculate.sh'
-    # таймаут будет равен 3с по умолчанию
+    # таймаут будет равен 3с
   ...
 ```
 
@@ -740,7 +746,7 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 Пример:
 ```yaml
   ...
-  script:
+  beforeScript:
     path: |
       ./cli_scripts/{{.file_name}}
   ...
@@ -754,5 +760,95 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
             in_transit: 1
         scriptArgs:
           file_name: "cmd_recalculate_customer_1.sh"
+```
+
+### Запрос в Базу данных
+
+После выполнения http запросов можно выполнить SQL запрос в БД для проверки изменений данных. 
+Допускается что ответ может содержать несколько записей. Далее эти данные сравниваются с ожидаемым списком записей.
+
+#### Описание запроса
+
+Под запросом подразумевается SELECT который вернет любое количество строк.
+
+- `dbQuery` - строка, содержит SQL запрос
+
+Пример:
+```yaml
+  ...
+  dbQuery:
+    SELECT code, purchase_date, partner_id FROM mark_paid_schedule AS m WHERE m.code = 'GIFT100000-000002'
+  ...
+```
+
+#### Описание ответа на запрос в Базу данных
+
+Под ответом подразумевается список json объектов которые должен вернуть запрос в БД.
+
+- `dbResponse` - строка, содержит список json объектов
+
+Пример:
+```yaml
+  ...
+  dbResponse:
+    - '{"code":"GIFT100000-000002","purchase_date":"2330-02-02T13:15:11.912874","partner_id":1}'
+    - '{"code":"GIFT100000-000003","purchase_date":"2330-02-02T13:15:11.912874","partner_id":1}'
+```
+
+```yaml
+  ...
+  dbResponse:
+    # пустой список
+```
+#### Параметризация при запросах в Базу данных
+
+Как и в случае с телом http-запроса, мы можем использовать параметризированные запросы.
+
+Пример:
+```yaml
+  ...
+    dbQuery: >
+      SELECT code, partner_id FROM mark_paid_schedule AS m WHERE DATE(m.purchase_date) BETWEEN '{{ .fromDate }}' AND '{{ .toDate }}'
+
+    dbResponse:
+      - '{"code":"{{ .cert1 }}","partner_id":1}'
+      - '{"code":"{{ .cert2 }}","partner_id":1}'
+  ...
+    cases:
+      ...
+      dbQueryArgs:
+        fromDate: "2330-02-01"
+        toDate: "2330-02-05"
+      dbResponseArgs:
+        cert1: "GIFT100000-000002"
+        cert2: "GIFT100000-000003"
+```
+
+В случае, когда в разных тестах ответ содержит разрное количество записей, вы можете переопределить ответ целиком для конкретного теста 
+продолжая использовать шаблон с параметрами в остальных
+
+Пример:
+```yaml
+  ...
+    dbQuery: >
+      SELECT code, partner_id FROM mark_paid_schedule AS m WHERE DATE(m.purchase_date) BETWEEN '{{ .fromDate }}' AND '{{ .toDate }}'
+
+    dbResponse:
+      - '{"code":"{{ .cert1 }}","partner_id":1}'
+  ...
+    cases:
+      ...
+      dbQueryArgs:
+        fromDate: "2330-02-01"
+        toDate: "2330-02-05"
+      dbResponseArgs:
+        cert1: "GIFT100000-000002"
+      ...
+      dbQueryArgs:
+        fromDate: "2330-02-01"
+        toDate: "2330-02-05"
+      dbResponseFull:
+        - '{"code":"GIFT100000-000002","partner_id":1}'
+        - '{"code":"GIFT100000-000003","partner_id":1}'
 ```
 

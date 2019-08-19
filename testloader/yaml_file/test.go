@@ -12,6 +12,8 @@ type Test struct {
 	Request      string
 	Responses    map[int]string
 	BeforeScript string
+	DbQuery      string
+	DbResponse   []string
 }
 
 func (t *Test) ToQuery() string {
@@ -77,4 +79,12 @@ func (t *Test) Cookies() map[string]string {
 
 func (t *Test) Headers() map[string]string {
 	return t.HeadersVal
+}
+
+func (t *Test) DbQueryString() string {
+	return t.DbQuery
+}
+
+func (t *Test) DbResponseJson() []string {
+	return t.DbResponse
 }
