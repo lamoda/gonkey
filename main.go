@@ -44,7 +44,7 @@ func main() {
 	if config.Host == "" {
 		log.Fatal(errors.New("service hostname not provided"))
 	} else {
-		if !strings.HasPrefix(config.Host, "http://") {
+		if !strings.HasPrefix(config.Host, "http://") && !strings.HasPrefix(config.Host, "https://") {
 			config.Host = "http://" + config.Host
 		}
 		config.Host = strings.TrimRight(config.Host, "/")
