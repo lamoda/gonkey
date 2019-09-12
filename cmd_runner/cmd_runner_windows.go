@@ -1,5 +1,3 @@
-// +build !windows
-
 package cmd_runner
 
 import (
@@ -9,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -20,9 +17,6 @@ func CmdRun(scriptPath string, timeout int) error {
 	}
 	cmd := exec.Command(strings.TrimRight(scriptPath, "\n"))
 	cmd.Env = os.Environ()
-
-	// Set up a process group which will be killed later
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -40,14 +34,8 @@ func CmdRun(scriptPath string, timeout int) error {
 
 	select {
 	case <-time.After(time.Duration(timeout) * time.Second):
-
-		// Get process group which we want to kill
-		pgid, err := syscall.Getpgid(cmd.Process.Pid)
-		if err != nil {
-			return err
-		}
-		// Send kill to process group
-		if err := syscall.Kill(-pgid, 15); err != nil {
+		// Kill process
+		if err := cmd.Process.Kill(); err != nil {
 			return err
 		}
 		fmt.Printf("Process killed as timeout(%d) reached\n", timeout)
