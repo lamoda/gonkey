@@ -293,8 +293,7 @@ func (f *Loader) loadTable(ctx *loadContext, t string, rows table) error {
 			// add to references
 			ctx.refsDefinition[name] = row
 			if f.debug {
-				rowJson, _ := json.Marshal(values)
-				fmt.Printf("Populating ref %s as %s from row definition\n", name, string(rowJson))
+				fmt.Printf("Populating ref %s as %s from row definition\n", name, row)
 			}
 			ctx.refsInserted[name] = values
 			if f.debug {
