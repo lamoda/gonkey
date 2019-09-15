@@ -383,8 +383,10 @@ func (f *Loader) buildInsertQuery(ctx *loadContext, t string, rows table) (strin
 	for i, field := range fields {
 		fields[i] = "\"" + field + "\""
 	}
-	query := "INSERT INTO \"%s\" (%s) VALUES %s RETURNING row_to_json(\"%[1]s\")"
-	return fmt.Sprintf(query, t, strings.Join(fields, ", "), strings.Join(dbValues, ", ")), nil
+
+	tableAlias := t + "_table_8cc8f4a3" // guarantees that table and column won't collide
+	query := "INSERT INTO \"%s\" AS %s (%s) VALUES %s RETURNING row_to_json(%[2]s)"
+	return fmt.Sprintf(query, t, tableAlias, strings.Join(fields, ", "), strings.Join(dbValues, ", ")), nil
 }
 
 // resolveExpression converts expressions starting with dollar sign into a value
