@@ -16,6 +16,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const tempTableSuffix = "_table_gonkey"
+
 type row map[string]interface{}
 
 type table []row
@@ -293,12 +295,13 @@ func (f *Loader) loadTable(ctx *loadContext, t string, rows table) error {
 			// add to references
 			ctx.refsDefinition[name] = row
 			if f.debug {
-				fmt.Printf("Populating ref %s as %s from row definition\n", name, row)
+				rowJson, _ := json.Marshal(row)
+				fmt.Printf("Populating ref %s as %s from row definition\n", name, string(rowJson))
 			}
 			ctx.refsInserted[name] = values
 			if f.debug {
-				rowJson, _ := json.Marshal(values)
-				fmt.Printf("Populating ref %s as %s from inserted values\n", name, string(rowJson))
+				valuesJson, _ := json.Marshal(values)
+				fmt.Printf("Populating ref %s as %s from inserted values\n", name, string(valuesJson))
 			}
 		}
 	}
@@ -384,7 +387,7 @@ func (f *Loader) buildInsertQuery(ctx *loadContext, t string, rows table) (strin
 		fields[i] = "\"" + field + "\""
 	}
 
-	tableAlias := t + "_table_8cc8f4a3" // guarantees that table and column won't collide
+	tableAlias := t + tempTableSuffix // guarantees that table and column won't collide
 	query := "INSERT INTO \"%s\" AS %s (%s) VALUES %s RETURNING row_to_json(%[2]s)"
 	return fmt.Sprintf(query, t, tableAlias, strings.Join(fields, ", "), strings.Join(dbValues, ", ")), nil
 }
