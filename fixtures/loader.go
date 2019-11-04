@@ -362,7 +362,11 @@ func (f *Loader) buildInsertQuery(ctx *loadContext, t string, rows table) (strin
 	for i, row := range rows {
 		dbValuesRow := make([]string, len(fields))
 		for k, name := range fields {
-			value, _ := row[name]
+			value, present := row[name]
+			if !present {
+				dbValuesRow[k] = "default" // default is a PostgreSQL keyword
+				continue
+			}
 			// resolve references
 			if stringValue, ok := value.(string); ok {
 				if len(stringValue) > 0 && stringValue[0] == '$' {
