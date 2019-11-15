@@ -30,4 +30,10 @@ jobs:
     - name: Build
       run: go build -v .
     - name: Test
-      run: go test -v ./...
+      run: |
+        go test -v ./fixtures -v
+        go test -v ./mocks -v
+        go test -v ./models -v
+        go test -v ./output -v
+        go test -v ./runner -v
+        go test -v ./testloader -v
