@@ -31,9 +31,9 @@ jobs:
       run: go build -v .
     - name: Test
       run: |
-        go test -v ./fixtures -v
-        go test -v ./mocks -v
-        go test -v ./models -v
-        go test -v ./output -v
-        go test -v ./runner -v
-        go test -v ./testloader -v
+        go test -v ./fixtures
+        go test -v ./mocks
+        go test -v ./models
+        go test -v ./output
+        go test -v ./runner
+        go test -v ./testloader
