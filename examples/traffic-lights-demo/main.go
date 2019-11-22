@@ -70,7 +70,7 @@ func initServer() {
 			return
 		}
 
-		lights = newTrafficLights
+		lights.CurrentLight = newTrafficLights.CurrentLight
 	})
 }
 
