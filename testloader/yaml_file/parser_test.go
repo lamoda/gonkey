@@ -63,7 +63,7 @@ func TestParseTestsWithCases(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tests, err := parseTestsWithCases(tmpfile.Name())
+	tests, err := parseTestDefinitionFile(tmpfile.Name())
 	if err != nil {
 		t.Error(err)
 	}
