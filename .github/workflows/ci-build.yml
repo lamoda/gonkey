@@ -1,9 +1,9 @@
-name: Go
+name: Building and testing against different environments
 on: [push]
 jobs:
 
   build:
-    name: Build
+    name: Build on ${{ strategy.matrix.os }} for golang v${{ strategy.matrix.go }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -31,9 +31,4 @@ jobs:
       run: go build -v .
     - name: Test
       run: |
-        go test -v ./fixtures
-        go test -v ./mocks
-        go test -v ./models
-        go test -v ./output
-        go test -v ./runner
-        go test -v ./testloader
+        go test -v ./...
