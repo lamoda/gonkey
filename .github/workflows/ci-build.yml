@@ -4,6 +4,7 @@ on:
   push:
     branches:
     tags:
+  pull_request:
 
 env:
   CGO_ENABLED: '0' # https://github.com/golang/go/issues/26988
@@ -35,7 +36,7 @@ jobs:
 
     - name: Build
       run: go build -v .
-      
+
     - name: Test
       run: |
         go test -v ./...
