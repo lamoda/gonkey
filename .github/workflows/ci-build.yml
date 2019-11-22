@@ -3,12 +3,12 @@ on: [push]
 jobs:
 
   build:
-    name: Build on ${{ strategy.matrix.os }} for golang v${{ strategy.matrix.go }}
+    name: Build on ${{ matrix.os }} for golang ${{ matrix.go }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        go: ['1.12.x', '1.13' ]
+        go: ['1.12.x', '1.13.x' ]
     steps:
 
     - name: Set up Go
