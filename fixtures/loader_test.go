@@ -23,12 +23,12 @@ tables:
         - 1
         - '2'
 `
-	expected := "INSERT INTO \"table\" (\"field1\", \"field2\", \"field3\", \"field4\", \"field5\") VALUES " +
-		"('value1', 1, NULL, NULL, NULL), " +
-		"('value2', 2, 2.5699477736545666, NULL, NULL), " +
-		"('\"', NULL, NULL, false, NULL), " +
-		"('''', NULL, NULL, NULL, '[1,\"2\"]') " +
-		"RETURNING row_to_json(\"table\")"
+	expected := "INSERT INTO \"table\" AS table_table_gonkey (\"field1\", \"field2\", \"field3\", \"field4\", \"field5\") VALUES " +
+		"('value1', 1, default, default, default), " +
+		"('value2', 2, 2.5699477736545666, default, default), " +
+		"('\"', default, default, false, NULL), " +
+		"('''', default, default, default, '[1,\"2\"]') " +
+		"RETURNING row_to_json(table_table_gonkey)"
 
 	ctx := loadContext{
 		refsDefinition: make(map[string]row),
@@ -99,9 +99,9 @@ tables:
 	mock.ExpectExec("^TRUNCATE TABLE \"table3\" CASCADE$").
 		WillReturnResult(sqlmock.NewResult(0, 0))
 
-	q := `^INSERT INTO "table1" \("f1", "f2"\) VALUES ` +
+	q := `^INSERT INTO "table1" AS table1_table_gonkey \("f1", "f2"\) VALUES ` +
 		`\('value1', 'value2'\) ` +
-		`RETURNING row_to_json\("table1"\)$`
+		`RETURNING row_to_json\(table1_table_gonkey\)$`
 
 	mock.ExpectQuery(q).
 		WillReturnRows(
@@ -109,9 +109,9 @@ tables:
 				AddRow("{\"f1\":\"value1\",\"f2\":\"value2\"}"),
 		)
 
-	q = `^INSERT INTO "table2" \("f1", "f2"\) VALUES ` +
+	q = `^INSERT INTO "table2" AS table2_table_gonkey \("f1", "f2"\) VALUES ` +
 		`\('value2', 'value1'\) ` +
-		`RETURNING row_to_json\("table2"\)$`
+		`RETURNING row_to_json\(table2_table_gonkey\)$`
 
 	mock.ExpectQuery(q).
 		WillReturnRows(
@@ -119,9 +119,9 @@ tables:
 				AddRow("{\"f1\":\"value2\",\"f2\":\"value1\"}"),
 		)
 
-	q = `^INSERT INTO "table3" \("f1", "f2"\) VALUES ` +
+	q = `^INSERT INTO "table3" AS table3_table_gonkey \("f1", "f2"\) VALUES ` +
 		`\('value1', 'value2'\) ` +
-		`RETURNING row_to_json\("table3"\)$`
+		`RETURNING row_to_json\(table3_table_gonkey\)$`
 
 	mock.ExpectQuery(q).
 		WillReturnRows(
@@ -201,9 +201,9 @@ tables:
 	mock.ExpectExec("^TRUNCATE TABLE \"table3\" CASCADE$").
 		WillReturnResult(sqlmock.NewResult(0, 0))
 
-	q := `^INSERT INTO "table1" \("f1", "f2"\) VALUES ` +
+	q := `^INSERT INTO "table1" AS table1_table_gonkey \("f1", "f2"\) VALUES ` +
 		`\('value1', 'value2'\) ` +
-		`RETURNING row_to_json\("table1"\)$`
+		`RETURNING row_to_json\(table1_table_gonkey\)$`
 
 	mock.ExpectQuery(q).
 		WillReturnRows(
@@ -211,9 +211,9 @@ tables:
 				AddRow("{\"f1\":\"value1\",\"f2\":\"value2\"}"),
 		)
 
-	q = `^INSERT INTO "table2" \("f1", "f2", "f3"\) VALUES ` +
+	q = `^INSERT INTO "table2" AS table2_table_gonkey \("f1", "f2", "f3"\) VALUES ` +
 		`\('value1 overwritten', 'value2', \(\"1\" \|\| \"2\" \|\| 3 \+ 5\)\) ` +
-		`RETURNING row_to_json\("table2"\)$`
+		`RETURNING row_to_json\(table2_table_gonkey\)$`
 
 	mock.ExpectQuery(q).
 		WillReturnRows(
@@ -221,10 +221,10 @@ tables:
 				AddRow("{\"f1\":\"value1 overwritten\",\"f2\":\"value2\",\"f3\":\"value3\"}"),
 		)
 
-	q = `^INSERT INTO "table3" \("f1", "f2", "f3"\) VALUES ` +
+	q = `^INSERT INTO "table3" AS table3_table_gonkey \("f1", "f2", "f3"\) VALUES ` +
 		`\('value1 overwritten', 'value2', \(\"1\" \|\| \"2\" \|\| 3 \+ 5\)\), ` +
-		`\('tplVal1', 'tplVal2', NULL\) ` +
-		`RETURNING row_to_json\("table3"\)$`
+		`\('tplVal1', 'tplVal2', default\) ` +
+		`RETURNING row_to_json\(table3_table_gonkey\)$`
 
 	mock.ExpectQuery(q).
 		WillReturnRows(
