@@ -17,8 +17,6 @@ func NewLoader(mocks *Mocks) *Loader {
 }
 
 func (l *Loader) Load(mocksDefinition map[string]interface{}) error {
-	// prevent deriving the definition from previous test
-	l.mocks.ResetDefinitions()
 	for serviceName, definition := range mocksDefinition {
 		service := l.mocks.Service(serviceName)
 		if service == nil {
