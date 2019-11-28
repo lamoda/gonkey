@@ -97,6 +97,13 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 		}
 	}
 
+	// reset mocks
+	if r.config.Mocks != nil {
+		// prevent deriving the definition from previous test
+		r.config.Mocks.ResetDefinitions()
+		r.config.Mocks.ResetRunningContext()
+	}
+
 	// load mocks
 	if r.config.MocksLoader != nil && v.ServiceMocks() != nil {
 		if err := r.config.MocksLoader.Load(v.ServiceMocks()); err != nil {
@@ -104,19 +111,14 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 		}
 	}
 
-	//reset mocks
-	if r.config.Mocks != nil {
-		r.config.Mocks.ResetRunningContext()
-	}
-
-	//launch script in cmd interface
+	// launch script in cmd interface
 	if v.BeforeScriptPath() != "" {
 		if err := cmd_runner.CmdRun(v.BeforeScriptPath(), v.BeforeScriptTimeout()); err != nil {
 			return nil, err
 		}
 	}
 
-	//make pause
+	// make pause
 	pause := v.Pause()
 	if pause > 0 {
 		time.Sleep(time.Duration(pause) * time.Second)
