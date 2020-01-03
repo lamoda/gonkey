@@ -141,6 +141,12 @@ The tests can be now ran with `go test`, for example: `go test ./...`.
         }
       }
 
+  responseHeaders:
+    200:
+      Content-Type: ["application/json"]
+      Cache-Control: ["no-store, must-revalidate"]
+      Set-Cookie: ["mycookie=123; Path=/; Domain=mydomain.com", "mycookie=456; Path=/; Domain=.mydomain.com"]
+
   cases:
     - requestArgs:
         orderNr: ORDER0001
@@ -166,6 +172,13 @@ The tests can be now ran with `go test`, for example: `go test ./...`.
 `headers` - a parameter for HTTP headers, the format is in the example above.
 
 `cookies` - a parameter for cookies, the format is in the example above.
+
+### HTTP-response
+
+`response` - the HTTP response body for the specified HTTP status codes.
+
+`responseHeaders` - all HTTP response headers for the specified HTTP status codes.
+
 
 
 ### Fixtures

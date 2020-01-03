@@ -54,7 +54,7 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		test := Test{TestDefinition: testDefinition}
 		test.Request = testDefinition.RequestTmpl
 		test.Responses = testDefinition.ResponseTmpls
-		test.ResponseHeaders = testDefinition.ResponseHeadersTmpls
+		test.ResponseHeaders = testDefinition.ResponseHeaders
 		test.BeforeScript = testDefinition.BeforeScriptParams.PathTmpl
 		test.DbQuery = testDefinition.DbQueryTmpl
 		test.DbResponse = testDefinition.DbResponseTmpl
@@ -92,8 +92,8 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		}
 
 		test.ResponseHeaders = make(map[int]map[string][]string)
-		for status, tpl := range testDefinition.ResponseHeadersTmpls {
-			test.ResponseHeaders[status] = tpl
+		for status, respHeaders := range testDefinition.ResponseHeaders {
+			test.ResponseHeaders[status] = respHeaders
 		}
 
 		// compile script body
