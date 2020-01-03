@@ -139,6 +139,12 @@ func TestFuncCases(t *testing.T) {
         }
       }
 
+responseHeaders:
+    200:
+      Content-Type: "application/json"
+      Cache-Control: "no-store, must-revalidate"
+      Set-Cookie: "mycookie=123; Path=/; Domain=mydomain.com", "mycookie=456; Path=/; Domain=.mydomain.com"
+
   cases:
     - requestArgs:
         orderNr: ORDER0001
@@ -187,6 +193,11 @@ func TestFuncCases(t *testing.T) {
 
 `cookies` -  параметр для передачи cookie, формат передачи указан в примере выше.
 
+### HTTP-ответ
+
+`response` - тело ответа HTTP для указанных кодов состояния HTTP.
+
+`responseHeaders` - все заголовки ответа HTTP для указанных кодов состояния HTTP.
 
 ### Фикстуры
 

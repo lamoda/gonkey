@@ -9,6 +9,7 @@ type TestInterface interface {
 	Path() string
 	GetResponses() map[int]string
 	GetResponse(code int) (string, bool)
+	GetResponseHeaders(code int) (map[string]string, bool)
 	GetName() string
 	Fixtures() []string
 	ServiceMocks() map[string]interface{}

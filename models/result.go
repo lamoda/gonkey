@@ -9,6 +9,7 @@ type Result struct {
 	ResponseStatus      string
 	ResponseContentType string
 	ResponseBody        string
+	ResponseHeaders     map[string][]string
 	DbQuery             string
 	DbResponse          []string
 	Errors              []error
