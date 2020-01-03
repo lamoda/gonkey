@@ -149,6 +149,7 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 		ResponseContentType: resp.Header.Get("Content-Type"),
 		ResponseStatusCode:  resp.StatusCode,
 		ResponseStatus:      resp.Status,
+		ResponseHeaders:     resp.Header,
 		Test:                v,
 	}
 

@@ -54,6 +54,7 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		test := Test{TestDefinition: testDefinition}
 		test.Request = testDefinition.RequestTmpl
 		test.Responses = testDefinition.ResponseTmpls
+		test.ResponseHeaders = testDefinition.ResponseHeadersTmpls
 		test.BeforeScript = testDefinition.BeforeScriptParams.PathTmpl
 		test.DbQuery = testDefinition.DbQueryTmpl
 		test.DbResponse = testDefinition.DbResponseTmpl
@@ -88,6 +89,11 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 				// not found args, using response as is
 				test.Responses[status] = tpl
 			}
+		}
+
+		test.ResponseHeaders = make(map[int]map[string][]string)
+		for status, tpl := range testDefinition.ResponseHeadersTmpls {
+			test.ResponseHeaders[status] = tpl
 		}
 
 		// compile script body

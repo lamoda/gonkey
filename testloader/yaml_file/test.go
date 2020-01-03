@@ -9,11 +9,12 @@ type Test struct {
 
 	TestDefinition
 
-	Request      string
-	Responses    map[int]string
-	BeforeScript string
-	DbQuery      string
-	DbResponse   []string
+	Request         string
+	Responses       map[int]string
+	ResponseHeaders map[int]map[string][]string
+	BeforeScript    string
+	DbQuery         string
+	DbResponse      []string
 }
 
 func (t *Test) ToQuery() string {
@@ -34,6 +35,11 @@ func (t *Test) ToJSON() ([]byte, error) {
 
 func (t *Test) GetResponse(code int) (string, bool) {
 	val, ok := t.Responses[code]
+	return val, ok
+}
+
+func (t *Test) GetResponseHeaders(code int) (map[string][]string, bool) {
+	val, ok := t.ResponseHeaders[code]
 	return val, ok
 }
 

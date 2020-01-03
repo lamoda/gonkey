@@ -12,6 +12,16 @@ func TestNewTestWithCases(t *testing.T) {
 			200: `{"foo": "bar", "hello": {{ .hello }} }`,
 			400: `{"foo": "bar", "hello": {{ .hello }} }`,
 		},
+		ResponseHeadersTmpls: map[int]map[string][]string{
+			200: {
+				"hello": []string{"world"},
+				"say":   []string{"hello"},
+			},
+			400: {
+				"hello": []string{"world"},
+				"foo":   []string{"bar"},
+			},
+		},
 		Cases: []CaseData{
 			{
 				RequestArgs: map[string]interface{}{
@@ -43,6 +53,7 @@ func TestNewTestWithCases(t *testing.T) {
 	}
 
 	tests, err := makeTestFromDefinition(data)
+
 	if err != nil {
 		t.Fatal(err)
 	}
