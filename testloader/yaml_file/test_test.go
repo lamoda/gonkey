@@ -12,7 +12,7 @@ func TestNewTestWithCases(t *testing.T) {
 			200: `{"foo": "bar", "hello": {{ .hello }} }`,
 			400: `{"foo": "bar", "hello": {{ .hello }} }`,
 		},
-		ResponseHeadersTmpls: map[int]map[string][]string{
+		ResponseHeaders: map[int]map[string][]string{
 			200: {
 				"hello": []string{"world"},
 				"say":   []string{"hello"},
