@@ -33,7 +33,7 @@ func (c *ResponseBodyChecker) Check(t models.TestInterface, result *models.Resul
 			}
 			errs = append(errs, checkErrs...)
 		} else {
-			// compare bodies as simple strings
+			// compare bodies as leaf nodes
 			errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.CompareParams{})...)
 		}
 	}

@@ -137,7 +137,8 @@ The tests can be now ran with `go test`, for example: `go test ./...`.
         "jsonrpc": "2.0",
         "result": {
           "user_id": {{ .userId }},
-          "amount": {{ .amount }}
+          "amount": {{ .amount }},
+          "token": "$matchRegexp(^\w{16}$)"
         }
       }
 
@@ -155,6 +156,28 @@ The tests can be now ran with `go test`, for example: `go test ./...`.
         200:
           userId: '0001'
           amount: 72000
+```
+
+As you can see in this example, you can use Regexp for checking response body.
+It can be used for all body (if it's plaint text):
+```
+    response:
+        200: "$matchRegexp(^xy+z$)"
+```
+or for elements of map/array (if it's JSON):
+```
+    response:
+        200: |
+          {
+            "id": "[\w-]+",
+            "jsonrpc": "[12].0",
+            "result": [
+              "data": [
+                  "ORDER[0]{3}[0-9]",
+                  "ORDER[0]{3}[0-9]"
+              ],
+            ]
+          }
 ```
 
 ### HTTP-request

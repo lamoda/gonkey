@@ -3,6 +3,7 @@ package compare
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -15,7 +16,20 @@ type CompareParams struct {
 	DisallowExtraFields  bool
 }
 
-// Compare ...
+type leafsMatchType int
+
+const (
+	pure leafsMatchType = iota
+	regex
+)
+
+var regexExprRx = regexp.MustCompile(`^\$matchRegexp\((.+)\)$`)
+
+// Compare compares values as plain text
+// It can be compared several ways:
+// - Pure values: should be equal
+// - Regex: try to compile 'expected' as regex and match 'actual' with it
+//     It activates on following syntax: $matchRegexp(%EXPECTED_VALUE%)
 func Compare(expected, actual interface{}, params CompareParams) []error {
 	return compareBranch("$", expected, actual, &params)
 }
@@ -32,9 +46,8 @@ func compareBranch(path string, expected, actual interface{}, params *ComparePar
 	}
 
 	// compare scalars
-	if isScalarType(actualType) && !params.IgnoreValues && !isScalarsEqual(expected, actual) {
-		errors = append(errors, makeError(path, "values do not match", expected, actual))
-		return errors
+	if isScalarType(actualType) && !params.IgnoreValues {
+		return compareLeafs(path, expected, actual)
 	}
 
 	// compare arrays
@@ -110,8 +123,81 @@ func isScalarType(t string) bool {
 	return !(t == "array" || t == "map")
 }
 
-func isScalarsEqual(value1, value2 interface{}) bool {
-	return value1 == value2
+func compareLeafs(path string, expected, actual interface{}) []error {
+
+	var errors []error
+
+	switch leafMatchType(expected) {
+	case pure:
+		errors = append(errors, comparePure(path, expected, actual)...)
+
+	case regex:
+		errors = append(errors, compareRegex(path, expected, actual)...)
+
+	default:
+		panic("unknown compare type")
+	}
+
+	return errors
+}
+
+func comparePure(path string, expected, actual interface{}) (errors []error) {
+
+	if expected != actual {
+		errors = append(errors, makeError(path, "values do not match", expected, actual))
+	}
+
+	return errors
+}
+
+func compareRegex(path string, expected, actual interface{}) (errors []error) {
+
+	regexExpr, ok := expected.(string)
+	if !ok {
+		errors = append(errors, makeError(path, "type mismatch", "string", reflect.TypeOf(expected)))
+		return errors
+	}
+
+	value, ok := actual.(string)
+	if !ok {
+		errors = append(errors, makeError(path, "type mismatch", "string", reflect.TypeOf(actual)))
+		return errors
+	}
+
+	rx, err := regexp.Compile(retrieveRegexStr(regexExpr))
+	if err != nil {
+		errors = append(errors, makeError(path, "can not compile regex", nil, "error"))
+		return errors
+	}
+
+	if !rx.MatchString(value) {
+		errors = append(errors, makeError(path, "value does not match regex", expected, actual))
+		return errors
+	}
+
+	return nil
+}
+
+func retrieveRegexStr(expr string) string {
+
+	if matches := regexExprRx.FindStringSubmatch(expr); matches != nil {
+		return matches[1]
+	}
+
+	return ""
+}
+
+func leafMatchType(expected interface{}) leafsMatchType {
+	val, ok := expected.(string)
+	if !ok {
+		return pure
+	}
+
+	if matches := regexExprRx.FindStringSubmatch(val); matches != nil {
+		return regex
+	}
+
+	return pure
 }
 
 func makeError(path, msg string, expected, actual interface{}) error {

@@ -85,6 +85,40 @@ func TestCompareDifferIntegers(t *testing.T) {
 	}
 }
 
+func TestCheckRegexMach(t *testing.T) {
+	errors := Compare("$matchRegexp(x.+z)", "xyyyz", CompareParams{})
+	if len(errors) != 0 {
+		t.Error(
+			"must return no errors",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+
+func TestCheckRegexNotMach(t *testing.T) {
+	errors := Compare("$matchRegexp(x.+z)", "ayyyb", CompareParams{})
+	if errors[0].Error() != makeErrorString("$",
+		"value does not match regex", "$matchRegexp(x.+z)", "ayyyb") {
+		t.Error(
+			"must return one error",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+
+func TestCheckRegexCantCompile(t *testing.T) {
+	errors := Compare("$matchRegexp((?x))", "2", CompareParams{})
+	if errors[0].Error() != makeErrorString("$", "can not compile regex", nil, "error") {
+		t.Error(
+			"must return one error",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+
 func TestCompareEqualArrays(t *testing.T) {
 	array1 := []string{"1", "2"}
 	array2 := []string{"1", "2"}
@@ -170,6 +204,38 @@ func TestCompareNestedDifferArrays(t *testing.T) {
 	}
 }
 
+func TestCompareArraysWithRegex(t *testing.T) {
+
+	arrayExpected := []string{"2", "$matchRegexp(x.+z)"}
+	arrayActual := []string{"2", "xyyyz"}
+
+	errors := Compare(arrayExpected, arrayActual, CompareParams{})
+	if len(errors) != 0 {
+		t.Error(
+			"must return no errors",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+
+func TestCompareArraysWithRegexNotMatch(t *testing.T) {
+
+	arrayExpected := []string{"2", "$matchRegexp(x.+z)"}
+	arrayActual := []string{"2", "ayyyb"}
+
+	errors := Compare(arrayExpected, arrayActual, CompareParams{})
+	expectedErrors := makeErrorString("$[1]",
+		"value does not match regex", "$matchRegexp(x.+z)", "ayyyb")
+	if errors[0].Error() != expectedErrors {
+		t.Error(
+			"must return one error",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+
 func TestCompareEqualMaps(t *testing.T) {
 	array1 := map[string]string{"a": "1", "b": "2"}
 	array2 := map[string]string{"a": "1", "b": "2"}
@@ -177,6 +243,35 @@ func TestCompareEqualMaps(t *testing.T) {
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+func TestCompareMapsWithRegex(t *testing.T) {
+	mapExpected := map[string]string{"a": "1", "b": "$matchRegexp(x.+z)"}
+	mapActual := map[string]string{"a": "1", "b": "xyyyz"}
+
+	errors := Compare(mapExpected, mapActual, CompareParams{})
+	if len(errors) != 0 {
+		t.Error(
+			"must return no errors",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+
+func TestCompareMapsWithRegexNotMatch(t *testing.T) {
+	mapExpected := map[string]string{"a": "1", "b": "$matchRegexp(x.+z)"}
+	mapActual := map[string]string{"a": "1", "b": "ayyyb"}
+
+	errors := Compare(mapExpected, mapActual, CompareParams{})
+	expectedErrors := makeErrorString("$.b", "value does not match regex", "$matchRegexp(x.+z)", "ayyyb")
+
+	if errors[0].Error() != expectedErrors {
+		t.Error(
+			"must return one error",
 			fmt.Sprintf("got result: %v", errors),
 		)
 		t.Fail()
