@@ -72,7 +72,7 @@ Response:
 
 Errors:
 {{ range $i, $e := .Errors }}
-{{ inc $i }} {{ $e.Error }}
+{{ inc $i }}) {{ $e.Error }}
 {{ end }}
 {{ else }}
      Result: {{ "OK" }}
