@@ -60,7 +60,11 @@ func (r *Runner) Run() (*models.Summary, error) {
 		return nil, err
 	}
 
-	client := newClient()
+	client, err := newClient()
+	if err != nil {
+		return nil, err
+	}
+
 	totalTests := 0
 	failedTests := 0
 

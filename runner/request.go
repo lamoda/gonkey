@@ -5,15 +5,22 @@ import (
 	"crypto/tls"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"os"
 	"strings"
 
 	"github.com/lamoda/gonkey/models"
 )
 
-func newClient() *http.Client {
+func newClient() (*http.Client, error) {
+	proxyUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+	if err != nil {
+		return nil, err
+	}
 	return &http.Client{Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}}
+		Proxy:           http.ProxyURL(proxyUrl),
+	}}, nil
 }
 
 func newRequest(host string, test models.TestInterface) (*http.Request, error) {
