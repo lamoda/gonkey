@@ -70,12 +70,20 @@ Response:
        Body:
 {{ if .ResponseBody }}{{ yellow .ResponseBody }}{{ else }}{{ yellow "<no body>" }}{{ end }}
 
+{{ if .DbQuery }}
+       Db Request:
+{{ cyan .DbQuery }}
+       Db Response:
+{{ range $value := .DbResponse }}
+{{ yellow $value }}{{ end }}
+{{ end }}
+
 {{ if .Errors }}
      Result: {{ danger "ERRORS!" }}
 
 Errors:
 {{ range $i, $e := .Errors }}
-{{ inc $i }}) {{ $e.Error }}
+{{ inc $i }} {{ $e.Error }}
 {{ end }}
 {{ else }}
      Result: {{ success "OK" }}

@@ -46,6 +46,16 @@ func (o *AllureReportOutput) Process(t models.TestInterface, result *models.Resu
 		*bytes.NewBufferString("Response"),
 		*bytes.NewBufferString(fmt.Sprintf(`Body: %s`, result.ResponseBody)),
 		"txt")
+	if result.DbQuery != "" {
+		o.allure.AddAttachment(
+			*bytes.NewBufferString("Db Query"),
+			*bytes.NewBufferString(fmt.Sprintf(`SQL string: %s`, result.DbQuery)),
+			"txt")
+		o.allure.AddAttachment(
+			*bytes.NewBufferString("Db Response"),
+			*bytes.NewBufferString(fmt.Sprintf(`Respone: %s`, result.DbResponse)),
+			"txt")
+	}
 	if !result.Passed() {
 		ers := ""
 		for _, e := range result.Errors {
