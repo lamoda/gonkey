@@ -59,6 +59,14 @@ Response:
        Body:
 {{ if .ResponseBody }}{{ .ResponseBody }}{{ else }}{{ "<no body>" }}{{ end }}
 
+{{ if .DbQuery }}
+       Db Request:
+{{ .DbQuery }}
+       Db Response:
+{{ range $value := .DbResponse }}
+{{ $value }}{{ end }}
+{{ end }}
+
 {{ if .Errors }}
      Result: {{ "ERRORS!" }}
 
