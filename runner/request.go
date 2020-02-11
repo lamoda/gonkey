@@ -13,14 +13,17 @@ import (
 )
 
 func newClient() (*http.Client, error) {
-	proxyUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
-	if err != nil {
-		return nil, err
-	}
-	return &http.Client{Transport: &http.Transport{
+	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		Proxy:           http.ProxyURL(proxyUrl),
-	}}, nil
+	}
+	if os.Getenv("HTTP_PROXY") != "" {
+		proxyUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+		if err != nil {
+			return nil, err
+		}
+		transport.Proxy = http.ProxyURL(proxyUrl)
+	}
+	return &http.Client{Transport: transport}, nil
 }
 
 func newRequest(host string, test models.TestInterface) (*http.Request, error) {
