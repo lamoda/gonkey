@@ -1,0 +1,19 @@
+- method: "{{ $method }}"
+  path: "/some/path/{{ $pathPart }}"
+  variables:
+    tag: "some_tag"
+    reqParam: "reqParam_value"
+    method: "POST"
+    pathPart: "part_of_path"
+    query: "query_val"
+    header: "header_val"
+    resp: "resp_val"
+    respRx: "$matchRegexp(^[0-9.]+$)"
+    jsonParam: "jsonParam_val"
+  query: "{{ $query }}"
+  headers:
+    header1: "{{ $header }}"
+  request: '{"reqParam": "{{ $reqParam }}"}'
+  response:
+    200: "{{ $resp }}"
+    404: "{{ $respRx }}"

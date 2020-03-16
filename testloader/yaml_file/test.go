@@ -28,8 +28,16 @@ func (t *Test) Path() string {
 	return t.RequestURL
 }
 
+func (t *Test) GetRequest() string {
+	return t.Request
+}
+
 func (t *Test) ToJSON() ([]byte, error) {
 	return []byte(t.Request), nil
+}
+
+func (t *Test) GetResponses() map[int]string {
+	return t.Responses
 }
 
 func (t *Test) GetResponse(code int) (string, bool) {
@@ -87,4 +95,33 @@ func (t *Test) DbQueryString() string {
 
 func (t *Test) DbResponseJson() []string {
 	return t.DbResponse
+}
+
+func (t *Test) GetVariables() map[string]string {
+	return t.Variables
+}
+
+func (t *Test) Clone() models.TestInterface {
+	res := *t
+
+	return &res
+}
+
+func (t *Test) SetQuery(val string) {
+	t.QueryParams = val
+}
+func (t *Test) SetMethod(val string) {
+	t.Method = val
+}
+func (t *Test) SetPath(val string) {
+	t.RequestURL = val
+}
+func (t *Test) SetRequest(val string) {
+	t.Request = val
+}
+func (t *Test) SetResponses(val map[int]string) {
+	t.Responses = val
+}
+func (t *Test) SetHeaders(val map[string]string) {
+	t.HeadersVal = val
 }
