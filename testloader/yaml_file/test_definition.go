@@ -2,6 +2,7 @@ package yaml_file
 
 type TestDefinition struct {
 	Name               string                 `json:"name" yaml:"name"`
+	Variables          map[string]string      `json:"variables" yaml:"variables"`
 	Method             string                 `json:"method" yaml:"method"`
 	RequestURL         string                 `json:"path" yaml:"path"`
 	QueryParams        string                 `json:"query" yaml:"query"`

@@ -13,6 +13,7 @@ import (
 	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/output"
 	"github.com/lamoda/gonkey/testloader"
+	"github.com/lamoda/gonkey/variables"
 )
 
 type Config struct {
@@ -20,6 +21,7 @@ type Config struct {
 	FixturesLoader *fixtures.Loader
 	Mocks          *mocks.Mocks
 	MocksLoader    *mocks.Loader
+	Variables      *variables.Variables
 }
 
 type Runner struct {
@@ -94,6 +96,10 @@ func (r *Runner) Run() (*models.Summary, error) {
 }
 
 func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*models.Result, error) {
+
+	r.config.Variables.Load(v.GetVariables())
+	v = r.config.Variables.Apply(v)
+
 	// load fixtures
 	if r.config.FixturesLoader != nil && v.Fixtures() != nil {
 		if err := r.config.FixturesLoader.Load(v.Fixtures()); err != nil {

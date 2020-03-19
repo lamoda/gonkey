@@ -16,6 +16,7 @@ import (
 	"github.com/lamoda/gonkey/output/console_colored"
 	"github.com/lamoda/gonkey/runner"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
+	"github.com/lamoda/gonkey/variables"
 )
 
 func main() {
@@ -74,10 +75,14 @@ func main() {
 		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
 	}
 
+	// TODO: get variables from .env-file
+	vars := variables.New()
+
 	r := runner.New(
 		&runner.Config{
 			Host:           config.Host,
 			FixturesLoader: fixturesLoader,
+			Variables:      vars,
 		},
 		yaml_file.NewLoader(config.TestsLocation),
 	)
