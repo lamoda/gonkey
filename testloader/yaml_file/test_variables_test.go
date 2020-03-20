@@ -3,6 +3,7 @@ package yaml_file
 import (
 	"testing"
 
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -12,6 +13,28 @@ import (
 
 const requestOriginal = `{"reqParam": "{{ $reqParam }}"}`
 const requestApplied = `{"reqParam": "reqParam_value"}`
+
+const envFile = "testdata/test.env"
+
+func TestParse_EniromentVariables(t *testing.T) {
+	err := godotenv.Load(envFile)
+	require.NoError(t, err)
+
+	tests, err := parseTestDefinitionFile("testdata/variables-enviroment.yaml")
+	require.NoError(t, err)
+
+	testOriginal := &tests[0]
+
+	vars := variables.New()
+	testApplied := vars.Apply(testOriginal)
+
+	assert.Equal(t, "/some/path/path_value", testApplied.Path())
+
+	resp, ok := testApplied.GetResponse(200)
+	assert.True(t, ok)
+	assert.Equal(t, "resp_val", resp)
+
+}
 
 func TestParseTestsWithVariables(t *testing.T) {
 

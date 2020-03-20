@@ -2,6 +2,7 @@ package variables
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 )
 
@@ -13,19 +14,26 @@ type Variable struct {
 }
 
 // NewVariable creates new variable with given name and value
-func NewVariable(name, value string) (*Variable, error) {
+func NewVariable(name, value string) *Variable {
 
-	rx, err := regexp.Compile(fmt.Sprintf(`{{\s*\$%s\s*}}`, name))
-	if err != nil {
-		return nil, err
-	}
+	name = regexp.QuoteMeta(name)
+	rx := regexp.MustCompile(fmt.Sprintf(`{{\s*\$%s\s*}}`, name))
 
 	return &Variable{
 		name:         name,
 		value:        value,
 		defaultValue: value,
 		rx:           rx,
-	}, nil
+	}
+}
+
+func NewFromEnvironment(name string) *Variable {
+	val := os.Getenv(name)
+	if val == "" {
+		return nil
+	}
+
+	return NewVariable(name, val)
 }
 
 // perform replaces variable in str to its value

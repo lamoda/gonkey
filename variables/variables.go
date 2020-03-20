@@ -23,10 +23,8 @@ func New() *Variables {
 // Load adds new variables and replaces values of existing
 func (vs *Variables) Load(variables map[string]string) error {
 	for n, v := range variables {
-		variable, err := NewVariable(n, v)
-		if err != nil {
-			return err
-		}
+		variable := NewVariable(n, v)
+
 		vs.variables[n] = variable
 	}
 
@@ -81,7 +79,13 @@ func (vs *Variables) perform(str string) string {
 }
 
 func (vs *Variables) get(name string) *Variable {
-	return vs.variables[name]
+
+	v := vs.variables[name]
+	if v == nil {
+		v = NewFromEnvironment(name)
+	}
+
+	return v
 }
 
 func (vs *Variables) performHeaders(headers map[string]string) map[string]string {

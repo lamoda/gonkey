@@ -1,0 +1,4 @@
+- method: "GET"
+  path: "/some/path/{{ $testPath }}"
+  response:
+    200: "{{ $testResp }}"
