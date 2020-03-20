@@ -1,23 +1,24 @@
 package yaml_file
 
 type TestDefinition struct {
-	Name               string                 `json:"name" yaml:"name"`
-	Variables          map[string]string      `json:"variables" yaml:"variables"`
-	Method             string                 `json:"method" yaml:"method"`
-	RequestURL         string                 `json:"path" yaml:"path"`
-	QueryParams        string                 `json:"query" yaml:"query"`
-	RequestTmpl        string                 `json:"request" yaml:"request"`
-	ResponseTmpls      map[int]string         `json:"response" yaml:"response"`
-	BeforeScriptParams beforeScriptParams     `json:"beforeScript" yaml:"beforeScript"`
-	HeadersVal         map[string]string      `json:"headers" yaml:"headers"`
-	CookiesVal         map[string]string      `json:"cookies" yaml:"cookies"`
-	Cases              []CaseData             `json:"cases" yaml:"cases"`
-	ComparisonParams   comparisonParams       `json:"comparisonParams" yaml:"comparisonParams"`
-	FixtureFiles       []string               `json:"fixtures" yaml:"fixtures"`
-	MocksDefinition    map[string]interface{} `json:"mocks" yaml:"mocks"`
-	PauseValue         int                    `json:"pause" yaml:"pause"`
-	DbQueryTmpl        string                 `json:"dbQuery" yaml:"dbQuery"`
-	DbResponseTmpl     []string               `json:"dbResponse" yaml:"dbResponse"`
+	Name               string                    `json:"name" yaml:"name"`
+	Variables          map[string]string         `json:"variables" yaml:"variables"`
+	Method             string                    `json:"method" yaml:"method"`
+	RequestURL         string                    `json:"path" yaml:"path"`
+	QueryParams        string                    `json:"query" yaml:"query"`
+	RequestTmpl        string                    `json:"request" yaml:"request"`
+	ResponseTmpls      map[int]string            `json:"response" yaml:"response"`
+	ResponseHeaders    map[int]map[string]string `json:"responseHeaders" yaml:"responseHeaders"`
+	BeforeScriptParams beforeScriptParams        `json:"beforeScript" yaml:"beforeScript"`
+	HeadersVal         map[string]string         `json:"headers" yaml:"headers"`
+	CookiesVal         map[string]string         `json:"cookies" yaml:"cookies"`
+	Cases              []CaseData                `json:"cases" yaml:"cases"`
+	ComparisonParams   comparisonParams          `json:"comparisonParams" yaml:"comparisonParams"`
+	FixtureFiles       []string                  `json:"fixtures" yaml:"fixtures"`
+	MocksDefinition    map[string]interface{}    `json:"mocks" yaml:"mocks"`
+	PauseValue         int                       `json:"pause" yaml:"pause"`
+	DbQueryTmpl        string                    `json:"dbQuery" yaml:"dbQuery"`
+	DbResponseTmpl     []string                  `json:"dbResponse" yaml:"dbResponse"`
 }
 
 type CaseData struct {
