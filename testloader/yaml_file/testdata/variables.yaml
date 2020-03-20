@@ -10,6 +10,7 @@
     resp: "resp_val"
     respRx: "$matchRegexp(^[0-9.]+$)"
     jsonParam: "jsonParam_val"
+    existingVar: "existingVar_Value"
   query: "{{ $query }}"
   headers:
     header1: "{{ $header }}"
@@ -17,3 +18,4 @@
   response:
     200: "{{ $resp }}"
     404: "{{ $respRx }}"
+    500: "{{ $existingVar }} - {{ $notExistingVar }}"

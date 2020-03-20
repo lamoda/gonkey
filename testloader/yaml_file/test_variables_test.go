@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/variables"
@@ -15,14 +16,14 @@ const requestApplied = `{"reqParam": "reqParam_value"}`
 func TestParseTestsWithVariables(t *testing.T) {
 
 	tests, err := parseTestDefinitionFile("testdata/variables.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	testOriginal := &tests[0]
 
 	vars := variables.New()
-	vars.Load(testOriginal.GetVariables())
+	err = vars.Load(testOriginal.GetVariables())
+	assert.NoError(t, err)
+
 	testApplied := vars.Apply(testOriginal)
 
 	// check that original test is not changed
@@ -73,4 +74,8 @@ func checkApplied(t *testing.T, test models.TestInterface) {
 	resp, ok = test.GetResponse(404)
 	assert.True(t, ok)
 	assert.Equal(t, "$matchRegexp(^[0-9.]+$)", resp)
+
+	resp, ok = test.GetResponse(500)
+	assert.True(t, ok)
+	assert.Equal(t, "existingVar_Value - {{ $notExistingVar }}", resp)
 }

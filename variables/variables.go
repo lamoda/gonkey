@@ -1,12 +1,18 @@
 package variables
 
-import "github.com/lamoda/gonkey/models"
+import (
+	"regexp"
+
+	"github.com/lamoda/gonkey/models"
+)
 
 type Variables struct {
 	variables variables
 }
 
 type variables map[string]*Variable
+
+var variableRx = regexp.MustCompile(`{{\s*\$(\w+)\s*}}`)
 
 func New() *Variables {
 	return &Variables{
@@ -29,19 +35,32 @@ func (vs *Variables) Load(variables map[string]string) error {
 
 func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
 
-	res := t.Clone()
+	newTest := t.Clone()
 
 	if vs == nil {
-		return res
+		return newTest
 	}
 
-	res.SetQuery(vs.perform(res.ToQuery()))
-	res.SetMethod(vs.perform(res.GetMethod()))
-	res.SetPath(vs.perform(res.Path()))
-	res.SetRequest(vs.perform(res.GetRequest()))
+	newTest.SetQuery(vs.perform(newTest.ToQuery()))
+	newTest.SetMethod(vs.perform(newTest.GetMethod()))
+	newTest.SetPath(vs.perform(newTest.Path()))
+	newTest.SetRequest(vs.perform(newTest.GetRequest()))
 
-	res.SetResponses(vs.performResponses(res.GetResponses()))
-	res.SetHeaders(vs.performHeaders(res.Headers()))
+	newTest.SetResponses(vs.performResponses(newTest.GetResponses()))
+	newTest.SetHeaders(vs.performHeaders(newTest.Headers()))
+
+	return newTest
+}
+
+func (vs *Variables) Len() int {
+	return len(vs.variables)
+}
+
+func usedVariables(str string) (res []string) {
+	matches := variableRx.FindAllStringSubmatch(str, -1)
+	for _, match := range matches {
+		res = append(res, match[1])
+	}
 
 	return res
 }
@@ -50,15 +69,19 @@ func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
 // and returns result string
 func (vs *Variables) perform(str string) string {
 
-	for _, v := range vs.variables {
-		str = v.Perform(str)
+	varNames := usedVariables(str)
+
+	for _, k := range varNames {
+		if v := vs.get(k); v != nil {
+			str = v.Perform(str)
+		}
 	}
 
 	return str
 }
 
-func (vs *Variables) Len() int {
-	return len(vs.variables)
+func (vs *Variables) get(name string) *Variable {
+	return vs.variables[name]
 }
 
 func (vs *Variables) performHeaders(headers map[string]string) map[string]string {
