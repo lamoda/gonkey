@@ -3,7 +3,9 @@ package yaml_file
 import (
 	"testing"
 
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/variables"
@@ -12,17 +14,39 @@ import (
 const requestOriginal = `{"reqParam": "{{ $reqParam }}"}`
 const requestApplied = `{"reqParam": "reqParam_value"}`
 
-func TestParseTestsWithVariables(t *testing.T) {
+const envFile = "testdata/test.env"
 
-	tests, err := parseTestDefinitionFile("testdata/variables.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+func TestParse_EniromentVariables(t *testing.T) {
+	err := godotenv.Load(envFile)
+	require.NoError(t, err)
+
+	tests, err := parseTestDefinitionFile("testdata/variables-enviroment.yaml")
+	require.NoError(t, err)
 
 	testOriginal := &tests[0]
 
 	vars := variables.New()
-	vars.Load(testOriginal.GetVariables())
+	testApplied := vars.Apply(testOriginal)
+
+	assert.Equal(t, "/some/path/path_value", testApplied.Path())
+
+	resp, ok := testApplied.GetResponse(200)
+	assert.True(t, ok)
+	assert.Equal(t, "resp_val", resp)
+
+}
+
+func TestParseTestsWithVariables(t *testing.T) {
+
+	tests, err := parseTestDefinitionFile("testdata/variables.yaml")
+	require.NoError(t, err)
+
+	testOriginal := &tests[0]
+
+	vars := variables.New()
+	err = vars.Load(testOriginal.GetVariables())
+	assert.NoError(t, err)
+
 	testApplied := vars.Apply(testOriginal)
 
 	// check that original test is not changed
@@ -73,4 +97,8 @@ func checkApplied(t *testing.T, test models.TestInterface) {
 	resp, ok = test.GetResponse(404)
 	assert.True(t, ok)
 	assert.Equal(t, "$matchRegexp(^[0-9.]+$)", resp)
+
+	resp, ok = test.GetResponse(500)
+	assert.True(t, ok)
+	assert.Equal(t, "existingVar_Value - {{ $notExistingVar }}", resp)
 }

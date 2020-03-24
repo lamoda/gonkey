@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
+
 	"github.com/lamoda/gonkey/checker/response_body"
 	"github.com/lamoda/gonkey/checker/response_db"
 	"github.com/lamoda/gonkey/checker/response_schema"
@@ -26,6 +28,7 @@ func main() {
 		TestsLocation    string
 		DbDsn            string
 		FixturesLocation string
+		EnvFile          string
 		Allure           bool
 		Verbose          bool
 		Debug            bool
@@ -36,6 +39,7 @@ func main() {
 	flag.StringVar(&config.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&config.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
 	flag.StringVar(&config.FixturesLocation, "fixtures", "", "Path to fixtures directory")
+	flag.StringVar(&config.EnvFile, "env-file", "", "Path to env-file")
 	flag.BoolVar(&config.Allure, "allure", true, "Make Allure report")
 	flag.BoolVar(&config.Verbose, "v", false, "Verbose output")
 	flag.BoolVar(&config.Debug, "debug", false, "Debug output")
@@ -75,7 +79,11 @@ func main() {
 		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
 	}
 
-	// TODO: get variables from .env-file
+	err := godotenv.Load(config.EnvFile)
+	if err != nil && config.EnvFile != "" {
+		log.Println(errors.New("error loading .env file"), err)
+	}
+
 	vars := variables.New()
 
 	r := runner.New(
