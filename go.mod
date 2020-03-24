@@ -10,7 +10,7 @@ require (
 	github.com/go-openapi/strfmt v0.19.5
 	github.com/go-openapi/validate v0.19.7
 	github.com/google/uuid v1.1.1
-  github.com/joho/godotenv v1.3.0
+	github.com/joho/godotenv v1.3.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/lib/pq v1.3.0
 	github.com/mattn/go-colorable v0.1.4 // indirect
