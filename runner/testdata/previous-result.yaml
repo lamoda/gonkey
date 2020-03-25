@@ -1,0 +1,42 @@
+- method: "GET"
+  path: "/some/path/plain_text"
+  response:
+    200: "bla"
+  variables_to_set:
+    200: "myResp"
+- method: "GET"
+  path: "/some/path/plain_text"
+  response:
+    200: "{{$myResp}}"
+
+- method: "GET"
+  path: "/some/path/json"
+  response:
+    200: >
+      {
+        "status": "status_val",
+        "other": "some_info",
+        "unused_field": "useless_info",
+        "nested_info": {
+          "nested_field_1": "nested_val1",
+          "nested_field_2": "nested_val2"
+        }
+      }
+  variables_to_set:
+    200:
+      statusVar: "status"
+      someField: "other"
+      nestedVar1: "nested_info.nested_field_1"
+      nestedVar2: "nested_info.nested_field_2"
+- method: "GET"
+  path: "/some/path/json"
+  response:
+    200: >
+      {
+        "status": "{{$statusVar}}",
+        "other": "{{$someField}}",
+        "nested_info": {
+                "nested_field_1": "{{$nestedVar1}}",
+                "nested_field_2": "{{$nestedVar2}}"
+         }
+      }

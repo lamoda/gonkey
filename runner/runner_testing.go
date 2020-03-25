@@ -14,6 +14,7 @@ import (
 	"github.com/lamoda/gonkey/output/allure_report"
 	testingOutput "github.com/lamoda/gonkey/output/testing"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
+	"github.com/lamoda/gonkey/variables"
 )
 
 type RunWithTestingParams struct {
@@ -52,6 +53,7 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 			Mocks:          params.Mocks,
 			MocksLoader:    mocksLoader,
 			FixturesLoader: fixturesLoader,
+			Variables:      variables.New(),
 		},
 		yamlLoader,
 	)

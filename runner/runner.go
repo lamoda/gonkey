@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/lamoda/gonkey/checker"
@@ -151,11 +152,13 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 	}
 	resp.Body.Close()
 
+	bodyStr := string(body)
+
 	result := models.Result{
 		Path:                req.URL.Path,
 		Query:               req.URL.RawQuery,
 		RequestBody:         actualRequestBody(req),
-		ResponseBody:        string(body),
+		ResponseBody:        bodyStr,
 		ResponseContentType: resp.Header.Get("Content-Type"),
 		ResponseStatusCode:  resp.StatusCode,
 		ResponseStatus:      resp.Status,
@@ -176,5 +179,32 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 		result.Errors = append(result.Errors, errs...)
 	}
 
+	if err := r.setVariablesFromResponse(v, result.ResponseContentType, bodyStr, resp.StatusCode); err != nil {
+		return nil, err
+	}
+
 	return &result, nil
+}
+
+func (r *Runner) setVariablesFromResponse(t models.TestInterface, contentType, body string, statusCode int) error {
+
+	varTemplates := t.GetVariablesToSet()
+	if varTemplates == nil {
+		return nil
+	}
+
+	isJson := strings.Contains(contentType, "json") && body != ""
+
+	vars, err := variables.FromResponse(varTemplates[statusCode], body, isJson)
+	if err != nil {
+		return err
+	}
+
+	if vars == nil {
+		return nil
+	}
+
+	r.config.Variables.Merge(vars)
+
+	return nil
 }

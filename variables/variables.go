@@ -21,14 +21,19 @@ func New() *Variables {
 }
 
 // Load adds new variables and replaces values of existing
-func (vs *Variables) Load(variables map[string]string) error {
+func (vs *Variables) Load(variables map[string]string) {
 	for n, v := range variables {
 		variable := NewVariable(n, v)
 
 		vs.variables[n] = variable
 	}
+}
 
-	return nil
+// Load adds new variables and replaces values of existing
+func (vs *Variables) Set(name, value string) {
+	v := NewVariable(name, value)
+
+	vs.variables[name] = v
 }
 
 func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
@@ -48,6 +53,13 @@ func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
 	newTest.SetHeaders(vs.performHeaders(newTest.Headers()))
 
 	return newTest
+}
+
+// Merge adds given variables to set or overrides existed
+func (vs *Variables) Merge(vars *Variables) {
+	for k, v := range vars.variables {
+		vs.variables[k] = v
+	}
 }
 
 func (vs *Variables) Len() int {
@@ -106,4 +118,10 @@ func (vs *Variables) performResponses(responses map[int]string) map[int]string {
 		res[k] = vs.perform(v)
 	}
 	return res
+}
+
+func (vs *Variables) Add(v *Variable) *Variables {
+	vs.variables[v.name] = v
+
+	return vs
 }
