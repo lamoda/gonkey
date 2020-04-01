@@ -202,7 +202,99 @@ or for elements of map/array (if it's JSON):
 
 `responseHeaders` - all HTTP response headers for the specified HTTP status codes.
 
+### Variables
 
+You can use variables in the description of the test, the following fields are supported:
+
+- method
+- path
+- query
+- headers
+- request
+- response
+
+Example:
+
+```yaml
+- method: "{{ $method }}"
+  path: "/some/path/{{ $pathPart }}"
+  query: "{{ $query }}"
+  headers:
+    header1: "{{ $header }}"
+  request: '{"reqParam": "{{ $reqParam }}"}'
+  response:
+    200: "{{ $resp }}"
+```
+
+You can assign values to variables in the following ways (priorities are from top to bottom):
+
+- in the description of the test
+- from the response of the previous test 
+- from environment variables or from env-file
+
+#### More detailed about assignment methods
+
+##### In the description of the test
+
+Example: 
+
+```yaml
+- method: "{{ $method }}"
+  path: "/some/path/{{ $pathPart }}"
+  variables:
+    reqParam: "reqParam_value"
+    method: "POST"
+    pathPart: "part_of_path"
+    query: "query_val"
+    header: "header_val"
+    resp: "resp_val"
+  query: "{{ $query }}"
+  headers:
+    header1: "{{ $header }}"
+  request: '{"reqParam": "{{ $reqParam }}"}'
+  response:
+    200: "{{ $resp }}"
+```
+
+##### From the response of the previous test 
+
+Example:
+
+```yaml
+# if the response is plain text
+- name: "get_last_post_id"
+  ...
+  variables_to_set:
+          200: "id"
+
+# if the response is JSON
+- name: "get_last_post_info"
+  variables_to_set:
+          200:
+            id: "id"
+            title: "title"
+            authorId: "author_info.id"
+```
+
+You can access nested fields like this:
+> "author_info.id"
+
+Any nesting levels are supported.
+
+##### From environment variables or from env-file
+
+Gonkey automatically checks if variable exists in the environment variables (case-sensitive) and loads a value from there, if it exists.
+
+If an env-file is specified, variables described in it will be added or will replace the corresponding environment variables.
+
+Example of an env file (standard syntax):
+```.env
+jwt=some_jwt_value
+secret=my_secret
+password=private_password
+```
+
+env-file can be convenient to hide sensitive information from a test (passwords, keys, etc.)
 
 ### Fixtures
 
