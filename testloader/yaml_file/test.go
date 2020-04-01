@@ -107,6 +107,10 @@ func (t *Test) GetVariables() map[string]string {
 	return t.Variables
 }
 
+func (t *Test) GetVariablesToSet() map[int]map[string]string {
+	return t.VariablesToSet
+}
+
 func (t *Test) Clone() models.TestInterface {
 	res := *t
 

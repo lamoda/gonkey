@@ -84,13 +84,11 @@ func main() {
 		log.Println(errors.New("error loading .env file"), err)
 	}
 
-	vars := variables.New()
-
 	r := runner.New(
 		&runner.Config{
 			Host:           config.Host,
 			FixturesLoader: fixturesLoader,
-			Variables:      vars,
+			Variables:      variables.New(),
 		},
 		yaml_file.NewLoader(config.TestsLocation),
 	)

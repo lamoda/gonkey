@@ -44,7 +44,7 @@ func TestParseTestsWithVariables(t *testing.T) {
 	testOriginal := &tests[0]
 
 	vars := variables.New()
-	err = vars.Load(testOriginal.GetVariables())
+	vars.Load(testOriginal.GetVariables())
 	assert.NoError(t, err)
 
 	testApplied := vars.Apply(testOriginal)

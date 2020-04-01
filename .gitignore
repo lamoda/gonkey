@@ -12,3 +12,6 @@ tmpfile*
 # debug
 debug
 **/debug.test
+
+# local env-file
+.*.env
