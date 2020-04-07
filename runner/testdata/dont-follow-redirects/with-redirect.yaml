@@ -1,0 +1,4 @@
+- name: "dont-follow-redirects"
+  method: GET
+  response:
+    302: "$matchRegexp(redirect-url)"

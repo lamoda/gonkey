@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 )
 
 const (
-	testDir = "testdata"
-	body    = "bla"
+	body = "bla"
 )
 
 func Test_PreviousResult(t *testing.T) {
@@ -19,7 +19,7 @@ func Test_PreviousResult(t *testing.T) {
 
 	RunWithTesting(t, &RunWithTestingParams{
 		Server:   srv,
-		TestsDir: testDir,
+		TestsDir: filepath.Join("testdata", "previous-result"),
 	})
 }
 

@@ -150,7 +150,7 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 	if err != nil {
 		return nil, err
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	bodyStr := string(body)
 
