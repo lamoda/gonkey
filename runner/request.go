@@ -23,7 +23,13 @@ func newClient() (*http.Client, error) {
 		}
 		transport.Proxy = http.ProxyURL(proxyUrl)
 	}
-	return &http.Client{Transport: transport}, nil
+
+	return &http.Client{
+		Transport: transport,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}, nil
 }
 
 func newRequest(host string, test models.TestInterface) (*http.Request, error) {
