@@ -18,6 +18,8 @@ type TestInterface interface {
 	BeforeScriptTimeout() int
 	Cookies() map[string]string
 	Headers() map[string]string
+	ContentType() string
+	GetForm() *Form
 	DbQueryString() string
 	DbResponseJson() []string
 	GetVariables() map[string]string
@@ -28,6 +30,7 @@ type TestInterface interface {
 	SetMethod(string)
 	SetPath(string)
 	SetRequest(string)
+	SetForm(form *Form)
 	SetResponses(map[int]string)
 	SetHeaders(map[string]string)
 
@@ -38,6 +41,11 @@ type TestInterface interface {
 
 	// Clone returns copy of current object
 	Clone() TestInterface
+}
+
+// TODO: add support for form fields
+type Form struct {
+	Files map[string]string `json:"files" yaml:"files"`
 }
 
 type Summary struct {

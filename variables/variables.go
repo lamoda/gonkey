@@ -52,6 +52,10 @@ func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
 	newTest.SetResponses(vs.performResponses(newTest.GetResponses()))
 	newTest.SetHeaders(vs.performHeaders(newTest.Headers()))
 
+	if form := newTest.GetForm(); form != nil {
+		newTest.SetForm(vs.performForm(form))
+	}
+
 	return newTest
 }
 
@@ -98,6 +102,16 @@ func (vs *Variables) get(name string) *Variable {
 	}
 
 	return v
+}
+
+func (vs *Variables) performForm(form *models.Form) *models.Form {
+
+	files := make(map[string]string, len(form.Files))
+
+	for k, v := range form.Files {
+		files[k] = vs.perform(v)
+	}
+	return &models.Form{Files: files}
 }
 
 func (vs *Variables) performHeaders(headers map[string]string) map[string]string {

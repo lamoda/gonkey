@@ -95,6 +95,12 @@ func (t *Test) Headers() map[string]string {
 	return t.HeadersVal
 }
 
+// TODO: it might make sense to do support of case-insensitive checking
+func (t *Test) ContentType() string {
+	ct, _ := t.HeadersVal["Content-Type"]
+	return ct
+}
+
 func (t *Test) DbQueryString() string {
 	return t.DbQuery
 }
@@ -105,6 +111,10 @@ func (t *Test) DbResponseJson() []string {
 
 func (t *Test) GetVariables() map[string]string {
 	return t.Variables
+}
+
+func (t *Test) GetForm() *models.Form {
+	return t.Form
 }
 
 func (t *Test) GetVariablesToSet() map[int]map[string]string {
@@ -126,12 +136,19 @@ func (t *Test) SetMethod(val string) {
 func (t *Test) SetPath(val string) {
 	t.RequestURL = val
 }
+
 func (t *Test) SetRequest(val string) {
 	t.Request = val
 }
+
+func (t *Test) SetForm(val *models.Form) {
+	t.Form = val
+}
+
 func (t *Test) SetResponses(val map[int]string) {
 	t.Responses = val
 }
+
 func (t *Test) SetHeaders(val map[string]string) {
 	t.HeadersVal = val
 }

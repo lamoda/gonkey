@@ -296,6 +296,31 @@ password=private_password
 
 env-файл, например, удобно использовать, когда нужно вынести из теста приватную информацию (пароли, ключи и т.п.)
 
+
+### Загрузка файлов
+
+В тестовом запросе можно загружать файлы. Для этого нужно указать тип запроса - POST и заголовок:
+
+> Content-Type: multipart/form-data
+
+Пример:
+
+```yaml
+ - name: "upload-files"
+   method: POST
+   form:
+       files:
+         file1: "testdata/upload-files/file1.txt"
+         file2: "testdata/upload-files/file2.log"
+   headers:
+     Content-Type: multipart/form-data # case-sensitive, can be omitted
+   response:
+     200: |
+       {
+         "status": "OK"
+       }
+```
+
 ### Фикстуры
 
 Чтобы наполнить базу перед тестом, используются файлы с фикстурами.
