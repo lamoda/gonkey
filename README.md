@@ -296,6 +296,30 @@ password=private_password
 
 env-file can be convenient to hide sensitive information from a test (passwords, keys, etc.)
 
+### Files uploading
+
+You can upload files in test request. For this you must specify the type of request - POST and header:
+
+> Content-Type: multipart/form-data
+
+Example:
+
+```yaml
+ - name: "upload-files"
+   method: POST
+   form:
+       files:
+         file1: "testdata/upload-files/file1.txt"
+         file2: "testdata/upload-files/file2.log"
+   headers:
+     Content-Type: multipart/form-data # case-sensitive, can be omitted
+   response:
+     200: |
+       {
+         "status": "OK"
+       }
+```
+
 ### Fixtures
 
 To seed the DB before the test, gonkey uses fixture files.
