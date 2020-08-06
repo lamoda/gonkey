@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 type replyStrategy interface {
@@ -134,4 +135,46 @@ func (s *methodVaryReply) EndRunningContext() []error {
 		errs = append(errs, def.EndRunningContext()...)
 	}
 	return errs
+}
+
+func newSequentialReply(strategies []*definition) replyStrategy {
+	return &sequentialReply{
+		sequence: strategies,
+	}
+}
+
+type sequentialReply struct {
+	sync.Mutex
+	count    int
+	sequence []*definition
+}
+
+func (s *sequentialReply) ResetRunningContext() {
+	s.Lock()
+	s.count = 0
+	s.Unlock()
+	for _, def := range s.sequence {
+		def.ResetRunningContext()
+	}
+}
+
+func (s *sequentialReply) EndRunningContext() []error {
+	var errs []error
+	for _, def := range s.sequence {
+		errs = append(errs, def.EndRunningContext()...)
+	}
+	return errs
+}
+
+func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
+	s.Lock()
+	defer s.Unlock()
+	// out of bounds, url requested more times than sequence length
+	if s.count >= len(s.sequence) {
+		w.WriteHeader(http.StatusNotFound)
+		return nil
+	}
+	def := s.sequence[s.count]
+	s.count++
+	return def.Execute(w, r)
 }

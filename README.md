@@ -372,7 +372,7 @@ Records in fixtures can use templates, inherit and reference each other.
 
 #### Record templates
 
-Usually, to insert a record to a DB, it's necessary to list all the fields without default values. Oftentimes, many of those fields are not important for the test and their values repeat from one fixture to another, creating unnecessary visual garbage and making the maintenance harder.
+Usually, to insert a record to a DB, it's necessary to list all the fields without default values. Oftentimes, many of those fields are not important for the test, and their values repeat from one fixture to another, creating unnecessary visual garbage and making the maintenance harder.
 
 With templates you can inherit the fields from template record redefining only the fields that are important for the test.
 
@@ -406,7 +406,7 @@ tables:
         name: Jane
 ```
 
-As you might have noticed, templates can be inherited as well with `$extend` keyword, but only if by the time of the dependent template definition the parent template is already defined (in this file or any other referended with `inherits`).
+As you might have noticed, templates can be inherited as well with `$extend` keyword, but only if by the time of the dependent template definition the parent template is already defined (in this file or any other referenced with `inherits`).
 
 #### Record inheritance
 
@@ -443,7 +443,7 @@ It's important to note that record inheritance only works with different fixture
 
 #### Record linking
 
-Despite the fact that fixture files allow you to set values for autoincrement columns (usually `id`), it's not recommended to do it. It's very difficult to control that all the values for `id` are correct between different files and that they never interfere. In order to let the DB assign autoincrement values it's enough to not set the value explicitly.
+Despite the fact that fixture files allow you to set values for autoincrement columns (usually `id`), it's not recommended doing it. It's very difficult to control that all the values for `id` are correct between different files and that they never interfere. In order to let the DB assign autoincrement values its enough to not set the value explicitly.
 
 However, if the value for `id` is not set explicitly, how is it possible to link several entities that should reference each other with ids? Fixtures let us to reference previously inserted records by their name, using `$refName.fieldName`.
 
@@ -607,7 +607,7 @@ Example:
 
 ###### bodyMatchesJSON
 
-Checks that the request body is JSON and it corresponds to the JSON defined in the `body` parameter.
+Checks that the request body is JSON, and it corresponds to the JSON defined in the `body` parameter.
 
 Parameters:
 - `body` (mandatory) - expected JSON. All keys on all levels defined in this parameter must be present in the request body.
@@ -634,7 +634,7 @@ Example:
 
 ###### queryMatches
 
-Checks that the GET request parameters correspond to the ones defined in the `query` paramter.
+Checks that the GET request parameters correspond to the ones defined in the `query` parameter.
 
 Parameters:
 - `expectedQuery` (mandatory) - a list of parameters to compare the parameter string to. The order of parameters is not important.
@@ -835,6 +835,36 @@ Example:
     ...
 ```
 
+###### sequence
+
+With this strategy for each consequent request you will get a reply defined by a consequent nested strategy.
+
+If no nested strategy specified for a request, i.e. arrived more requests than nested strategies specified, response would be `404 Not Found`. 
+
+Parameters:
+- `sequence` (mandatory) - list of nested strategies.
+
+Example:
+```yaml
+  ...
+  mocks:
+    service1:
+      strategy: sequence
+      sequence:
+        # Responds with a different text on each consequent request:
+        # "1" for first call, "2" for second call and so on.
+        # For 5th and later calls response will be 404 Not Found.
+        - strategy: constant
+          body: '1'
+        - strategy: constant
+          body: '2'
+        - strategy: constant
+          body: '3'
+        - strategy: constant
+          body: '4'
+    ...
+```
+
 ##### Calls count
 
 You can define, how many times each mock or mock resource must be called (using `uriVary`). If the actual number of calls is different from expected, the test will be considered failed.
@@ -939,7 +969,7 @@ Example:
 
 #### Definition of DB request response
 
-The response is a list of JSON bojects that the DB request should return.
+The response is a list of JSON objects that the DB request should return.
 
 - `dbResponse` - a string that contains a list of JSON objects.
 
