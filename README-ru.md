@@ -633,12 +633,12 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
     ...
 ```
 
-###### expectedQuery
+###### queryMatches
 
 Проверяет, что параметры GET запроса соответствуют заданным в параметре `query`.
 
 Параметры:
-- `query` (обязательный) - строка параметров с которой будет сверяться запрос. Порядок параметров не имеет значения.
+- `expectedQuery` (обязательный) - строка параметров с которой будет сверяться запрос. Порядок параметров не имеет значения.
 
 Пример:
 ```yaml
@@ -648,8 +648,8 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
       requestConstraints:
         # эта проверка будет требовать, чтобы запрос содержал ключи key1 и key2,
         # а значения были равны key1=value1, key1=value11 и key2=value2. Ключи не указанные в запросе будут пропущены при проверке.
-        - kind: expectedQuery
-          query:  key1=value1&key2=value2&key1=value11
+        - kind: queryMatches
+          expectedQuery:  key1=value1&key2=value2&key1=value11
     ...
 ```
 

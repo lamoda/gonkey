@@ -632,12 +632,12 @@ Example:
     ...
 ```
 
-###### expectedQuery
+###### queryMatches
 
 Checks that the GET request parameters correspond to the ones defined in the `query` paramter.
 
 Parameters:
-- `query` (mandatory) - a list of parameters to compare the parameter string to. The order of parameters is not important.
+- `expectedQuery` (mandatory) - a list of parameters to compare the parameter string to. The order of parameters is not important.
 
 Example:
 ```yaml
@@ -648,8 +648,8 @@ Example:
         # this check will demand that the request contains key1 и key2
         # and the values are key1=value1, key1=value11 и key2=value2. 
         # Keys not mentioned here are omitted while running the check.
-        - kind: expectedQuery
-          query:  key1=value1&key2=value2&key1=value11
+        - kind: queryMatches
+          expectedQuery:  key1=value1&key2=value2&key1=value11
     ...
 ```
 
