@@ -79,9 +79,10 @@ func main() {
 		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
 	}
 
-	err := godotenv.Load(config.EnvFile)
-	if err != nil && config.EnvFile != "" {
-		log.Println(errors.New("error loading .env file"), err)
+	if config.EnvFile != "" {
+		if err := godotenv.Load(config.EnvFile); err != nil {
+			log.Println(errors.New("can't load .env file"), err)
+		}
 	}
 
 	r := runner.New(
