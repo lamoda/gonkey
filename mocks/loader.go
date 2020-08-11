@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type Loader struct {
@@ -105,6 +106,9 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 	case "constant":
 		*ak = append(*ak, "body", "statusCode", "headers")
 		return l.loadConstantStrategy(path, definition)
+	case "sequence":
+		*ak = append(*ak, "sequence")
+		return l.loadSequenceStrategy(path, definition)
 	default:
 		return nil, fmt.Errorf("unknown strategy: %s", strategyName)
 	}
@@ -190,6 +194,25 @@ func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface
 		return nil, err
 	}
 	return newConstantReplyWithCode([]byte(body), statusCode, headers), nil
+}
+
+func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+	if _, ok := def["sequence"]; !ok {
+		return nil, errors.New("`sequence` requires `sequence` key")
+	}
+	seqSlice, ok := def["sequence"].([]interface{})
+	if !ok {
+		return nil, errors.New("`sequence` must be a list")
+	}
+	strategies := make([]*definition, len(seqSlice))
+	for i, v := range seqSlice {
+		def, err := l.loadDefinition(path+"."+strconv.Itoa(i), v)
+		if err != nil {
+			return nil, err
+		}
+		strategies[i] = def
+	}
+	return newSequentialReply(strategies), nil
 }
 
 func (l *Loader) loadHeaders(def map[interface{}]interface{}) (map[string]string, error) {
