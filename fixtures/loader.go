@@ -196,7 +196,7 @@ func (f *Loader) loadTables(ctx *loadContext) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// truncate first
 	truncatedTables := make(map[string]bool)
@@ -205,7 +205,7 @@ func (f *Loader) loadTables(ctx *loadContext) error {
 			// already truncated
 			continue
 		}
-		if err := f.truncateTable(lt.Name); err != nil {
+		if err := f.truncateTable(tx, lt.Name); err != nil {
 			return err
 		}
 		truncatedTables[lt.Name] = true
@@ -215,33 +215,33 @@ func (f *Loader) loadTables(ctx *loadContext) error {
 		if len(lt.Rows) == 0 {
 			continue
 		}
-		if err := f.loadTable(ctx, lt.Name, lt.Rows); err != nil {
+		if err := f.loadTable(tx, ctx, lt.Name, lt.Rows); err != nil {
 			return err
 		}
 	}
 	// alter the sequences so they contain max id + 1
-	if err := f.fixSequences(); err != nil {
+	if err := f.fixSequences(tx); err != nil {
 		return err
 	}
 
-	tx.Commit()
+	_ = tx.Commit()
 	return nil
 }
 
 // truncateTable truncates table
-func (f *Loader) truncateTable(name string) error {
+func (f *Loader) truncateTable(tx *sql.Tx, name string) error {
 	query := fmt.Sprintf("TRUNCATE TABLE \"%s\" CASCADE", name)
 	if f.debug {
 		fmt.Println("Issuing SQL:", query)
 	}
-	_, err := f.db.Exec(query)
+	_, err := tx.Exec(query)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f *Loader) loadTable(ctx *loadContext, t string, rows table) error {
+func (f *Loader) loadTable(tx *sql.Tx, ctx *loadContext, t string, rows table) error {
 	// $extend keyword allows to import values from a named row
 	for i, row := range rows {
 		if base, ok := row["$extend"]; ok {
@@ -265,11 +265,11 @@ func (f *Loader) loadTable(ctx *loadContext, t string, rows table) error {
 		fmt.Println("Issuing SQL:", query)
 	}
 	// issuing query
-	insertedRows, err := f.db.Query(query)
+	insertedRows, err := tx.Query(query)
 	if err != nil {
 		return err
 	}
-	defer insertedRows.Close()
+	defer func() { _ = insertedRows.Close() }()
 	// reading results
 	// here I assume that returning rows go in the same
 	// order as values were passed to INSERT statement
@@ -308,7 +308,7 @@ func (f *Loader) loadTable(ctx *loadContext, t string, rows table) error {
 	return err
 }
 
-func (f *Loader) fixSequences() error {
+func (f *Loader) fixSequences(tx *sql.Tx) error {
 	query := `
 DO $$
 DECLARE
@@ -335,7 +335,7 @@ END$$
 	if f.debug {
 		fmt.Println("Issuing SQL:", query)
 	}
-	_, err := f.db.Exec(query)
+	_, err := tx.Exec(query)
 	return err
 }
 
@@ -346,7 +346,7 @@ func (f *Loader) buildInsertQuery(ctx *loadContext, t string, rows table) (strin
 	var fields []string
 	fieldPresence := make(map[string]bool)
 	for _, row := range rows {
-		for name, _ := range row {
+		for name := range row {
 			if len(name) > 0 && name[0] == '$' {
 				continue
 			}
@@ -411,7 +411,7 @@ func (f *Loader) resolveExpression(expr string, ctx *loadContext) (string, error
 	} else {
 		value, err := f.resolveFieldReference(ctx.refsInserted, expr)
 		if err != nil {
-			return "", nil
+			return "", err
 		}
 		return toDbValue(value)
 	}
