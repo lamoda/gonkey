@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/joho/godotenv"
+
 	"github.com/lamoda/gonkey/checker/response_body"
 	"github.com/lamoda/gonkey/checker/response_db"
 	"github.com/lamoda/gonkey/checker/response_header"
@@ -23,6 +25,7 @@ type RunWithTestingParams struct {
 	Mocks       *mocks.Mocks
 	FixturesDir string
 	DB          *sql.DB
+	EnvFilePath string
 }
 
 // RunWithTesting is a helper function the wraps the common Run and provides simple way
@@ -31,6 +34,12 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	var mocksLoader *mocks.Loader
 	if params.Mocks != nil {
 		mocksLoader = mocks.NewLoader(params.Mocks)
+	}
+
+	if params.EnvFilePath != "" {
+		if err := godotenv.Load(params.EnvFilePath); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	debug := os.Getenv("GONKEY_DEBUG") != ""
