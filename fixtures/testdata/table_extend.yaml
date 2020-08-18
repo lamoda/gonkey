@@ -1,0 +1,21 @@
+templates:
+  baseTpl:
+    f1: tplVal1
+  ref3:
+    $extend: baseTpl
+    f2: tplVal2
+tables:
+  table1:
+    - $name: ref1
+      f1: value1
+      f2: value2
+
+  table2:
+    - $name: ref2
+      $extend: ref1
+      f1: value1 overwritten
+      f3: $eval("1" || "2" || 3 + 5)
+
+  table3:
+    - $extend: ref2
+    - $extend: ref3

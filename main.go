@@ -32,6 +32,7 @@ func main() {
 		Allure           bool
 		Verbose          bool
 		Debug            bool
+		DbType           string
 	}
 
 	flag.StringVar(&config.Host, "host", "", "Target system hostname")
@@ -39,6 +40,7 @@ func main() {
 	flag.StringVar(&config.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&config.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
 	flag.StringVar(&config.FixturesLocation, "fixtures", "", "Path to fixtures directory")
+	flag.StringVar(&config.EnvFile, "db-type", fixtures.PostgresParam, "Type of database (options: postgres)")
 	flag.StringVar(&config.EnvFile, "env-file", "", "Path to env-file")
 	flag.BoolVar(&config.Allure, "allure", true, "Make Allure report")
 	flag.BoolVar(&config.Verbose, "v", false, "Verbose output")
@@ -68,12 +70,13 @@ func main() {
 		}
 	}
 
-	var fixturesLoader *fixtures.Loader
+	var fixturesLoader fixtures.Loader
 	if db != nil && config.FixturesLocation != "" {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
 			DB:       db,
 			Location: config.FixturesLocation,
 			Debug:    config.Debug,
+			DbType:   fixtures.FetchDbType(config.DbType),
 		})
 	} else if config.FixturesLocation != "" {
 		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))

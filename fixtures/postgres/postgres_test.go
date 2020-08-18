@@ -1,28 +1,18 @@
-package fixtures
+package postgres
 
 import (
+	"database/sql"
+	"io/ioutil"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 func TestBuildInsertQuery(t *testing.T) {
-	yml := `
-tables:
-  table:
-    - field1: "value1"
-      field2: 1
-    - field1: "value2"
-      field2: 2
-      field3: 2.569947773654566473
-    - field4: false
-      field5: null
-      field1: '"'
-    - field1: "'"
-      field5:
-        - 1
-        - '2'
-`
+	yml, err := ioutil.ReadFile("../testdata/table.yaml")
+	require.NoError(t, err)
+
 	expected := "INSERT INTO \"table\" AS table_table_gonkey (\"field1\", \"field2\", \"field3\", \"field4\", \"field5\") VALUES " +
 		"('value1', 1, default, default, default), " +
 		"('value2', 2, 2.5699477736545666, default, default), " +
@@ -35,8 +25,9 @@ tables:
 		refsInserted:   make(map[string]row),
 	}
 
-	l := NewLoader(&Config{})
-	l.loadYml([]byte(yml), &ctx)
+	l := New(&sql.DB{}, "", false)
+	err = l.loadYml(yml, &ctx)
+	require.NoError(t, err)
 
 	query, err := l.buildInsertQuery(&ctx, "table", ctx.tables[0].Rows)
 
@@ -52,35 +43,21 @@ tables:
 }
 
 func TestLoadTablesShouldResolveRefs(t *testing.T) {
-	yml := `
-tables:
-  table1:
-    - $name: ref1
-      f1: value1
-      f2: value2
-
-  table2:
-    - $name: ref2
-      f1: $ref1.f2
-      f2: $ref1.f1
-
-  table3:
-    - f1: $ref1.f1
-      f2: $ref2.f1
-`
+	yml, err := ioutil.ReadFile("../testdata/table_refs.yaml")
+	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	ctx := loadContext{
 		refsDefinition: make(map[string]row),
 		refsInserted:   make(map[string]row),
 	}
 
-	l := NewLoader(&Config{DB: db, Debug: true})
+	l := New(db, "", true)
 
 	err = l.loadYml([]byte(yml), &ctx)
 	if err != nil {
@@ -147,42 +124,21 @@ tables:
 }
 
 func TestLoadTablesShouldExtendRows(t *testing.T) {
-	yml := `
-templates:
-  baseTpl:
-    f1: tplVal1
-  ref3:
-    $extend: baseTpl
-    f2: tplVal2
-tables:
-  table1:
-    - $name: ref1
-      f1: value1
-      f2: value2
-
-  table2:
-    - $name: ref2
-      $extend: ref1
-      f1: value1 overwritten
-      f3: $eval("1" || "2" || 3 + 5)
-
-  table3:
-    - $extend: ref2
-    - $extend: ref3
-`
+	yml, err := ioutil.ReadFile("../testdata/table_extend.yaml")
+	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	ctx := loadContext{
 		refsDefinition: make(map[string]row),
 		refsInserted:   make(map[string]row),
 	}
 
-	l := NewLoader(&Config{DB: db, Debug: true})
+	l := New(db, "", true)
 
 	err = l.loadYml([]byte(yml), &ctx)
 	if err != nil {
