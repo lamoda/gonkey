@@ -6,6 +6,7 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"github.com/lamoda/gonkey/fixtures/mysql"
 	"github.com/lamoda/gonkey/fixtures/postgres"
 )
 
@@ -14,10 +15,12 @@ type DbType int
 const (
 	_ = iota
 	Postgres
+	Mysql
 )
 
 const (
 	PostgresParam = "postgres"
+	MysqlParam    = "mysql"
 )
 
 type Config struct {
@@ -44,6 +47,12 @@ func NewLoader(cfg *Config) Loader {
 			location,
 			cfg.Debug,
 		)
+	case Mysql:
+		loader = mysql.New(
+			cfg.DB,
+			location,
+			cfg.Debug,
+		)
 	default:
 		panic("unknown db type")
 	}
@@ -55,6 +64,8 @@ func FetchDbType(dbType string) DbType {
 	switch dbType {
 	case PostgresParam:
 		return Postgres
+	case MysqlParam:
+		return Mysql
 	default:
 		panic("unknown db type param")
 	}

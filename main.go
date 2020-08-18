@@ -40,11 +40,16 @@ func main() {
 	flag.StringVar(&config.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&config.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
 	flag.StringVar(&config.FixturesLocation, "fixtures", "", "Path to fixtures directory")
-	flag.StringVar(&config.EnvFile, "db-type", fixtures.PostgresParam, "Type of database (options: postgres)")
 	flag.StringVar(&config.EnvFile, "env-file", "", "Path to env-file")
 	flag.BoolVar(&config.Allure, "allure", true, "Make Allure report")
 	flag.BoolVar(&config.Verbose, "v", false, "Verbose output")
 	flag.BoolVar(&config.Debug, "debug", false, "Debug output")
+	flag.StringVar(
+		&config.EnvFile,
+		"db-type",
+		fixtures.PostgresParam,
+		"Type of database (options: postgres, mysql)",
+	)
 
 	flag.Parse()
 
