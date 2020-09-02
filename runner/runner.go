@@ -147,11 +147,12 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
+
+	_ = resp.Body.Close()
+
 	if err != nil {
-		_ = resp.Body.Close()
 		return nil, err
 	}
-	_ = resp.Body.Close()
 
 	bodyStr := string(body)
 

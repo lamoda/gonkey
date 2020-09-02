@@ -1,14 +1,7 @@
 package mocks
 
-import (
-	"errors"
-	"strings"
-	"sync"
-)
-
 type Mocks struct {
-	mocks    map[string]*ServiceMock
-	shutDown sync.Once
+	mocks map[string]*ServiceMock
 }
 
 func New(mocks ...*ServiceMock) *Mocks {
@@ -38,44 +31,20 @@ func (m *Mocks) ResetDefinitions() {
 }
 
 func (m *Mocks) Start() error {
-	var (
-		wg      = sync.WaitGroup{}
-		errChan = make(chan error, len(m.mocks))
-	)
 	for _, v := range m.mocks {
-		wg.Add(1)
-		go func(v *ServiceMock) {
-			defer wg.Done()
-			if internalErr := v.StartServer(); internalErr != nil {
-				m.Shutdown()
-				errChan <- internalErr
-			}
-		}(v)
-	}
-	wg.Wait()
-	close(errChan)
-	errList := make([]string, 0, len(errChan))
-	for err := range errChan {
-		errList = append(errList, err.Error())
-	}
-	if len(errList) != 0 {
-		return errors.New(strings.Join(errList, "; "))
+		err := v.StartServer()
+		if err != nil {
+			m.Shutdown()
+			return err
+		}
 	}
 	return nil
 }
 
 func (m *Mocks) Shutdown() {
-	m.shutDown.Do(func() {
-		wg := sync.WaitGroup{}
-		for _, v := range m.mocks {
-			wg.Add(1)
-			go func(v *ServiceMock) {
-				defer wg.Done()
-				v.ShutdownServer()
-			}(v)
-		}
-		wg.Wait()
-	})
+	for _, v := range m.mocks {
+		v.ShutdownServer()
+	}
 }
 
 func (m *Mocks) Service(serviceName string) *ServiceMock {
