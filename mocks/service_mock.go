@@ -39,7 +39,9 @@ func (m *ServiceMock) StartServer() error {
 }
 
 func (m *ServiceMock) ShutdownServer() {
-	m.server.Shutdown(context.TODO())
+	ctx, cancel := context.WithCancel(context.TODO())
+	cancel()
+	m.server.Shutdown(ctx)
 	m.listener = nil
 	m.server = nil
 }

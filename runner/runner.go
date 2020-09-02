@@ -148,6 +148,7 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		_ = resp.Body.Close()
 		return nil, err
 	}
 	_ = resp.Body.Close()
