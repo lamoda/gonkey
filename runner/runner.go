@@ -19,7 +19,7 @@ import (
 
 type Config struct {
 	Host           string
-	FixturesLoader *fixtures.Loader
+	FixturesLoader fixtures.Loader
 	Mocks          *mocks.Mocks
 	MocksLoader    *mocks.Loader
 	Variables      *variables.Variables

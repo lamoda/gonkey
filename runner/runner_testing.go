@@ -25,6 +25,7 @@ type RunWithTestingParams struct {
 	Mocks       *mocks.Mocks
 	FixturesDir string
 	DB          *sql.DB
+	DbType      fixtures.DbType
 	EnvFilePath string
 }
 
@@ -44,12 +45,13 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 
 	debug := os.Getenv("GONKEY_DEBUG") != ""
 
-	var fixturesLoader *fixtures.Loader
+	var fixturesLoader fixtures.Loader
 	if params.DB != nil {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
 			Location: params.FixturesDir,
 			DB:       params.DB,
 			Debug:    debug,
+			DbType:   params.DbType,
 		})
 	}
 
