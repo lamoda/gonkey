@@ -48,18 +48,17 @@ func (m *Mocks) Start() error {
 	return nil
 }
 
-// Maybe slow after go1.15 for gracefull shutdown reason
-// https://github.com/golang/go/blob/release-branch.go1.15/src/net/http/server.go#L2679
-// See ShutdownContext for workaround
+// Stops immediately, with no gracefully closing connections
 func (m *Mocks) Shutdown() {
-	_ = m.ShutdownContext(context.TODO())
+	ctx, cancel := context.WithCancel(context.TODO())
+	cancel()
+	_ = m.ShutdownContext(ctx)
 }
 
-// To immedeately stop mocks pass here pre-cancelled context
 func (m *Mocks) ShutdownContext(ctx context.Context) error {
 	errs := make([]string, 0, len(m.mocks))
 	for _, v := range m.mocks {
-		if err := v.ShutdownServerContext(ctx); err != nil {
+		if err := v.ShutdownServer(ctx); err != nil {
 			errs = append(errs, fmt.Sprintf("%s: %s", v.mock.path, err.Error()))
 		}
 	}
