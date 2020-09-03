@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        go: ['1.12.x', '1.13.x', '1.14.x' ]
+        go: ['1.12.x', '1.13.x', '1.14.x', '1.15.x']
     steps:
 
     - name: Set up Go

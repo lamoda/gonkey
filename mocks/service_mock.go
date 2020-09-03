@@ -38,10 +38,11 @@ func (m *ServiceMock) StartServer() error {
 	return nil
 }
 
-func (m *ServiceMock) ShutdownServer() {
-	m.server.Shutdown(context.TODO())
+func (m *ServiceMock) ShutdownServer(ctx context.Context) error {
+	err := m.server.Shutdown(ctx)
 	m.listener = nil
 	m.server = nil
+	return err
 }
 
 func (m *ServiceMock) ServerAddr() string {

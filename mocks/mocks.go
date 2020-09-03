@@ -1,5 +1,12 @@
 package mocks
 
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strings"
+)
+
 type Mocks struct {
 	mocks map[string]*ServiceMock
 }
@@ -41,10 +48,24 @@ func (m *Mocks) Start() error {
 	return nil
 }
 
+// Stops immediately, with no gracefully closing connections
 func (m *Mocks) Shutdown() {
+	ctx, cancel := context.WithCancel(context.TODO())
+	cancel()
+	_ = m.ShutdownContext(ctx)
+}
+
+func (m *Mocks) ShutdownContext(ctx context.Context) error {
+	errs := make([]string, 0, len(m.mocks))
 	for _, v := range m.mocks {
-		v.ShutdownServer()
+		if err := v.ShutdownServer(ctx); err != nil {
+			errs = append(errs, fmt.Sprintf("%s: %s", v.mock.path, err.Error()))
+		}
 	}
+	if len(errs) != 0 {
+		return errors.New(strings.Join(errs, "; "))
+	}
+	return nil
 }
 
 func (m *Mocks) Service(serviceName string) *ServiceMock {
