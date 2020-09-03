@@ -40,6 +40,7 @@ func (m *ServiceMock) StartServer() error {
 
 func (m *ServiceMock) ShutdownServer() {
 	ctx, cancel := context.WithCancel(context.TODO())
+	// pre-cancel ctx to avoid waiting for gracefull shutdown
 	cancel()
 	m.server.Shutdown(ctx)
 	m.listener = nil
