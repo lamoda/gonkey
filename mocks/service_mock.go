@@ -38,12 +38,16 @@ func (m *ServiceMock) StartServer() error {
 	return nil
 }
 
+// Not used: backward compatibility with public interface
 func (m *ServiceMock) ShutdownServer() {
-	ctx, cancel := context.WithCancel(context.TODO())
-	cancel()
-	m.server.Shutdown(ctx)
+	_ = m.ShutdownServerContext(context.TODO())
+}
+
+func (m *ServiceMock) ShutdownServerContext(ctx context.Context) (err error) {
+	err = m.server.Shutdown(ctx)
 	m.listener = nil
 	m.server = nil
+	return err
 }
 
 func (m *ServiceMock) ServerAddr() string {
