@@ -2,7 +2,6 @@ package console_colored
 
 import (
 	"bytes"
-	"fmt"
 	"text/template"
 
 	"github.com/fatih/color"
@@ -15,13 +14,15 @@ const dotsPerLine = 80
 type ConsoleColoredOutput struct {
 	output.OutputInterface
 
-	verbose bool
-	dots    int
+	verbose       bool
+	dots          int
+	coloredPrintf func(format string, a ...interface{})
 }
 
 func NewOutput(verbose bool) *ConsoleColoredOutput {
 	return &ConsoleColoredOutput{
-		verbose: verbose,
+		verbose:       verbose,
+		coloredPrintf: color.New().PrintfFunc(),
 	}
 }
 
@@ -31,12 +32,12 @@ func (o *ConsoleColoredOutput) Process(t models.TestInterface, result *models.Re
 		if err != nil {
 			return err
 		}
-		fmt.Print(text)
+		o.coloredPrintf("%s", text)
 	} else {
-		fmt.Print(".")
+		o.coloredPrintf(".")
 		o.dots++
 		if o.dots%dotsPerLine == 0 {
-			fmt.Print("\n")
+			o.coloredPrintf("\n")
 		}
 	}
 	return nil
@@ -110,5 +111,5 @@ func templateFuncMap() template.FuncMap {
 }
 
 func (o *ConsoleColoredOutput) ShowSummary(summary *models.Summary) {
-	fmt.Printf("\nFailed tests: %d/%d\n", summary.Failed, summary.Total)
+	o.coloredPrintf("\nFailed tests: %d/%d\n", summary.Failed, summary.Total)
 }
