@@ -13,6 +13,7 @@ import (
 	"github.com/lamoda/gonkey/checker/response_header"
 	"github.com/lamoda/gonkey/fixtures"
 	"github.com/lamoda/gonkey/mocks"
+	"github.com/lamoda/gonkey/output"
 	"github.com/lamoda/gonkey/output/allure_report"
 	testingOutput "github.com/lamoda/gonkey/output/testing"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
@@ -27,6 +28,7 @@ type RunWithTestingParams struct {
 	DB          *sql.DB
 	DbType      fixtures.DbType
 	EnvFilePath string
+	OutputFunc  output.OutputInterface
 }
 
 // RunWithTesting is a helper function the wraps the common Run and provides simple way
@@ -69,7 +71,11 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 		yamlLoader,
 	)
 
-	r.AddOutput(testingOutput.NewOutput(t))
+	if params.OutputFunc != nil {
+		r.AddOutput(params.OutputFunc)
+	} else {
+		r.AddOutput(testingOutput.NewOutput(t))
+	}
 
 	if os.Getenv("GONKEY_ALLURE_DIR") != "" {
 		allureOutput := allure_report.NewOutput("Gonkey", os.Getenv("GONKEY_ALLURE_DIR"))
