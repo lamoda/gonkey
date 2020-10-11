@@ -35,14 +35,31 @@ func parseTestDefinitionFile(absPath string) ([]Test, error) {
 	return tests, nil
 }
 
-func executeTmpl(tmpl *template.Template, args map[string]interface{}) (string, error) {
+func substituteArgs(tmpl string, args map[string]interface{}) (string, error) {
+	compiledTmpl, err := template.New("").Parse(tmpl)
+	if err != nil {
+		return "", err
+	}
+
 	buf := &bytes.Buffer{}
 
-	if err := tmpl.Execute(buf, args); err != nil {
+	if err := compiledTmpl.Execute(buf, args); err != nil {
 		return "", err
 	}
 
 	return buf.String(), nil
+}
+
+func substituteArgsToMap(tmpl map[string]string, args map[string]interface{}) (map[string]string, error) {
+	res := make(map[string]string)
+	for key, value := range tmpl {
+		var err error
+		res[key], err = substituteArgs(value, args)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 // Make tests from the given test definition.
@@ -61,30 +78,57 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		return append(tests, test), nil
 	}
 
-	requestTmpl, err := template.New("request").Parse(testDefinition.RequestTmpl)
-	if err != nil {
-		return nil, err
-	}
+	var err error
+
+	requestTmpl := testDefinition.RequestTmpl
+	beforeScriptPathTmpl := testDefinition.BeforeScriptParams.PathTmpl
+	requestURLTmpl := testDefinition.RequestURL
+	queryParamsTmpl := testDefinition.QueryParams
+	headersValTmpl := testDefinition.HeadersVal
+	cookiesValTmpl := testDefinition.CookiesVal
+	responseHeadersTmpl := testDefinition.ResponseHeaders
 
 	// produce as many tests as cases defined
 	for caseIdx, testCase := range testDefinition.Cases {
 		test := Test{TestDefinition: testDefinition}
 		test.Name = fmt.Sprintf("%s #%d", test.Name, caseIdx)
 
-		// compile request body
-		test.Request, err = executeTmpl(requestTmpl, testCase.RequestArgs)
+		// substitute RequestArgs to different parts of request
+		test.RequestURL, err = substituteArgs(requestURLTmpl, testCase.RequestArgs)
+		if err != nil {
+			return nil, err
+		}
 
-		// compile response bodies
+		test.Request, err = substituteArgs(requestTmpl, testCase.RequestArgs)
+		if err != nil {
+			return nil, err
+		}
+
+		test.QueryParams, err = substituteArgs(queryParamsTmpl, testCase.RequestArgs)
+		if err != nil {
+			return nil, err
+		}
+
+		test.HeadersVal, err = substituteArgsToMap(headersValTmpl, testCase.RequestArgs)
+		if err != nil {
+			return nil, err
+		}
+
+		test.CookiesVal, err = substituteArgsToMap(cookiesValTmpl, testCase.RequestArgs)
+		if err != nil {
+			return nil, err
+		}
+
+		// substitute ResponseArgs to different parts of response
 		test.Responses = make(map[int]string)
 		for status, tpl := range testDefinition.ResponseTmpls {
 			args, ok := testCase.ResponseArgs[status]
 			if ok {
 				// found args for response status
-				t, err := template.New("response").Parse(tpl)
+				test.Responses[status], err = substituteArgs(tpl, args)
 				if err != nil {
 					return nil, err
 				}
-				test.Responses[status], err = executeTmpl(t, args)
 			} else {
 				// not found args, using response as is
 				test.Responses[status] = tpl
@@ -92,23 +136,29 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		}
 
 		test.ResponseHeaders = make(map[int]map[string]string)
-		for status, respHeaders := range testDefinition.ResponseHeaders {
-			test.ResponseHeaders[status] = respHeaders
+		for status, respHeaders := range responseHeadersTmpl {
+			args, ok := testCase.ResponseArgs[status]
+			if ok {
+				// found args for response status
+				test.ResponseHeaders[status], err = substituteArgsToMap(respHeaders, args)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				// not found args, using response as is
+				test.ResponseHeaders[status] = respHeaders
+			}
 		}
 
-		// compile script body
-		beforeScriptPathTmpl, err := template.New("beforeScript").Parse(testDefinition.BeforeScriptParams.PathTmpl)
+		test.BeforeScript, err = substituteArgs(beforeScriptPathTmpl, testCase.BeforeScriptArgs)
 		if err != nil {
 			return nil, err
 		}
-		test.BeforeScript, err = executeTmpl(beforeScriptPathTmpl, testCase.BeforeScriptArgs)
 
-		// compile DbQuery body
-		dbQueryTmpl, err := template.New("dbQuery").Parse(testDefinition.DbQueryTmpl)
+		test.DbQuery, err = substituteArgs(testDefinition.DbQueryTmpl, testCase.DbQueryArgs)
 		if err != nil {
 			return nil, err
 		}
-		test.DbQuery, err = executeTmpl(dbQueryTmpl, testCase.DbQueryArgs)
 
 		// compile DbResponse
 		if testCase.DbResponse != nil {
@@ -118,11 +168,7 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 			if len(testDefinition.DbResponseTmpl) != 0 {
 				// compile DbResponse string by string
 				for _, tpl := range testDefinition.DbResponseTmpl {
-					dbResponseTmpl, err := template.New("dbResponse").Parse(tpl)
-					if err != nil {
-						return nil, err
-					}
-					dbResponseString, err := executeTmpl(dbResponseTmpl, testCase.DbResponseArgs)
+					dbResponseString, err := substituteArgs(tpl, testCase.DbResponseArgs)
 					if err != nil {
 						return nil, err
 					}
