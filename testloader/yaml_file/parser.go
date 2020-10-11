@@ -66,10 +66,18 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		return nil, err
 	}
 
+	requestURLTmpl, err := template.New("requestURL").Parse(testDefinition.RequestURL)
+	if err != nil {
+		return nil, err
+	}
+
 	// produce as many tests as cases defined
 	for caseIdx, testCase := range testDefinition.Cases {
 		test := Test{TestDefinition: testDefinition}
 		test.Name = fmt.Sprintf("%s #%d", test.Name, caseIdx)
+
+		// compile request uri
+		test.RequestURL, err = executeTmpl(requestURLTmpl, testCase.RequestArgs)
 
 		// compile request body
 		test.Request, err = executeTmpl(requestTmpl, testCase.RequestArgs)
