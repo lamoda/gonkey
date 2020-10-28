@@ -26,6 +26,7 @@ type TestDefinition struct {
 }
 
 type CaseData struct {
+	Variables        map[string]string              `json:"variables" yaml:"variables"`
 	RequestArgs      map[string]interface{}         `json:"requestArgs" yaml:"requestArgs"`
 	ResponseArgs     map[int]map[string]interface{} `json:"responseArgs" yaml:"responseArgs"`
 	BeforeScriptArgs map[string]interface{}         `json:"beforeScriptArgs" yaml:"beforeScriptArgs"`

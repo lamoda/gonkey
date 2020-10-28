@@ -23,7 +23,7 @@ func New() *Variables {
 // Load adds new variables and replaces values of existing
 func (vs *Variables) Load(variables map[string]string) {
 	for n, v := range variables {
-		variable := NewVariable(n, v)
+		variable := NewVariable(n, vs.perform(v))
 
 		vs.variables[n] = variable
 	}

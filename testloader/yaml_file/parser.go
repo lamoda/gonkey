@@ -71,6 +71,14 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		test := Test{TestDefinition: testDefinition}
 		test.Name = fmt.Sprintf("%s #%d", test.Name, caseIdx)
 
+		// load variables from case
+		if test.Variables == nil {
+			test.Variables = map[string]string{}
+		}
+		for key, value := range testCase.Variables {
+			test.Variables[key] = value
+		}
+
 		// compile request body
 		test.Request, err = executeTmpl(requestTmpl, testCase.RequestArgs)
 
