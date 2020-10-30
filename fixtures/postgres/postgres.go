@@ -209,7 +209,7 @@ func (f *LoaderPostgres) loadTables(ctx *loadContext) error {
 			continue
 		}
 		if err := f.loadTable(ctx, lt.Name, lt.Rows); err != nil {
-			return err
+			return fmt.Errorf("failed to load table '%s' because:\n%s", lt.Name, err)
 		}
 	}
 	// alter the sequences so they contain max id + 1
@@ -296,6 +296,14 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, t string, rows table) error
 				fmt.Printf("Populating ref %s as %s from inserted values\n", name, string(valuesJson))
 			}
 		}
+	}
+
+	// iterate through any remaining rows and check for an error
+	for insertedRows.Next() {
+		continue
+	}
+	if err := insertedRows.Err(); err != nil {
+		return fmt.Errorf("failed to execute query. DB returned error:\n%s", err)
 	}
 	return err
 }
