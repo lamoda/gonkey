@@ -74,6 +74,7 @@ func (r *Runner) Run() (*models.Summary, error) {
 	for v := range loader {
 		testResult, err := r.executeTest(v, client)
 		if err != nil {
+			// todo: populate error with test name. Currently it is not possible here to get test name.
 			return nil, err
 		}
 		totalTests++
@@ -104,7 +105,7 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 	// load fixtures
 	if r.config.FixturesLoader != nil && v.Fixtures() != nil {
 		if err := r.config.FixturesLoader.Load(v.Fixtures()); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("unable to load fixtures [%s], error:\n%s", strings.Join(v.Fixtures(), ", "), err)
 		}
 	}
 
