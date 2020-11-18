@@ -12,14 +12,14 @@ import (
 func parseTestDefinitionFile(absPath string) ([]Test, error) {
 	data, err := ioutil.ReadFile(absPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read file %s:\n%s", absPath, err)
 	}
 
 	var testDefinitions []TestDefinition
 
 	// reading the test source file
 	if err := yaml.Unmarshal(data, &testDefinitions); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshall %s:\n%s", absPath, err)
 	}
 
 	var tests []Test
