@@ -1,0 +1,61 @@
+- name: Test passed into mock service params in an awkward way.
+  mocks:
+    backend:
+      strategy: uriVary
+      uris:
+        /process:
+          requestConstraints:
+            - kind: bodyMatchesJSON
+              body: |
+                {
+                  "client_code": "proxy",
+                  "origin_request": {
+                    "body": "{\"some\": {\"request\": \"body\", \"to\": \"be\"}, \"passed\": \"into backend\"}"
+                  }
+                }
+          strategy: constant
+          body: ""
+          statusCode: 200
+  method: POST
+  path: /proxy
+  request: '{"some": {"request": "body", "to": "be"}, "passed": "into backend"}'
+  response:
+    200: |
+      {
+        "status": "ok"
+      }
+
+- name: Test passed into mock service params in a handy way.
+  mocks:
+    backend:
+      strategy: uriVary
+      uris:
+        /process:
+          requestConstraints:
+            - kind: bodyMatchesJSON
+              body: |
+                {
+                  "client_code": "proxy"
+                }
+            - kind: bodyJSONFieldMatchesJSON
+              path: origin_request.body
+              value: |
+                {
+                  "some": {
+                    "request": "body",
+                    "to": "be"
+                  },
+                  "passed": "into backend"
+                }
+
+          strategy: constant
+          body: ""
+          statusCode: 200
+  method: POST
+  path: /proxy
+  request: '{"some": {"request": "body", "to": "be"}, "passed": "into backend"}'
+  response:
+    200: |
+      {
+        "status": "ok"
+      }

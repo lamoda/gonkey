@@ -229,14 +229,14 @@ Example:
 You can assign values to variables in the following ways (priorities are from top to bottom):
 
 - in the description of the test
-- from the response of the previous test 
+- from the response of the previous test
 - from environment variables or from env-file
 
 #### More detailed about assignment methods
 
 ##### In the description of the test
 
-Example: 
+Example:
 
 ```yaml
 - method: "{{ $method }}"
@@ -256,7 +256,7 @@ Example:
     200: "{{ $resp }}"
 ```
 
-##### From the response of the previous test 
+##### From the response of the previous test
 
 Example:
 
@@ -619,7 +619,7 @@ Example:
     service1:
       requestConstraints:
         # this check will demand that the request contains keys key1, key2 and subKey1
-        # and their values set to value1 and value2. However, it's fine if the request has 
+        # and their values set to value1 and value2. However, it's fine if the request has
         # other keys not mentioned here.
         - kind: bodyMatchesJSON
           body: >
@@ -630,6 +630,40 @@ Example:
               }
             }
     ...
+```
+
+###### bodyJSONFieldMatchesJSON
+
+When request body is JSON, checks that value of particular JSON-field is string-packed JSON
+that matches to JSON defined in `value` parameter.
+
+Parameters:
+- `path` (mandatory) - path to string field, containing JSON to check.
+- `value` (mandatory) - expected JSON.
+
+Example:
+
+Origin request that contains string-packed JSON
+```yaml
+  {
+      "field1": {
+        "field2": "{\"stringpacked\": \"json\"}"
+      }
+  }
+```
+
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        - kind: bodyJSONFieldMatchesJSON
+          path: field1.field2
+          value: |
+            {
+              "stringpacked": "json"
+            }
+  ...
 ```
 
 ###### queryMatches
@@ -646,7 +680,7 @@ Example:
     service1:
       requestConstraints:
         # this check will demand that the request contains key1 и key2
-        # and the values are key1=value1, key1=value11 и key2=value2. 
+        # and the values are key1=value1, key1=value11 и key2=value2.
         # Keys not mentioned here are omitted while running the check.
         - kind: queryMatches
           expectedQuery:  key1=value1&key2=value2&key1=value11
@@ -744,7 +778,7 @@ Example:
       headers:
         Content-Type: application/json
     ...
-``` 
+```
 
 ###### constant
 
@@ -821,7 +855,7 @@ Example:
       methods:
         GET:
           # nothing stops us from using `uriVary` strategy here
-          # this way we can form different responses to different 
+          # this way we can form different responses to different
           # method+resource combinations
           strategy: constant
           body: >
@@ -839,7 +873,7 @@ Example:
 
 With this strategy for each consequent request you will get a reply defined by a consequent nested strategy.
 
-If no nested strategy specified for a request, i.e. arrived more requests than nested strategies specified, response would be `404 Not Found`. 
+If no nested strategy specified for a request, i.e. arrived more requests than nested strategies specified, response would be `404 Not Found`.
 
 Parameters:
 - `sequence` (mandatory) - list of nested strategies.
