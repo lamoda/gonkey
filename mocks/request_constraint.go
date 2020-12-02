@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/lamoda/gonkey/compare"
+	"github.com/tidwall/gjson"
 )
 
 type verifier interface {
@@ -65,6 +66,52 @@ func (c *bodyMatchesJSONConstraint) Verify(r *http.Request) []error {
 		IgnoreArraysOrdering: true,
 	}
 	return compare.Compare(c.expectedBody, actual, params)
+}
+
+type bodyJSONFieldMatchesJSONConstraint struct {
+	path     string
+	expected interface{}
+}
+
+func newBodyJSONFieldMatchesJSONConstraint(path, expected string) (verifier, error) {
+	var v interface{}
+	err := json.Unmarshal([]byte(expected), &v)
+	if err != nil {
+		return nil, err
+	}
+	res := &bodyJSONFieldMatchesJSONConstraint{
+		path:     path,
+		expected: v,
+	}
+	return res, nil
+}
+
+func (c *bodyJSONFieldMatchesJSONConstraint) Verify(r *http.Request) []error {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return []error{err}
+	}
+
+	// write body for future reusing
+	r.Body = ioutil.NopCloser(bytes.NewReader(body))
+
+	value := gjson.Get(string(body), c.path)
+	if !value.Exists() {
+		return []error{fmt.Errorf("json field %s does not exist", c.path)}
+	}
+	if len(value.String()) == 0 {
+		return []error{fmt.Errorf("json field %s is empty", c.path)}
+	}
+
+	var actual interface{}
+	err = json.Unmarshal([]byte(value.String()), &actual)
+	if err != nil {
+		return []error{err}
+	}
+	params := compare.CompareParams{
+		IgnoreArraysOrdering: true,
+	}
+	return compare.Compare(c.expected, actual, params)
 }
 
 type methodConstraint struct {
