@@ -739,6 +739,36 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
     ...
 ```
 
+###### bodyMatchesXML
+
+Проверяет, что тело запроса - это XML, который соответствует заданному в параметре `body`.
+
+Параметры:
+- `body` (обязательный) - XML, с которым будет сверяться запрос.
+
+Example:
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        - kind: bodyMatchesXML
+          body: |
+            <Person>
+              <Company>Hogwarts School of Witchcraft and Wizardry</Company>
+              <FullName>Harry Potter</FullName>
+              <Email where="work">hpotter@hog.gb</Email>
+              <Email where="home">hpotter@gmail.com</Email>
+              <Addr>4 Privet Drive</Addr>
+              <Group>
+                <Value>Hexes</Value>
+                <Value>Jinxes</Value>
+                <Value>Jinxes</Value>
+              </Group>
+            </Person>
+  ...
+```
+
 ##### Стратегии ответов (strategy)
 
 Стратегии ответов определяют, как мок будет отвечать на входящие запросы.

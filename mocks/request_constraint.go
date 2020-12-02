@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/lamoda/gonkey/compare"
+	"github.com/lamoda/gonkey/xmlparsing"
 	"github.com/tidwall/gjson"
 )
 
@@ -27,6 +28,44 @@ type nopConstraint struct {
 
 func (c *nopConstraint) Verify(r *http.Request) []error {
 	return nil
+}
+
+type bodyMatchesXMLConstraint struct {
+	expectedBody interface{}
+}
+
+func newBodyMatchesXMLConstraint(expected string) (verifier, error) {
+	expectedBody, err := xmlparsing.Parse(expected)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &bodyMatchesXMLConstraint{
+		expectedBody: expectedBody,
+	}
+	return res, nil
+}
+
+func (c *bodyMatchesXMLConstraint) Verify(r *http.Request) []error {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return []error{err}
+	}
+	// write body for future reusing
+	r.Body = ioutil.NopCloser(bytes.NewReader(body))
+	if len(body) == 0 {
+		return []error{errors.New("request is empty")}
+	}
+
+	actual, err := xmlparsing.Parse(string(body))
+	if err != nil {
+		return []error{err}
+	}
+
+	params := compare.CompareParams{
+		IgnoreArraysOrdering: true,
+	}
+	return compare.Compare(c.expectedBody, actual, params)
 }
 
 type bodyMatchesJSONConstraint struct {
