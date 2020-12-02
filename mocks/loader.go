@@ -284,6 +284,9 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 	case "headerIs":
 		*ak = append(*ak, "header", "value", "regexp")
 		return l.loadHeaderIsConstraint(def)
+	case "bodyMatchesXML":
+		*ak = append(*ak, "body")
+		return l.loadBodyMatchesXMLConstraint(def)
 	default:
 		return nil, fmt.Errorf("unknown constraint: %s", kind)
 	}
@@ -320,6 +323,18 @@ func (l *Loader) loadBodyJSONFieldMatchesJSONConstraint(def map[interface{}]inte
 		return nil, errors.New("`value` must be string")
 	}
 	return newBodyJSONFieldMatchesJSONConstraint(path, value)
+}
+
+func (l *Loader) loadBodyMatchesXMLConstraint(def map[interface{}]interface{}) (verifier, error) {
+	c, ok := def["body"]
+	if !ok {
+		return nil, errors.New("`bodyMatchesXML` requires `body` key")
+	}
+	body, ok := c.(string)
+	if !ok {
+		return nil, errors.New("`body` must be string")
+	}
+	return newBodyMatchesXMLConstraint(body)
 }
 
 func (l *Loader) loadQueryMatchesConstraint(def map[interface{}]interface{}) (verifier, error) {

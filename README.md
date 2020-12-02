@@ -738,6 +738,35 @@ Examples:
     ...
 ```
 
+###### bodyMatchesXML
+
+Checks that the request body is XML, and it matches to the XML defined in the `body` parameter.
+
+Parameters:
+- `body` (mandatory) - expected XML.
+
+Example:
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        - kind: bodyMatchesXML
+          body: |
+            <Person>
+              <Company>Hogwarts School of Witchcraft and Wizardry</Company>
+              <FullName>Harry Potter</FullName>
+              <Email where="work">hpotter@hog.gb</Email>
+              <Email where="home">hpotter@gmail.com</Email>
+              <Addr>4 Privet Drive</Addr>
+              <Group>
+                <Value>Hexes</Value>
+                <Value>Jinxes</Value>
+              </Group>
+            </Person>
+  ...
+```
+
 ##### Response strategies (strategy)
 
 Response strategies define what mock will response to incoming requests.
