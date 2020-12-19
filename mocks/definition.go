@@ -3,6 +3,7 @@ package mocks
 import (
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"sync"
 )
 
@@ -32,13 +33,18 @@ func (d *definition) Execute(w http.ResponseWriter, r *http.Request) []error {
 	d.Unlock()
 	var errors []error
 	if len(d.requestConstraints) > 0 {
+		requestDump, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			fmt.Printf("Gonkey internal error: %s\n", err)
+		}
+
 		for _, c := range d.requestConstraints {
 			errs := c.Verify(r)
 			for _, e := range errs {
 				errors = append(errors, &RequestConstraintError{
-					error:      e,
-					Constraint: c,
-					Request:    r,
+					error:       e,
+					Constraint:  c,
+					RequestDump: requestDump,
 				})
 			}
 		}
