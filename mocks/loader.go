@@ -273,8 +273,14 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 		return l.loadQueryMatchesConstraint(def)
 	case "methodIsGET":
 		return &methodConstraint{method: "GET"}, nil
+	case "methodIsPATCH":
+		return &methodConstraint{method: "PATCH"}, nil
 	case "methodIsPOST":
 		return &methodConstraint{method: "POST"}, nil
+	case "methodIsPUT":
+		return &methodConstraint{method: "PUT"}, nil
+	case "methodIsDELETE":
+		return &methodConstraint{method: "DELETE"}, nil
 	case "methodIs":
 		*ak = append(*ak, "method")
 		return l.loadMethodIsConstraint(def)
