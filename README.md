@@ -838,7 +838,7 @@ Example:
 
 Uses different response strategies, depending on a path of a requested resource.
 
-When receiving a request for a resource that is not defined in the parameters, responses with `404 Not Found`.
+When receiving a request for a resource that is not defined in the parameters, the test will be considered failed.
 
 Parameters:
 - `uris` (mandatory) - a list of resources, each resource can be configured as a separate mock-service using any available request constraints and response strategies (see example)
@@ -870,7 +870,7 @@ Example:
 
 Uses various response strategies, depending on the request method.
 
-When receiving a request with a method not defined in methodVary, the server responses with `405 Method Not Allowed`.
+When receiving a request with a method not defined in methodVary, the test will be considered failed.
 
 Parameters:
 - `methods` (mandatory) - a list of methods, each method can be configured as a separate mock-service using any available request constraints and response strategies (see example)
@@ -902,7 +902,7 @@ Example:
 
 With this strategy for each consequent request you will get a reply defined by a consequent nested strategy.
 
-If no nested strategy specified for a request, i.e. arrived more requests than nested strategies specified, response would be `404 Not Found`.
+If no nested strategy specified for a request, i.e. arrived more requests than nested strategies specified, the test will be considered failed.
 
 Parameters:
 - `sequence` (mandatory) - list of nested strategies.

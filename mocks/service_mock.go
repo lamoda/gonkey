@@ -55,14 +55,10 @@ func (m *ServiceMock) ServerAddr() string {
 func (m *ServiceMock) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	m.Lock()
 	defer m.Unlock()
+
 	if m.mock != nil {
 		errs := m.mock.Execute(w, r)
-		for _, e := range errs {
-			m.errors = append(m.errors, &Error{
-				error:       e,
-				ServiceName: m.ServiceName,
-			})
-		}
+		m.errors = append(m.errors, errs...)
 	}
 }
 

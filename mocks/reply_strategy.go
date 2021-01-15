@@ -1,8 +1,10 @@
 package mocks
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 	"sync"
 )
@@ -22,6 +24,14 @@ type constantReply struct {
 	replyBody  []byte
 	statusCode int
 	headers    map[string]string
+}
+
+func unhandledRequestError(r *http.Request) []error {
+	requestContent, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		return []error{fmt.Errorf("Gonkey internal error during request dump: %s\n", err)}
+	}
+	return []error{fmt.Errorf("unhandled request to mock:\n%s", requestContent)}
 }
 
 func newFileReplyWithCode(filename string, statusCode int, headers map[string]string) replyStrategy {
@@ -49,6 +59,13 @@ func (s *constantReply) HandleRequest(w http.ResponseWriter, r *http.Request) []
 	w.WriteHeader(s.statusCode)
 	w.Write(s.replyBody)
 	return nil
+}
+
+type failReply struct {
+}
+
+func (s *failReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
+	return unhandledRequestError(r)
 }
 
 type nopReply struct {
@@ -82,8 +99,7 @@ func (s *uriVaryReply) HandleRequest(w http.ResponseWriter, r *http.Request) []e
 			return def.Execute(w, r)
 		}
 	}
-	w.WriteHeader(http.StatusNotFound)
-	return nil
+	return unhandledRequestError(r)
 }
 
 func (s *uriVaryReply) ResetRunningContext() {
@@ -119,8 +135,7 @@ func (s *methodVaryReply) HandleRequest(w http.ResponseWriter, r *http.Request) 
 			return def.Execute(w, r)
 		}
 	}
-	w.WriteHeader(http.StatusMethodNotAllowed)
-	return nil
+	return unhandledRequestError(r)
 }
 
 func (s *methodVaryReply) ResetRunningContext() {
@@ -171,8 +186,7 @@ func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) 
 	defer s.Unlock()
 	// out of bounds, url requested more times than sequence length
 	if s.count >= len(s.sequence) {
-		w.WriteHeader(http.StatusNotFound)
-		return nil
+		return unhandledRequestError(r)
 	}
 	def := s.sequence[s.count]
 	s.count++
