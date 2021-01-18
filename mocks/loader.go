@@ -284,6 +284,9 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 	case "headerIs":
 		*ak = append(*ak, "header", "value", "regexp")
 		return l.loadHeaderIsConstraint(def)
+	case "pathMatches":
+		*ak = append(*ak, "path", "regexp")
+		return l.loadPathMatchesConstraint(def)
 	case "bodyMatchesXML":
 		*ak = append(*ak, "body")
 		return l.loadBodyMatchesXMLConstraint(def)
@@ -335,6 +338,23 @@ func (l *Loader) loadBodyMatchesXMLConstraint(def map[interface{}]interface{}) (
 		return nil, errors.New("`body` must be string")
 	}
 	return newBodyMatchesXMLConstraint(body)
+}
+
+func (l *Loader) loadPathMatchesConstraint(def map[interface{}]interface{}) (verifier, error) {
+	var pathStr, regexpStr string
+	if path, ok := def["path"]; ok {
+		pathStr, ok = path.(string)
+		if !ok {
+			return nil, errors.New("`path` must be string")
+		}
+	}
+	if regexp, ok := def["regexp"]; ok {
+		regexpStr, ok = regexp.(string)
+		if !ok || regexp == "" {
+			return nil, errors.New("`regexp` must be string")
+		}
+	}
+	return newPathConstraint(pathStr, regexpStr)
 }
 
 func (l *Loader) loadQueryMatchesConstraint(def map[interface{}]interface{}) (verifier, error) {

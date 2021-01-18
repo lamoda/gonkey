@@ -242,3 +242,37 @@ func (c *queryConstraint) Verify(r *http.Request) (errors []error) {
 
 	return errors
 }
+
+type pathConstraint struct {
+	verifier
+
+	path   string
+	regexp *regexp.Regexp
+}
+
+func newPathConstraint(path, re string) (verifier, error) {
+	var reCompiled *regexp.Regexp
+	if re != "" {
+		var err error
+		reCompiled, err = regexp.Compile(re)
+		if err != nil {
+			return nil, err
+		}
+	}
+	res := &pathConstraint{
+		path:   path,
+		regexp: reCompiled,
+	}
+	return res, nil
+}
+
+func (c *pathConstraint) Verify(r *http.Request) []error {
+	path := r.URL.Path
+	if c.path != "" && c.path != path {
+		return []error{fmt.Errorf("url path %s doesn't match expected %s", path, c.path)}
+	}
+	if c.regexp != nil && !c.regexp.MatchString(path) {
+		return []error{fmt.Errorf("url path %s doesn't match regexp %s", path, c.regexp)}
+	}
+	return nil
+}

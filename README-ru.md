@@ -668,6 +668,29 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
   ...
 ```
 
+###### pathMatches
+
+Проверяет, что путь в запросе соответствует заданному значению.
+
+Параметры:
+- `path` - строка, которой должен быть равен путь запроса;
+- `regexp` - регулярное выражение, которому должен соответствовать путь запроса.
+
+Пример:
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        - kind: pathMatches
+          path: /api/v1/test/somevalue
+    service2:
+      requestConstraints:
+        - kind: pathMatches
+          regexp: ^/api/v1/test/.*$
+    ...
+```
+
 ###### queryMatches
 
 Проверяет, что параметры GET запроса соответствуют заданным в параметре `query`.
