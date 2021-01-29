@@ -666,6 +666,29 @@ Origin request that contains string-packed JSON
   ...
 ```
 
+###### pathMatches
+
+Checks that the request path corresponds to the expected one.
+
+Parameters:
+- `path` - a string with the expected request path value;
+- `regexp` - a regular expression to check the path value against.
+
+Example:
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        - kind: pathMatches
+          path: /api/v1/test/somevalue
+    service2:
+      requestConstraints:
+        - kind: pathMatches
+          regexp: ^/api/v1/test/.*$
+    ...
+```
+
 ###### queryMatches
 
 Checks that the GET request parameters correspond to the ones defined in the `query` parameter.
