@@ -1,0 +1,30 @@
+- name: Test transform script
+  method: POST
+  path: /echo
+  request: '{"some": "request"}'
+  responseTransformScripts:
+    timeout: 5
+    status:
+      200:
+        scripts:
+          - cat
+          - cat
+          - cat
+  response:
+    200: '{"some": "request"}'
+
+- name: Test common transform script
+  method: POST
+  path: /echo
+  request: '{"some": "request"}'
+  comparisonParams:
+    disallowExtraFields: true
+  responseTransformScripts:
+    timeout: 5
+    scripts:
+      - echo "FAIL"
+      - echo "FAIL"
+      - echo "OK"
+  response:
+    200: >
+        "OK"
