@@ -9,12 +9,13 @@ type Test struct {
 
 	TestDefinition
 
-	Request         string
-	Responses       map[int]string
-	ResponseHeaders map[int]map[string]string
-	BeforeScript    string
-	DbQuery         string
-	DbResponse      []string
+	Request          string
+	Responses        map[int]string
+	ResponseHeaders  map[int]map[string]string
+	BeforeScript     string
+	TransformScripts map[int][]string // [status][]scripts
+	DbQuery          string
+	DbResponse       []string
 }
 
 func (t *Test) ToQuery() string {
@@ -85,6 +86,14 @@ func (t *Test) BeforeScriptPath() string {
 
 func (t *Test) BeforeScriptTimeout() int {
 	return t.BeforeScriptParams.Timeout
+}
+
+func (t *Test) ResponseTransformScripts() map[int][]string {
+	return t.TransformScripts
+}
+
+func (t *Test) ResponseTransformTimeout() int {
+	return t.ResponseTransformScriptsParams.Timeout
 }
 
 func (t *Test) Cookies() map[string]string {

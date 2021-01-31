@@ -3,6 +3,7 @@ package runner
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -156,6 +157,44 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 	}
 
 	bodyStr := string(body)
+
+	// launch transform scripts in cmd interface
+	if v.ResponseTransformScripts() != nil {
+		tout := v.ResponseTransformTimeout()
+		transformers := v.ResponseTransformScripts()
+		// run common scripts
+		if scripts, ok := transformers[0]; ok {
+			for _, cmd := range scripts {
+				log.Println("response transform: run common script: ", cmd)
+				tmStart := time.Now()
+				if bodyStr, err = cmd_runner.CmdRunWithIO(cmd, bodyStr, tout); err != nil {
+					return nil, err
+				}
+
+				tout = tout - int(time.Since(tmStart).Seconds())
+				if tout <= 0 {
+					return nil, fmt.Errorf("Response transform process timeout(%d) reached", v.ResponseTransformTimeout())
+				}
+			}
+		}
+
+		// run scripts for status
+		if scripts, ok := transformers[resp.StatusCode]; ok {
+			for _, cmd := range scripts {
+				log.Println("response transform: run script for status[", resp.Status, "]: ", cmd)
+				tmStart := time.Now()
+				if bodyStr, err = cmd_runner.CmdRunWithIO(cmd, bodyStr, tout); err != nil {
+					return nil, err
+				}
+
+				tout = tout - int(time.Since(tmStart).Seconds())
+				if tout <= 0 {
+					return nil, fmt.Errorf("Response transform process timeout(%d) reached", v.ResponseTransformTimeout())
+				}
+			}
+		}
+
+	}
 
 	result := models.Result{
 		Path:                req.URL.Path,

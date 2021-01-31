@@ -24,6 +24,8 @@ type TestInterface interface {
 	DbResponseJson() []string
 	GetVariables() map[string]string
 	GetVariablesToSet() map[int]map[string]string
+	ResponseTransformScripts() map[int][]string
+	ResponseTransformTimeout() int
 
 	// setters
 	SetQuery(string)

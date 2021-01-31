@@ -75,6 +75,12 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		test.BeforeScript = testDefinition.BeforeScriptParams.PathTmpl
 		test.DbQuery = testDefinition.DbQueryTmpl
 		test.DbResponse = testDefinition.DbResponseTmpl
+		// build scripts map by status, key=0 - common scripts
+		test.TransformScripts = make(map[int][]string)
+		test.TransformScripts[0] = testDefinition.ResponseTransformScriptsParams.Scripts
+		for code, param := range testDefinition.ResponseTransformScriptsParams.Status {
+			test.TransformScripts[code] = param.Scripts
+		}
 		return append(tests, test), nil
 	}
 
@@ -153,6 +159,13 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		test.BeforeScript, err = substituteArgs(beforeScriptPathTmpl, testCase.BeforeScriptArgs)
 		if err != nil {
 			return nil, err
+		}
+
+		// build scripts map by status, key=0 - common scripts
+		test.TransformScripts = make(map[int][]string)
+		test.TransformScripts[0] = testDefinition.ResponseTransformScriptsParams.Scripts
+		for code, param := range testCase.ResponseTransformScriptsParams.Status {
+			test.TransformScripts[code] = param.Scripts
 		}
 
 		test.DbQuery, err = substituteArgs(testDefinition.DbQueryTmpl, testCase.DbQueryArgs)
