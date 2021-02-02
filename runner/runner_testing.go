@@ -8,6 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 
+	"github.com/lamoda/gonkey/checker"
 	"github.com/lamoda/gonkey/checker/response_body"
 	"github.com/lamoda/gonkey/checker/response_db"
 	"github.com/lamoda/gonkey/checker/response_header"
@@ -29,6 +30,7 @@ type RunWithTestingParams struct {
 	DbType      fixtures.DbType
 	EnvFilePath string
 	OutputFunc  output.OutputInterface
+	Checkers    []checker.CheckerInterface
 }
 
 // RunWithTesting is a helper function the wraps the common Run and provides simple way
@@ -89,6 +91,8 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	if params.DB != nil {
 		r.AddCheckers(response_db.NewChecker(params.DB))
 	}
+
+	r.AddCheckers(params.Checkers...)
 
 	_, err := r.Run()
 	if err != nil {
