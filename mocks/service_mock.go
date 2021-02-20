@@ -27,7 +27,7 @@ func NewServiceMock(serviceName string, mock *definition) *ServiceMock {
 }
 
 func (m *ServiceMock) StartServer() error {
-	addr := ":0" // all interfaces, random port
+	addr := "localhost:0" // loopback, random port
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
