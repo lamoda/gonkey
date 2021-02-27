@@ -40,7 +40,7 @@ func compareBranch(path string, expected, actual interface{}, params *ComparePar
 	var errors []error
 
 	// compare types
-	if expectedType != actualType {
+	if leafMatchType(expected) != regex && expectedType != actualType {
 		errors = append(errors, makeError(path, "types do not match", expectedType, actualType))
 		return errors
 	}
@@ -158,11 +158,7 @@ func compareRegex(path string, expected, actual interface{}) (errors []error) {
 		return errors
 	}
 
-	value, ok := actual.(string)
-	if !ok {
-		errors = append(errors, makeError(path, "type mismatch", "string", reflect.TypeOf(actual)))
-		return errors
-	}
+	value := fmt.Sprintf("%v", actual)
 
 	rx, err := regexp.Compile(retrieveRegexStr(regexExpr))
 	if err != nil {
