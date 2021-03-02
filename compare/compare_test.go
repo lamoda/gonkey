@@ -222,7 +222,7 @@ func TestCompareArraysWithRegex(t *testing.T) {
 func TestCompareArraysWithRegexMixedTypes(t *testing.T) {
 
 	arrayExpected := []string{"2", "$matchRegexp([0-9]+)"}
-	arrayActual := []interface{}{"2", "123"}
+	arrayActual := []interface{}{"2", 123}
 
 	errors := Compare(arrayExpected, arrayActual, CompareParams{})
 	if len(errors) != 0 {
