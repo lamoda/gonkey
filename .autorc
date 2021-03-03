@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    "git-tag",
+    "released"
+  ],
+  "owner": "lamoda",
+  "repo": "gonkey",
+  "name": "autorelease",
+  "email": "autorelease@lamoda.noreply"
+}
