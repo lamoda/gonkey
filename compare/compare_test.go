@@ -219,6 +219,21 @@ func TestCompareArraysWithRegex(t *testing.T) {
 	}
 }
 
+func TestCompareArraysWithRegexMixedTypes(t *testing.T) {
+
+	arrayExpected := []string{"2", "$matchRegexp([0-9]+)"}
+	arrayActual := []interface{}{"2", 123}
+
+	errors := Compare(arrayExpected, arrayActual, CompareParams{})
+	if len(errors) != 0 {
+		t.Error(
+			"must return no errors",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+
 func TestCompareArraysWithRegexNotMatch(t *testing.T) {
 
 	arrayExpected := []string{"2", "$matchRegexp(x.+z)"}
