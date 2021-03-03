@@ -1,4 +1,4 @@
-name: AutoRelease
+name: Release
 
 on:
   push:
@@ -7,13 +7,21 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
     steps:
       - uses: actions/checkout@v2
-      - uses: CupOfTea696/gh-action-auto-release@v1.0.2
-        with:
-          title: "Release: $version"
-          tag: "v$semver"
-          draft: true
-          regex: "/^Release: #{semver}$/i"
+
+      - name: Prepare repository
+        run: git fetch --unshallow --tags
+
+      - name: Install auto
+        run: |
+          curl -vkL https://github.com/intuit/auto/releases/download/v10.16.8/auto-linux.gz -o ~/auto.gz
+          gunzip ~/auto.gz
+          chmod a+x ~/auto
+
+      - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ~/auto shipit
