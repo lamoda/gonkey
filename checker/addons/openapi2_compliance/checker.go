@@ -1,4 +1,4 @@
-package response_schema
+package openapi2_compliance
 
 import (
 	"encoding/json"

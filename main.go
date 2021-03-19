@@ -12,7 +12,6 @@ import (
 
 	"github.com/lamoda/gonkey/checker/response_body"
 	"github.com/lamoda/gonkey/checker/response_db"
-	"github.com/lamoda/gonkey/checker/response_schema"
 	"github.com/lamoda/gonkey/fixtures"
 	"github.com/lamoda/gonkey/output/allure_report"
 	"github.com/lamoda/gonkey/output/console_colored"
@@ -24,7 +23,6 @@ import (
 func main() {
 	var config struct {
 		Host             string
-		SpecPath         string
 		TestsLocation    string
 		DbDsn            string
 		FixturesLocation string
@@ -36,7 +34,6 @@ func main() {
 	}
 
 	flag.StringVar(&config.Host, "host", "", "Target system hostname")
-	flag.StringVar(&config.SpecPath, "spec", "", "Path or URL to swagger specification")
 	flag.StringVar(&config.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&config.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
 	flag.StringVar(&config.FixturesLocation, "fixtures", "", "Path to fixtures directory")
@@ -112,9 +109,6 @@ func main() {
 	}
 
 	r.AddCheckers(response_body.NewChecker())
-	if config.SpecPath != "" {
-		r.AddCheckers(response_schema.NewChecker(config.SpecPath))
-	}
 
 	if db != nil {
 		r.AddCheckers(response_db.NewChecker(db))
