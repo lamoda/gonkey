@@ -172,8 +172,8 @@ responseHeaders:
     response:
         200: |
           {
-            "id": "[\w-]+",
-            "jsonrpc": "[12].0",
+            "id": "$matchRegexp([\w-]+)",
+            "jsonrpc": "$matchRegexp([12].0)",
             "result": [
               "data": [
                   "ORDER[0]{3}[0-9]",
