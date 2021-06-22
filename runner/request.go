@@ -178,7 +178,11 @@ func request(test models.TestInterface, b *bytes.Buffer, host string) (*http.Req
 	}
 
 	for k, v := range test.Headers() {
-		req.Header.Add(k, v)
+		if strings.ToLower(k) == "host" {
+			req.Host = v
+		} else {
+			req.Header.Add(k, v)
+		}
 	}
 	return req, nil
 }
