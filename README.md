@@ -370,6 +370,18 @@ tables:
 
 Records in fixtures can use templates, inherit and reference each other.
 
+#### Deleting data from tables
+
+To clear the table before the test put square brackets next to the table name.
+
+Example:
+
+```yaml
+# fixtures/empty_posts_table.yml
+tables:
+  posts: []
+```
+
 #### Record templates
 
 Usually, to insert a record to a DB, it's necessary to list all the fields without default values. Oftentimes, many of those fields are not important for the test, and their values repeat from one fixture to another, creating unnecessary visual garbage and making the maintenance harder.
