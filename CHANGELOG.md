@@ -1,3 +1,23 @@
+# v1.4.1 (Thu Jun 24 2021)
+
+#### 🐛 Bug Fix
+
+- new: add support for "Host" http header [#91](https://github.com/lamoda/gonkey/pull/91) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### 📝 Documentation
+
+- add docs in README: clear tables in fixtures [#92](https://github.com/lamoda/gonkey/pull/92) ([@NikolayOskin](https://github.com/NikolayOskin))
+- fix mistake in regexp example in README [#87](https://github.com/lamoda/gonkey/pull/87) ([@JustSkiv](https://github.com/JustSkiv))
+
+#### Authors: 4
+
+- [@Alexey19](https://github.com/Alexey19)
+- Alexey Tyuryumov (Alexey.Tyuryumov@acronis.com)
+- Nikolay Oskin ([@NikolayOskin](https://github.com/NikolayOskin))
+- Nikolay Tuzov ([@JustSkiv](https://github.com/JustSkiv))
+
+---
+
 # v1.4.0 (Fri Mar 19 2021)
 
 #### 🚀 Enhancement
