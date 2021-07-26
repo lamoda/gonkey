@@ -10,7 +10,7 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/stretchr/testify v1.5.1
-	github.com/tidwall/gjson v1.6.0
+	github.com/tidwall/gjson v1.6.5
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/yaml.v2 v2.2.8
 )
