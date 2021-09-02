@@ -101,4 +101,12 @@ func checkApplied(t *testing.T, test models.TestInterface) {
 	resp, ok = test.GetResponse(500)
 	assert.True(t, ok)
 	assert.Equal(t, "existingVar_Value - {{ $notExistingVar }}", resp)
+
+	raw, ok := test.ServiceMocks()["server"]
+	assert.True(t, ok)
+	mockMap, ok := raw.(map[interface{}]interface{})
+	assert.True(t, ok)
+	mockBody, ok := mockMap["body"]
+	assert.True(t, ok)
+	assert.Equal(t, "{\"reqParam\": \"reqParam_value\"}", mockBody)
 }

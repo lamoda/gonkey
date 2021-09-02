@@ -209,6 +209,9 @@ responseHeaders:
 - headers
 - request
 - response
+- body для моков
+- headers для моков
+- requestConstraints для моков
 
 Пример использования:
 
@@ -221,6 +224,14 @@ responseHeaders:
   request: '{"reqParam": "{{ $reqParam }}"}'
   response:
     200: "{{ $resp }}"
+  mocks:
+    server_mock:
+      strategy: constant
+      body: >
+        {
+          "message": "{{ $mockParam }}"
+        }
+      statusCode: 200
 ```
 
 Присваивать значения переменным можно следующими способами:
