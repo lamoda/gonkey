@@ -176,8 +176,8 @@ responseHeaders:
             "jsonrpc": "$matchRegexp([12].0)",
             "result": [
               "data": [
-                  "ORDER[0]{3}[0-9]",
-                  "ORDER[0]{3}[0-9]"
+                  "$matchRegexp(ORDER[0]{3}[0-9])",
+                  "$matchRegexp(ORDER[0]{3}[0-9])"
               ],
             ]
           }
