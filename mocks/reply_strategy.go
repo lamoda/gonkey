@@ -34,14 +34,17 @@ func unhandledRequestError(r *http.Request) []error {
 	return []error{fmt.Errorf("unhandled request to mock:\n%s", requestContent)}
 }
 
-func newFileReplyWithCode(filename string, statusCode int, headers map[string]string) replyStrategy {
-	content, _ := ioutil.ReadFile(filename)
+func newFileReplyWithCode(filename string, statusCode int, headers map[string]string) (replyStrategy, error) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
 	r := &constantReply{
 		replyBody:  content,
 		statusCode: statusCode,
 		headers:    headers,
 	}
-	return r
+	return r, nil
 }
 
 func newConstantReplyWithCode(content []byte, statusCode int, headers map[string]string) replyStrategy {
