@@ -173,7 +173,7 @@ func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) 
 	if err != nil {
 		return nil, err
 	}
-	return newFileReplyWithCode(filename, statusCode, headers), nil
+	return newFileReplyWithCode(filename, statusCode, headers)
 }
 
 func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
