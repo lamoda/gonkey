@@ -1,3 +1,15 @@
+# v1.4.2 (Sat Sep 04 2021)
+
+#### 🐛 Bug Fix
+
+- mocks file reply strategy: show error when no file found by filepath [#96](https://github.com/lamoda/gonkey/pull/96) ([@NikolayOskin](https://github.com/NikolayOskin))
+
+#### Authors: 1
+
+- Nikolay Oskin ([@NikolayOskin](https://github.com/NikolayOskin))
+
+---
+
 # v1.4.1 (Thu Jun 24 2021)
 
 #### 🐛 Bug Fix
