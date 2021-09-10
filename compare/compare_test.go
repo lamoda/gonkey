@@ -434,10 +434,46 @@ func TestCompareDifferJsonScalars(t *testing.T) {
 	}
 }
 
+var expectedArrayJson = `
+{
+  "data":[
+    {"name": "n111"},
+    {"name": "n222"},
+    {"name": "n333"}
+  ]
+}
+`
+
+var actualArrayJson = `
+{
+  "data": [
+    {"message": "m555", "name": "n333"},
+    {"message": "m777", "name": "n111"},
+    {"message": "m999","name": "n222"}
+  ]
+}
+`
+
+func TestCompareEqualArraysWithIgnoreArraysOrdering(t *testing.T) {
+	var json1, json2 interface{}
+	json.Unmarshal([]byte(expectedArrayJson), &json1)
+	json.Unmarshal([]byte(actualArrayJson), &json2)
+	errors := Compare(json1, json2, CompareParams{
+		IgnoreArraysOrdering: true,
+	})
+	if len(errors) != 0 {
+		t.Error(
+			"must return no errors",
+			fmt.Sprintf("got result: %v", errors),
+		)
+		t.Fail()
+	}
+}
+
 func TestCompareEqualComplexJson(t *testing.T) {
 	var json1, json2 interface{}
 	json.Unmarshal([]byte(complexJson1), &json1)
-	json.Unmarshal([]byte(complexJson1), &json2)
+	json.Unmarshal([]byte(complexJson1), &json2) // compare json with same json
 	errors := Compare(json1, json2, CompareParams{})
 	if len(errors) != 0 {
 		t.Error(
@@ -459,7 +495,7 @@ func TestCompareDifferComplexJson(t *testing.T) {
 		"#/parameters/profile_id",
 		"#/parameters/profile_id2",
 	)
-	if errors[0].Error() != expectedErr {
+	if len(errors) == 0 || errors[0].Error() != expectedErr {
 		t.Error(
 			"must return one error",
 			fmt.Sprintf("got result: %v", errors),
