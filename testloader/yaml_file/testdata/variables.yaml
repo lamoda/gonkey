@@ -19,3 +19,8 @@
     200: "{{ $resp }}"
     404: "{{ $respRx }}"
     500: "{{ $existingVar }} - {{ $notExistingVar }}"
+  mocks:
+    server:
+      strategy: constant
+      body: '{"reqParam": "{{ $reqParam }}"}'
+      statusCode: 200

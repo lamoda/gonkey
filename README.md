@@ -212,6 +212,9 @@ You can use variables in the description of the test, the following fields are s
 - headers
 - request
 - response
+- mocks body
+- mocks headers
+- mocks requestConstraints
 
 Example:
 
@@ -224,6 +227,14 @@ Example:
   request: '{"reqParam": "{{ $reqParam }}"}'
   response:
     200: "{{ $resp }}"
+  mocks:
+    server_mock:
+      strategy: constant
+      body: >
+        {
+          "message": "{{ $mockParam }}"
+        }
+      statusCode: 200
 ```
 
 You can assign values to variables in the following ways (priorities are from top to bottom):

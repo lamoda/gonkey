@@ -56,6 +56,10 @@ func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
 		newTest.SetForm(vs.performForm(form))
 	}
 
+	for _, definition := range newTest.ServiceMocks() {
+		vs.performInterface(definition)
+	}
+
 	return newTest
 }
 
@@ -92,6 +96,27 @@ func (vs *Variables) perform(str string) string {
 	}
 
 	return str
+}
+
+func (vs *Variables) performInterface(value interface{}) {
+	if mapValue, ok := value.(map[interface{}]interface{}); ok {
+		for key := range mapValue {
+			if strValue, ok := mapValue[key].(string); ok {
+				mapValue[key] = vs.perform(strValue)
+			} else {
+				vs.performInterface(mapValue[key])
+			}
+		}
+	}
+	if arrValue, ok := value.([]interface{}); ok {
+		for idx := range arrValue {
+			if strValue, ok := arrValue[idx].(string); ok {
+				arrValue[idx] = vs.perform(strValue)
+			} else {
+				vs.performInterface(arrValue[idx])
+			}
+		}
+	}
 }
 
 func (vs *Variables) get(name string) *Variable {
