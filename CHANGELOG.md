@@ -1,3 +1,24 @@
+# v1.5.0 (Wed Sep 22 2021)
+
+#### 🚀 Enhancement
+
+- new: fix algorithm for array compare [#98](https://github.com/lamoda/gonkey/pull/98) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### 🐛 Bug Fix
+
+- new: support variables in mock definition [#94](https://github.com/lamoda/gonkey/pull/94) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### 📝 Documentation
+
+- new: added missing $matchRegexp to examples [#95](https://github.com/lamoda/gonkey/pull/95) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### Authors: 2
+
+- [@Alexey19](https://github.com/Alexey19)
+- Alexey Tyuryumov (Alexey.Tyuryumov@acronis.com)
+
+---
+
 # v1.4.2 (Sat Sep 04 2021)
 
 #### 🐛 Bug Fix
