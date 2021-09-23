@@ -138,7 +138,7 @@ The tests can be now ran with `go test`, for example: `go test ./...`.
         "result": {
           "user_id": {{ .userId }},
           "amount": {{ .amount }},
-          "token": "$matchRegexp(^\w{16}$)"
+          "token": "$matchRegexp(^\\w{16}$)"
         }
       }
 
@@ -175,7 +175,7 @@ or for elements of map/array (if it's JSON):
     response:
         200: |
           {
-            "id": "$matchRegexp([\w-]+)",
+            "id": "$matchRegexp([\\w-]+)",
             "jsonrpc": "$matchRegexp([12].0)",
             "result": [
               "data": [

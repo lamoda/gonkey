@@ -172,7 +172,7 @@ responseHeaders:
     response:
         200: |
           {
-            "id": "$matchRegexp([\w-]+)",
+            "id": "$matchRegexp([\\w-]+)",
             "jsonrpc": "$matchRegexp([12].0)",
             "result": [
               "data": [
