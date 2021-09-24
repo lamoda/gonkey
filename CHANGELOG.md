@@ -1,3 +1,20 @@
+# v1.5.1 (Fri Sep 24 2021)
+
+#### ⚠️ Pushed to `master`
+
+- Minor fix in README.md ([@luza](https://github.com/luza))
+
+#### 📝 Documentation
+
+- doc: update Readme files - backslash in regexp should be escaped [#99](https://github.com/lamoda/gonkey/pull/99) ([@svzhl](https://github.com/svzhl))
+
+#### Authors: 2
+
+- [@svzhl](https://github.com/svzhl)
+- Denis Girko ([@luza](https://github.com/luza))
+
+---
+
 # v1.5.0 (Wed Sep 22 2021)
 
 #### 🚀 Enhancement
