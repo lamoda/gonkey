@@ -1071,7 +1071,7 @@ Query is a SELECT that returns any number of strings.
 Example:
 ```yaml
   ...
-  dbQuery:
+  dbQuery: >
     SELECT code, purchase_date, partner_id FROM mark_paid_schedule AS m WHERE m.code = 'GIFT100000-000002'
   ...
 ```
