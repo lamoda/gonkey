@@ -21,8 +21,6 @@ type LoaderPostgres struct {
 	debug    bool
 }
 
-const tempTableSuffix = "_table_gonkey"
-
 type row map[string]interface{}
 
 type table []row
@@ -37,8 +35,29 @@ type fixture struct {
 }
 
 type loadedTable struct {
-	Name string
+	Name tableName
 	Rows table
+}
+type tableName struct {
+	Name   string
+	Schema string
+}
+
+func newTableName(source string) tableName {
+	parts := strings.SplitN(source, ".", 2)
+	switch {
+	case len(parts) == 1:
+		parts = append(parts, parts[0])
+		fallthrough
+	case parts[0] == "":
+		parts[0] = "public"
+	}
+	lt := tableName{Schema: parts[0], Name: parts[1]}
+	return lt
+}
+
+func (t *tableName) getFullName() string {
+	return fmt.Sprintf("\"%s\".\"%s\"", t.Schema, t.Name)
 }
 
 type loadContext struct {
@@ -176,7 +195,7 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 			rows[i] = fields
 		}
 		lt := loadedTable{
-			Name: sourceTable.Key.(string),
+			Name: newTableName(sourceTable.Key.(string)),
 			Rows: rows,
 		}
 		(*ctx).tables = append((*ctx).tables, lt)
@@ -194,14 +213,14 @@ func (f *LoaderPostgres) loadTables(ctx *loadContext) error {
 	// truncate first
 	truncatedTables := make(map[string]bool)
 	for _, lt := range ctx.tables {
-		if _, ok := truncatedTables[lt.Name]; ok {
+		if _, ok := truncatedTables[lt.Name.getFullName()]; ok {
 			// already truncated
 			continue
 		}
 		if err := f.truncateTable(lt.Name); err != nil {
 			return err
 		}
-		truncatedTables[lt.Name] = true
+		truncatedTables[lt.Name.getFullName()] = true
 	}
 	// then load data
 	for _, lt := range ctx.tables {
@@ -221,8 +240,8 @@ func (f *LoaderPostgres) loadTables(ctx *loadContext) error {
 }
 
 // truncateTable truncates table
-func (f *LoaderPostgres) truncateTable(name string) error {
-	query := fmt.Sprintf("TRUNCATE TABLE \"%s\" CASCADE", name)
+func (f *LoaderPostgres) truncateTable(name tableName) error {
+	query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", name.getFullName())
 	if f.debug {
 		fmt.Println("Issuing SQL:", query)
 	}
@@ -233,7 +252,7 @@ func (f *LoaderPostgres) truncateTable(name string) error {
 	return nil
 }
 
-func (f *LoaderPostgres) loadTable(ctx *loadContext, t string, rows table) error {
+func (f *LoaderPostgres) loadTable(ctx *loadContext, t tableName, rows table) error {
 	// $extend keyword allows to import values from a named row
 	for i, row := range rows {
 		if base, ok := row["$extend"]; ok {
@@ -341,7 +360,7 @@ END$$
 
 // buildInsertQuery builds SQL query for data insertion
 // based on values read from yaml
-func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t string, rows table) (string, error) {
+func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows table) (string, error) {
 	// first pass, collecting all the fields
 	var fields []string
 	fieldPresence := make(map[string]bool)
@@ -380,7 +399,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t string, rows table
 			}
 			dbValue, err := toDbValue(value)
 			if err != nil {
-				return "", fmt.Errorf("unable to process %s value (row %d of %s): %s", name, i, t, err.Error())
+				return "", fmt.Errorf("unable to process %s value (row %d of %s): %s", name, i, t.getFullName(), err.Error())
 			}
 			dbValuesRow[k] = dbValue
 		}
@@ -391,9 +410,8 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t string, rows table
 		fields[i] = "\"" + field + "\""
 	}
 
-	tableAlias := t + tempTableSuffix // guarantees that table and column won't collide
-	query := "INSERT INTO \"%s\" AS %s (%s) VALUES %s RETURNING row_to_json(%[2]s)"
-	return fmt.Sprintf(query, t, tableAlias, strings.Join(fields, ", "), strings.Join(dbValues, ", ")), nil
+	query := "INSERT INTO %s AS row (%s) VALUES %s RETURNING row_to_json(row)"
+	return fmt.Sprintf(query, t.getFullName(), strings.Join(fields, ", "), strings.Join(dbValues, ", ")), nil
 }
 
 // resolveExpression converts expressions starting with dollar sign into a value

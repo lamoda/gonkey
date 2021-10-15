@@ -334,6 +334,7 @@ Example:
 ### Fixtures
 
 To seed the DB before the test, gonkey uses fixture files.
+* You can use schema in PostreSQL: schema.table_name
 
 File example:
 
