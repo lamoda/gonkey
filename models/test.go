@@ -16,6 +16,8 @@ type TestInterface interface {
 	Pause() int
 	BeforeScriptPath() string
 	BeforeScriptTimeout() int
+	AfterRequestScriptPath() string
+	AfterRequestScriptTimeout() int
 	Cookies() map[string]string
 	Headers() map[string]string
 	ContentType() string

@@ -13,6 +13,7 @@ type Test struct {
 	Responses       map[int]string
 	ResponseHeaders map[int]map[string]string
 	BeforeScript    string
+	AfterRequestScript    string
 	DbQuery         string
 	DbResponse      []string
 }
@@ -85,6 +86,14 @@ func (t *Test) BeforeScriptPath() string {
 
 func (t *Test) BeforeScriptTimeout() int {
 	return t.BeforeScriptParams.Timeout
+}
+
+func (t *Test) AfterRequestScriptPath() string {
+	return t.AfterRequestScript
+}
+
+func (t *Test) AfterRequestScriptTimeout() int {
+	return t.AfterRequestScriptParams.Timeout
 }
 
 func (t *Test) Cookies() map[string]string {

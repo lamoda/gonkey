@@ -13,7 +13,8 @@ type TestDefinition struct {
 	RequestTmpl        string                    `json:"request" yaml:"request"`
 	ResponseTmpls      map[int]string            `json:"response" yaml:"response"`
 	ResponseHeaders    map[int]map[string]string `json:"responseHeaders" yaml:"responseHeaders"`
-	BeforeScriptParams beforeScriptParams        `json:"beforeScript" yaml:"beforeScript"`
+	BeforeScriptParams scriptParams              `json:"beforeScript" yaml:"beforeScript"`
+	AfterRequestScriptParams scriptParams        `json:"afterRequestScript" yaml:"afterRequestScript"`
 	HeadersVal         map[string]string         `json:"headers" yaml:"headers"`
 	CookiesVal         map[string]string         `json:"cookies" yaml:"cookies"`
 	Cases              []CaseData                `json:"cases" yaml:"cases"`
@@ -29,6 +30,7 @@ type CaseData struct {
 	RequestArgs      map[string]interface{}         `json:"requestArgs" yaml:"requestArgs"`
 	ResponseArgs     map[int]map[string]interface{} `json:"responseArgs" yaml:"responseArgs"`
 	BeforeScriptArgs map[string]interface{}         `json:"beforeScriptArgs" yaml:"beforeScriptArgs"`
+	AfterRequestScriptArgs map[string]interface{}         `json:"afterRequestScriptArgs" yaml:"afterRequestScriptArgs"`
 	DbQueryArgs      map[string]interface{}         `json:"dbQueryArgs" yaml:"dbQueryArgs"`
 	DbResponseArgs   map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
 	DbResponse       []string                       `json:"dbResponse" yaml:"dbResponse"`
@@ -40,7 +42,7 @@ type comparisonParams struct {
 	DisallowExtraFields  bool `json:"disallowExtraFields" yaml:"disallowExtraFields"`
 }
 
-type beforeScriptParams struct {
+type scriptParams struct {
 	PathTmpl string `json:"path" yaml:"path"`
 	Timeout  int    `json:"timeout" yaml:"timeout"`
 }

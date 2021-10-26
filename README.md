@@ -1007,8 +1007,14 @@ Example:
 
 ### CMD interface
 
-Before running an HTTP request you can run a script using cmd interface.
-When the test is ran, the first step is to load fixtures and run mocks. Next, the script is executed, then the test is ran.
+When the test is ran, operations are performed in the following order:
+
+1. Fixtures load
+2. Mocks setup
+3. beforeScript execute
+4. HTTP-request sent
+5. afterRequestScript execute
+6. The checks are ran
 
 #### Script definition
 
@@ -1020,9 +1026,18 @@ To define the script you need to provide 2 parameters:
 Example:
 ```yaml
   ...
+  afterRequestScript:
+    path: './cli_scripts/cmd_recalculate.sh'
+    # the timeout will be equal 10s
+    timeout: 10
+  ...
+```
+
+```yaml
+  ...
   beforeScript:
     path: './cli_scripts/cmd_recalculate.sh'
-    # the timeout will equal 10s
+    # the timeout will be equal 10s
     timeout: 10
   ...
 ```
