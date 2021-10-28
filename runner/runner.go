@@ -169,6 +169,13 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 		Test:                v,
 	}
 
+	// launch script in cmd interface
+	if v.AfterRequestScriptPath() != "" {
+		if err := cmd_runner.CmdRun(v.AfterRequestScriptPath(), v.AfterRequestScriptTimeout()); err != nil {
+			return nil, err
+		}
+	}
+
 	if r.config.Mocks != nil {
 		errs := r.config.Mocks.EndRunningContext()
 		result.Errors = append(result.Errors, errs...)

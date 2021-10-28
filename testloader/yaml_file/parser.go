@@ -73,6 +73,7 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		test.Responses = testDefinition.ResponseTmpls
 		test.ResponseHeaders = testDefinition.ResponseHeaders
 		test.BeforeScript = testDefinition.BeforeScriptParams.PathTmpl
+		test.AfterRequestScript = testDefinition.AfterRequestScriptParams.PathTmpl
 		test.DbQuery = testDefinition.DbQueryTmpl
 		test.DbResponse = testDefinition.DbResponseTmpl
 		return append(tests, test), nil
@@ -82,6 +83,7 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 
 	requestTmpl := testDefinition.RequestTmpl
 	beforeScriptPathTmpl := testDefinition.BeforeScriptParams.PathTmpl
+	afterRequestScriptPathTmpl := testDefinition.AfterRequestScriptParams.PathTmpl
 	requestURLTmpl := testDefinition.RequestURL
 	queryParamsTmpl := testDefinition.QueryParams
 	headersValTmpl := testDefinition.HeadersVal
@@ -151,6 +153,11 @@ func makeTestFromDefinition(testDefinition TestDefinition) ([]Test, error) {
 		}
 
 		test.BeforeScript, err = substituteArgs(beforeScriptPathTmpl, testCase.BeforeScriptArgs)
+		if err != nil {
+			return nil, err
+		}
+
+		test.AfterRequestScript, err = substituteArgs(afterRequestScriptPathTmpl, testCase.AfterRequestScriptArgs)
 		if err != nil {
 			return nil, err
 		}
