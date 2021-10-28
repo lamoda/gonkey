@@ -1,3 +1,16 @@
+# v1.7.0 (Thu Oct 28 2021)
+
+#### 🚀 Enhancement
+
+- the ability to run afterRequestScript [#105](https://github.com/lamoda/gonkey/pull/105) (andrey.suchilov@lamoda.ru [@nofuture17](https://github.com/nofuture17))
+
+#### Authors: 2
+
+- Andrey Suchilov (andrey.suchilov@lamoda.ru)
+- Suchilov Andrey ([@nofuture17](https://github.com/nofuture17))
+
+---
+
 # v1.6.0 (Fri Oct 15 2021)
 
 #### 🚀 Enhancement
