@@ -69,10 +69,14 @@ func (m *ServiceMock) SetDefinition(newDefinition *definition) {
 }
 
 func (m *ServiceMock) ResetDefinition() {
+	m.Lock()
+	defer m.Unlock()
 	m.mock = m.defaultDefinition
 }
 
 func (m *ServiceMock) ResetRunningContext() {
+	m.Lock()
+	defer m.Unlock()
 	m.errors = nil
 	m.mock.ResetRunningContext()
 }
