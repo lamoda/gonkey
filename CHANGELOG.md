@@ -1,3 +1,15 @@
+# v1.7.1 (Sun Nov 21 2021)
+
+#### 🐛 Bug Fix
+
+- Fix race condition in service mock [#108](https://github.com/lamoda/gonkey/pull/108) ([@hibooboo2](https://github.com/hibooboo2))
+
+#### Authors: 1
+
+- James Jeffrey ([@hibooboo2](https://github.com/hibooboo2))
+
+---
+
 # v1.7.0 (Thu Oct 28 2021)
 
 #### 🚀 Enhancement
