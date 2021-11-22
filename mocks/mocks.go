@@ -39,7 +39,7 @@ func (m *Mocks) ResetDefinitions() {
 
 func (m *Mocks) Start() error {
 	for _, v := range m.mocks {
-		err := v.StartServer("localhost:0") // loopback, random port
+		err := v.StartServer()
 		if err != nil {
 			m.Shutdown()
 			return err
