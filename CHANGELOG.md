@@ -1,3 +1,15 @@
+# v1.8.0 (Tue Nov 23 2021)
+
+#### 🚀 Enhancement
+
+- (service_mock): set server address from argument [#107](https://github.com/lamoda/gonkey/pull/107) ([@33r01b](https://github.com/33r01b))
+
+#### Authors: 1
+
+- Ruslan Samigullin ([@33r01b](https://github.com/33r01b))
+
+---
+
 # v1.7.1 (Sun Nov 21 2021)
 
 #### 🐛 Bug Fix
