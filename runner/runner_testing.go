@@ -27,6 +27,7 @@ type RunWithTestingParams struct {
 	Mocks       *mocks.Mocks
 	FixturesDir string
 	DB          *sql.DB
+	// If DB parameter present, used to recognize type of database, if not set, by default uses Postgres
 	DbType      fixtures.DbType
 	EnvFilePath string
 	OutputFunc  output.OutputInterface

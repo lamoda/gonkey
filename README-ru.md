@@ -62,6 +62,9 @@ func TestFuncCases(t *testing.T) {
         TestsDir:    "cases",
         Mocks:       m,
         DB:          db,
+        // Тип используемой базы данных, возможные значения fixtures.Postgres, fixtures.Mysql
+        // Если в параметр DB не пустой, а данный параметр не назначен, будет использоваться тип бд fixtures.Postgresql
+        DbType:      fixtures.Postgres,
         FixturesDir: "fixtures",
     })
 }
