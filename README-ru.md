@@ -785,6 +785,37 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
     ...
 ```
 
+###### bodyMatchesText
+
+Проверяет что, тело запроса соответствует указанному или подпадает под условия регулярного выражения.
+
+Параметры:
+- `body` - строка, которой должно быть равно значение тела запроса;
+- `regexp` - регулярное выражение, которому должно соответствовать значение тела.
+
+Примеры:
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        - kind: bodyMatchesText
+            body: |-
+              query HeroNameAndFriends {
+                    hero {
+                      name
+                      friends {
+                        name
+                      }
+                    }
+                  }
+    service2:
+      requestConstraints:
+        - kind: bodyMatchesText
+            regexp: (HeroNameAndFriendsq)
+    ...
+```
+
 ###### bodyMatchesXML
 
 Проверяет, что тело запроса - это XML, который соответствует заданному в параметре `body`.
