@@ -411,15 +411,15 @@ func (l *Loader) loadHeaderIsConstraint(def map[interface{}]interface{}) (verifi
 
 func (l *Loader) loadBodyMatchesTextConstraint(def map[interface{}]interface{}) (verifier, error) {
 	var bodyStr, regexpStr string
-	if path, ok := def["body"]; ok {
-		bodyStr, ok = path.(string)
+	if body, ok := def["body"]; ok {
+		bodyStr, ok = body.(string)
 		if !ok {
-			return nil, errors.New("`path` must be string")
+			return nil, errors.New("`body` must be string")
 		}
 	}
 	if regexp, ok := def["regexp"]; ok {
 		regexpStr, ok = regexp.(string)
-		if !ok || regexp == "" {
+		if !ok {
 			return nil, errors.New("`regexp` must be string")
 		}
 	}
