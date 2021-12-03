@@ -13,8 +13,7 @@ import (
 type DbType int
 
 const (
-	_ = iota
-	Postgres
+	Postgres DbType = iota
 	Mysql
 )
 

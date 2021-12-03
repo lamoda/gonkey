@@ -64,6 +64,9 @@ func TestFuncCases(t *testing.T) {
         TestsDir:    "cases",
         Mocks:       m,
         DB:          db,
+        // Type of database, can be fixtures.Postgres or fixtures.Mysql
+        // if DB parameter present, by default uses fixtures.Postgres database type
+        DbType:      fixtures.Postgres,
         FixturesDir: "fixtures",
     })
 }
