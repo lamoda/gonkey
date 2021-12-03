@@ -1,3 +1,15 @@
+# v1.9.0 (Fri Dec 03 2021)
+
+#### 🚀 Enhancement
+
+- Use fixtures.Postgres as default DbType when run tests [#109](https://github.com/lamoda/gonkey/pull/109) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
 # v1.8.0 (Tue Nov 23 2021)
 
 #### 🚀 Enhancement
