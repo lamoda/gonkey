@@ -181,16 +181,16 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 		result.Errors = append(result.Errors, errs...)
 	}
 
+	if err := r.setVariablesFromResponse(v, result.ResponseContentType, bodyStr, resp.StatusCode); err != nil {
+		return nil, err
+	}
+
 	for _, c := range r.checkers {
 		errs, err := c.Check(v, &result)
 		if err != nil {
 			return nil, err
 		}
 		result.Errors = append(result.Errors, errs...)
-	}
-
-	if err := r.setVariablesFromResponse(v, result.ResponseContentType, bodyStr, resp.StatusCode); err != nil {
-		return nil, err
 	}
 
 	return &result, nil
