@@ -185,6 +185,9 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 		return nil, err
 	}
 
+	r.config.Variables.Load(v.GetVariables())
+	v = r.config.Variables.Apply(v)
+
 	for _, c := range r.checkers {
 		errs, err := c.Check(v, &result)
 		if err != nil {
