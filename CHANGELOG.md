@@ -1,3 +1,16 @@
+# v1.11.0 (Mon Dec 06 2021)
+
+#### 🚀 Enhancement
+
+- added bodyMatchesText requestConstraint with example test [#110](https://github.com/lamoda/gonkey/pull/110) (l.yarushin@timeweb.ru [@leorush](https://github.com/leorush))
+
+#### Authors: 2
+
+- Lev ([@leorush](https://github.com/leorush))
+- Lev Yarushin (l.yarushin@timeweb.ru)
+
+---
+
 # v1.10.0 (Mon Dec 06 2021)
 
 #### 🚀 Enhancement
