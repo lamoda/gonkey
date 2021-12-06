@@ -52,7 +52,7 @@ func TestNewTestWithCases(t *testing.T) {
 		},
 	}
 
-	tests, err := makeTestFromDefinition(data)
+	tests, err := makeTestFromDefinition("cases/example.yaml", data)
 
 	if err != nil {
 		t.Fatal(err)
@@ -63,11 +63,21 @@ func TestNewTestWithCases(t *testing.T) {
 
 	reqData, err := tests[0].ToJSON()
 	if !reflect.DeepEqual(reqData, []byte(`{"foo": "bar", "hello": "world" }`)) {
-		t.Errorf("wait request %s, got %s", `{"foo": "bar", "hello": "world" }`, reqData)
+		t.Errorf("want request %s, got %s", `{"foo": "bar", "hello": "world" }`, reqData)
+	}
+
+	filename := tests[0].GetFileName()
+	if !reflect.DeepEqual(filename, "cases/example.yaml") {
+		t.Errorf("want filename %s, got %s", "cases/example.yaml", filename)
 	}
 
 	reqData, err = tests[1].ToJSON()
 	if !reflect.DeepEqual(reqData, []byte(`{"foo": "bar", "hello": "world2" }`)) {
-		t.Errorf("wait request %s, got %s", `{"foo": "bar", "hello": "world2" }`, reqData)
+		t.Errorf("want request %s, got %s", `{"foo": "bar", "hello": "world2" }`, reqData)
+	}
+
+	filename = tests[1].GetFileName()
+	if !reflect.DeepEqual(filename, "cases/example.yaml") {
+		t.Errorf("want filename %s, got %s", "cases/example.yaml", filename)
 	}
 }
