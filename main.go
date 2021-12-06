@@ -42,7 +42,7 @@ func main() {
 	flag.BoolVar(&config.Verbose, "v", false, "Verbose output")
 	flag.BoolVar(&config.Debug, "debug", false, "Debug output")
 	flag.StringVar(
-		&config.EnvFile,
+		&config.DbType,
 		"db-type",
 		fixtures.PostgresParam,
 		"Type of database (options: postgres, mysql)",
