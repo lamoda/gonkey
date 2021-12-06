@@ -9,13 +9,13 @@ type Test struct {
 
 	TestDefinition
 
-	Request         string
-	Responses       map[int]string
-	ResponseHeaders map[int]map[string]string
-	BeforeScript    string
-	AfterRequestScript    string
-	DbQuery         string
-	DbResponse      []string
+	Request            string
+	Responses          map[int]string
+	ResponseHeaders    map[int]map[string]string
+	BeforeScript       string
+	AfterRequestScript string
+	DbQuery            string
+	DbResponse         []string
 }
 
 func (t *Test) ToQuery() string {
@@ -160,4 +160,8 @@ func (t *Test) SetResponses(val map[int]string) {
 
 func (t *Test) SetHeaders(val map[string]string) {
 	t.HeadersVal = val
+}
+
+func (t *Test) SetDbQueryString(query string) {
+	t.DbQuery = query
 }
