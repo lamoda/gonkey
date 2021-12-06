@@ -48,6 +48,8 @@ func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
 	newTest.SetMethod(vs.perform(newTest.GetMethod()))
 	newTest.SetPath(vs.perform(newTest.Path()))
 	newTest.SetRequest(vs.perform(newTest.GetRequest()))
+	newTest.SetDbQueryString(vs.perform(newTest.DbQueryString()))
+	newTest.SetDbResponseJson(vs.performDbResponses(newTest.DbResponseJson()))
 
 	newTest.SetResponses(vs.performResponses(newTest.GetResponses()))
 	newTest.SetHeaders(vs.performHeaders(newTest.Headers()))
@@ -156,6 +158,20 @@ func (vs *Variables) performResponses(responses map[int]string) map[int]string {
 	for k, v := range responses {
 		res[k] = vs.perform(v)
 	}
+	return res
+}
+
+func (vs *Variables) performDbResponses(responses []string) []string {
+	if responses == nil {
+		return nil
+	}
+
+	res := make([]string, len(responses))
+
+	for idx, v := range responses {
+		res[idx] = vs.perform(v)
+	}
+
 	return res
 }
 
