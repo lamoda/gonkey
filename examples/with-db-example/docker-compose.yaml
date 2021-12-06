@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:10.3
+    command: postgres -c 'max_connections=100'
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=testing_db
+      - POSTGRES_USER=testing_user
+      - POSTGRES_PASSWORD=testing_password
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: "pg_isready -U postgres"
+
+  svc:
+    build:
+      context: .
+      dockerfile: server.dockerfile
+    command: python /app/server.py
+    ports:
+      - 5000:5000
+    environment:
+      - APP_POSTGRES_HOST=postgres
+      - APP_POSTGRES_PORT=5432
+      - APP_POSTGRES_USER=testing_user
+      - APP_POSTGRES_PASS=testing_password
+      - APP_POSTGRES_DB=testing_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-db:
