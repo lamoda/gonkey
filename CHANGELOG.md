@@ -1,3 +1,15 @@
+# v1.10.0 (Mon Dec 06 2021)
+
+#### 🚀 Enhancement
+
+- [BUG] fixed DbType param in console client [#112](https://github.com/lamoda/gonkey/pull/112) ([@chistopat](https://github.com/chistopat))
+
+#### Authors: 1
+
+- Yegor Chistyakov ([@chistopat](https://github.com/chistopat))
+
+---
+
 # v1.9.0 (Fri Dec 03 2021)
 
 #### 🚀 Enhancement
