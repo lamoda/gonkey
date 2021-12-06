@@ -165,3 +165,7 @@ func (t *Test) SetHeaders(val map[string]string) {
 func (t *Test) SetDbQueryString(query string) {
 	t.DbQuery = query
 }
+
+func (t *Test) SetDbResponseJson(responses []string) {
+	t.DbResponse = responses
+}
