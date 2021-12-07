@@ -9,13 +9,15 @@ type Test struct {
 
 	TestDefinition
 
-	Request         string
-	Responses       map[int]string
-	ResponseHeaders map[int]map[string]string
-	BeforeScript    string
-	AfterRequestScript    string
-	DbQuery         string
-	DbResponse      []string
+	Filename string
+
+	Request            string
+	Responses          map[int]string
+	ResponseHeaders    map[int]map[string]string
+	BeforeScript       string
+	AfterRequestScript string
+	DbQuery            string
+	DbResponse         []string
 }
 
 func (t *Test) ToQuery() string {
@@ -128,6 +130,10 @@ func (t *Test) GetForm() *models.Form {
 
 func (t *Test) GetVariablesToSet() map[int]map[string]string {
 	return t.VariablesToSet
+}
+
+func (t *Test) GetFileName() string {
+	return t.Filename
 }
 
 func (t *Test) Clone() models.TestInterface {

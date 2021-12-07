@@ -27,6 +27,8 @@ type TestInterface interface {
 	GetVariables() map[string]string
 	GetVariablesToSet() map[int]map[string]string
 
+	GetFileName() string
+
 	// setters
 	SetQuery(string)
 	SetMethod(string)

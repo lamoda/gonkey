@@ -46,6 +46,7 @@ func (o *ConsoleColoredOutput) Process(t models.TestInterface, result *models.Re
 func renderResult(result *models.Result) (string, error) {
 	text := `
        Name: {{ green .Test.GetName }}
+       File: {{ green .Test.GetFileName }}
 
 Request:
      Method: {{ cyan .Test.GetMethod }}
