@@ -40,7 +40,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 class PostgresStorage:
     def __init__(self):
-        # подключение к Postgres
         params = {
             "host": os.environ['APP_POSTGRES_HOST'],
             "port": os.environ['APP_POSTGRES_PORT'],
@@ -55,7 +54,7 @@ class PostgresStorage:
 
     def apply_migrations(self):
         self.cursor.execute("""
-        CREATE TABLE testing (id SERIAL PRIMARY KEY, name VARCHAR(200) NOT NULL);
+        CREATE TABLE IF NOT EXISTS testing (id SERIAL PRIMARY KEY, name VARCHAR(200) NOT NULL);
         """)
         self.conn.commit()
         self.cursor.executemany(
