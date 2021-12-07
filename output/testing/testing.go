@@ -34,6 +34,7 @@ func (o *TestingOutput) Process(t models.TestInterface, result *models.Result) e
 func renderResult(result *models.Result) (string, error) {
 	text := `
        Name: {{ .Test.GetName }}
+       File: {{ .Test.GetFileName }}
 
 Request:
      Method: {{ .Test.GetMethod }}

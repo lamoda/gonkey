@@ -788,6 +788,39 @@ Examples:
     ...
 ```
 
+###### bodyMatchesText
+
+Checks that the request has the defined body text, or it falls under the definition of a regular expression.
+
+Parameters:
+
+- `body` - a string with the expected request body value;
+- `regexp` - a regular expression to check the body value against.
+
+
+Examples:
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        - kind: bodyMatchesText
+            body: |-
+              query HeroNameAndFriends {
+                    hero {
+                      name
+                      friends {
+                        name
+                      }
+                    }
+                  }
+    service2:
+      requestConstraints:
+        - kind: bodyMatchesText
+            regexp: (HeroNameAndFriends)
+    ...
+```
+
 ###### bodyMatchesXML
 
 Checks that the request body is XML, and it matches to the XML defined in the `body` parameter.

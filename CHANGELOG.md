@@ -1,3 +1,40 @@
+# v1.11.1 (Tue Dec 07 2021)
+
+#### 🐛 Bug Fix
+
+- Write paths to test files in test output [#113](https://github.com/lamoda/gonkey/pull/113) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
+# v1.11.0 (Mon Dec 06 2021)
+
+#### 🚀 Enhancement
+
+- added bodyMatchesText requestConstraint with example test [#110](https://github.com/lamoda/gonkey/pull/110) (l.yarushin@timeweb.ru [@leorush](https://github.com/leorush))
+
+#### Authors: 2
+
+- Lev ([@leorush](https://github.com/leorush))
+- Lev Yarushin (l.yarushin@timeweb.ru)
+
+---
+
+# v1.10.0 (Mon Dec 06 2021)
+
+#### 🚀 Enhancement
+
+- [BUG] fixed DbType param in console client [#112](https://github.com/lamoda/gonkey/pull/112) ([@chistopat](https://github.com/chistopat))
+
+#### Authors: 1
+
+- Yegor Chistyakov ([@chistopat](https://github.com/chistopat))
+
+---
+
 # v1.9.0 (Fri Dec 03 2021)
 
 #### 🚀 Enhancement

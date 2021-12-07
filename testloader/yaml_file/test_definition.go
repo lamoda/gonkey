@@ -3,37 +3,37 @@ package yaml_file
 import "github.com/lamoda/gonkey/models"
 
 type TestDefinition struct {
-	Name               string                    `json:"name" yaml:"name"`
-	Variables          map[string]string         `json:"variables" yaml:"variables"`
-	VariablesToSet     VariablesToSet            `json:"variables_to_set" yaml:"variables_to_set"`
-	Form               *models.Form              `json:"form" yaml:"form"`
-	Method             string                    `json:"method" yaml:"method"`
-	RequestURL         string                    `json:"path" yaml:"path"`
-	QueryParams        string                    `json:"query" yaml:"query"`
-	RequestTmpl        string                    `json:"request" yaml:"request"`
-	ResponseTmpls      map[int]string            `json:"response" yaml:"response"`
-	ResponseHeaders    map[int]map[string]string `json:"responseHeaders" yaml:"responseHeaders"`
-	BeforeScriptParams scriptParams              `json:"beforeScript" yaml:"beforeScript"`
-	AfterRequestScriptParams scriptParams        `json:"afterRequestScript" yaml:"afterRequestScript"`
-	HeadersVal         map[string]string         `json:"headers" yaml:"headers"`
-	CookiesVal         map[string]string         `json:"cookies" yaml:"cookies"`
-	Cases              []CaseData                `json:"cases" yaml:"cases"`
-	ComparisonParams   comparisonParams          `json:"comparisonParams" yaml:"comparisonParams"`
-	FixtureFiles       []string                  `json:"fixtures" yaml:"fixtures"`
-	MocksDefinition    map[string]interface{}    `json:"mocks" yaml:"mocks"`
-	PauseValue         int                       `json:"pause" yaml:"pause"`
-	DbQueryTmpl        string                    `json:"dbQuery" yaml:"dbQuery"`
-	DbResponseTmpl     []string                  `json:"dbResponse" yaml:"dbResponse"`
+	Name                     string                    `json:"name" yaml:"name"`
+	Variables                map[string]string         `json:"variables" yaml:"variables"`
+	VariablesToSet           VariablesToSet            `json:"variables_to_set" yaml:"variables_to_set"`
+	Form                     *models.Form              `json:"form" yaml:"form"`
+	Method                   string                    `json:"method" yaml:"method"`
+	RequestURL               string                    `json:"path" yaml:"path"`
+	QueryParams              string                    `json:"query" yaml:"query"`
+	RequestTmpl              string                    `json:"request" yaml:"request"`
+	ResponseTmpls            map[int]string            `json:"response" yaml:"response"`
+	ResponseHeaders          map[int]map[string]string `json:"responseHeaders" yaml:"responseHeaders"`
+	BeforeScriptParams       scriptParams              `json:"beforeScript" yaml:"beforeScript"`
+	AfterRequestScriptParams scriptParams              `json:"afterRequestScript" yaml:"afterRequestScript"`
+	HeadersVal               map[string]string         `json:"headers" yaml:"headers"`
+	CookiesVal               map[string]string         `json:"cookies" yaml:"cookies"`
+	Cases                    []CaseData                `json:"cases" yaml:"cases"`
+	ComparisonParams         comparisonParams          `json:"comparisonParams" yaml:"comparisonParams"`
+	FixtureFiles             []string                  `json:"fixtures" yaml:"fixtures"`
+	MocksDefinition          map[string]interface{}    `json:"mocks" yaml:"mocks"`
+	PauseValue               int                       `json:"pause" yaml:"pause"`
+	DbQueryTmpl              string                    `json:"dbQuery" yaml:"dbQuery"`
+	DbResponseTmpl           []string                  `json:"dbResponse" yaml:"dbResponse"`
 }
 
 type CaseData struct {
-	RequestArgs      map[string]interface{}         `json:"requestArgs" yaml:"requestArgs"`
-	ResponseArgs     map[int]map[string]interface{} `json:"responseArgs" yaml:"responseArgs"`
-	BeforeScriptArgs map[string]interface{}         `json:"beforeScriptArgs" yaml:"beforeScriptArgs"`
+	RequestArgs            map[string]interface{}         `json:"requestArgs" yaml:"requestArgs"`
+	ResponseArgs           map[int]map[string]interface{} `json:"responseArgs" yaml:"responseArgs"`
+	BeforeScriptArgs       map[string]interface{}         `json:"beforeScriptArgs" yaml:"beforeScriptArgs"`
 	AfterRequestScriptArgs map[string]interface{}         `json:"afterRequestScriptArgs" yaml:"afterRequestScriptArgs"`
-	DbQueryArgs      map[string]interface{}         `json:"dbQueryArgs" yaml:"dbQueryArgs"`
-	DbResponseArgs   map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
-	DbResponse       []string                       `json:"dbResponse" yaml:"dbResponse"`
+	DbQueryArgs            map[string]interface{}         `json:"dbQueryArgs" yaml:"dbQueryArgs"`
+	DbResponseArgs         map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
+	DbResponse             []string                       `json:"dbResponse" yaml:"dbResponse"`
 }
 
 type comparisonParams struct {

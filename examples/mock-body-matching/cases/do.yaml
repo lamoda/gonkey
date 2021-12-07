@@ -1,0 +1,45 @@
+- name: Test body matching
+  mocks:
+    backend:
+      strategy: uriVary
+      uris:
+        /process:
+          requestConstraints:
+            - kind: bodyMatchesText
+              # >- and |- remove the line feed, remove the trailing blank lines.
+              body: |-
+                query HeroNameAndFriends {
+                      hero {
+                        name
+                        friends {
+                          name
+                        }
+                      }
+                    }
+            - kind: bodyMatchesText
+              regexp: (HeroNameAndFriends)
+          strategy: constant
+          body: "OK"
+          statusCode: 200
+  method: POST
+  path: /do
+  response:
+    200: |
+      {
+                "data": {
+                  "hero": {
+                    "name": "R2-D2",
+                    "friends": [
+                      {
+                        "name": "Luke Skywalker"
+                      },
+                      {
+                        "name": "Han Solo"
+                      },
+                      {
+                        "name": "Leia Organa"
+                      }
+                    ]
+                  }
+                }
+              }
