@@ -1,3 +1,15 @@
+# v1.11.1 (Tue Dec 07 2021)
+
+#### 🐛 Bug Fix
+
+- Write paths to test files in test output [#113](https://github.com/lamoda/gonkey/pull/113) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
 # v1.11.0 (Mon Dec 06 2021)
 
 #### 🚀 Enhancement
