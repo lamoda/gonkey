@@ -1,3 +1,15 @@
+# v1.12.0 (Thu Dec 09 2021)
+
+#### 🚀 Enhancement
+
+- Allow passing variables to dbQuery and dbResponse [#114](https://github.com/lamoda/gonkey/pull/114) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
 # v1.11.1 (Tue Dec 07 2021)
 
 #### 🐛 Bug Fix
