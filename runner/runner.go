@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -70,13 +71,21 @@ func (r *Runner) Run() (*models.Summary, error) {
 
 	totalTests := 0
 	failedTests := 0
+	skippedTests := 0
+	brokenTests := 0
 
 	for v := range loader {
 		testResult, err := r.executeTest(v, client)
-		if err != nil {
+		switch {
+		case err != nil && errors.Is(err, errTestSkipped):
+			skippedTests++
+		case err != nil && errors.Is(err, errTestBroken):
+			brokenTests++
+		case err != nil:
 			// todo: populate error with test name. Currently it is not possible here to get test name.
 			return nil, err
 		}
+
 		totalTests++
 		if len(testResult.Errors) > 0 {
 			failedTests++
@@ -90,6 +99,8 @@ func (r *Runner) Run() (*models.Summary, error) {
 
 	s := &models.Summary{
 		Success: failedTests == 0,
+		Skipped: skippedTests,
+		Broken:  brokenTests,
 		Failed:  failedTests,
 		Total:   totalTests,
 	}
