@@ -48,7 +48,6 @@ func testServerUpload(t *testing.T) *httptest.Server {
 		_, err = w.Write(respData)
 		require.NoError(t, err)
 
-		return
 	}))
 }
 

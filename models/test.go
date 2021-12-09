@@ -37,6 +37,8 @@ type TestInterface interface {
 	SetForm(form *Form)
 	SetResponses(map[int]string)
 	SetHeaders(map[string]string)
+	SetDbQueryString(string)
+	SetDbResponseJson([]string)
 
 	// comparison properties
 	NeedsCheckingValues() bool

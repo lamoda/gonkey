@@ -10,7 +10,7 @@ type Test struct {
 	TestDefinition
 
 	Filename string
-
+  
 	Request            string
 	Responses          map[int]string
 	ResponseHeaders    map[int]map[string]string
@@ -166,4 +166,12 @@ func (t *Test) SetResponses(val map[int]string) {
 
 func (t *Test) SetHeaders(val map[string]string) {
 	t.HeadersVal = val
+}
+
+func (t *Test) SetDbQueryString(query string) {
+	t.DbQuery = query
+}
+
+func (t *Test) SetDbResponseJson(responses []string) {
+	t.DbResponse = responses
 }

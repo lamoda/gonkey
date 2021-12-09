@@ -215,6 +215,8 @@ You can use variables in the description of the test, the following fields are s
 - headers
 - request
 - response
+- dbQuery
+- dbResponse
 - mocks body
 - mocks headers
 - mocks requestConstraints
@@ -238,12 +240,17 @@ Example:
           "message": "{{ $mockParam }}"
         }
       statusCode: 200
+  dbQuery: >
+    SELECT id, name FROM testing_tools WHERE id={{ $sqlQueryParam }}
+  dbResponse:
+    - '{"id": {{ $sqlResultParam }}, "name": "gonkey"}'
 ```
 
 You can assign values to variables in the following ways (priorities are from top to bottom):
 
 - in the description of the test
 - from the response of the previous test
+- from the response of currently running test
 - from environment variables or from env-file
 
 #### More detailed about assignment methods
@@ -294,6 +301,26 @@ You can access nested fields like this:
 > "author_info.id"
 
 Any nesting levels are supported.
+
+##### From the response of currently running test
+
+Example:
+
+```yaml
+- name: Get info with database
+  method: GET
+  path: "/info/1"
+  variables_to_set:
+    200:
+      golang_id: query_result.0.0
+  response:
+    200: '{"result_id": "1", "query_result": [[ {{ $golang_id }} , "golang"], [2, "gonkey"]]}'
+  dbQuery: >
+    SELECT id, name FROM testing_tools WHERE id={{ $golang_id }}
+  dbResponse:
+    - '{"id": {{ $golang_id}}, "name": "golang"}'
+```
+
 
 ##### From environment variables or from env-file
 

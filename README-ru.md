@@ -212,6 +212,8 @@ responseHeaders:
 - headers
 - request
 - response
+- dbQuery
+- dbResponse
 - body для моков
 - headers для моков
 - requestConstraints для моков
@@ -235,12 +237,17 @@ responseHeaders:
           "message": "{{ $mockParam }}"
         }
       statusCode: 200
+  dbQuery: >
+    SELECT id, name FROM testing_tools WHERE id={{ $sqlQueryParam }}
+  dbResponse:
+    - '{"id": {{ $sqlResultParam }}, "name": "gonkey"}'
 ```
 
 Присваивать значения переменным можно следующими способами:
 
 - в описании самого теста
 - из результатов предыдущего запроса
+- из результата текущего запроса
 - в переменных окружения или в env-файле
 
 Приоритеты источников соответствуют порядку перечисления.
@@ -293,6 +300,25 @@ responseHeaders:
 > "author_info.id"
 
 Глубина вложенности может быть любая.
+
+##### Из результата текущего запроса
+
+Пример:
+
+```yaml
+- name: Get info with database
+  method: GET
+  path: "/info/1"
+  variables_to_set:
+    200:
+      golang_id: query_result.0.0
+  response:
+    200: '{"result_id": "1", "query_result": [[ {{ $golang_id }} , "golang"], [2, "gonkey"]]}'
+  dbQuery: >
+    SELECT id, name FROM testing_tools WHERE id={{ $golang_id }}
+  dbResponse:
+    - '{"id": {{ $golang_id}}, "name": "golang"}'
+```
 
 ##### В переменных окружения или в env-файле
 
