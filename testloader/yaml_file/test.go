@@ -10,7 +10,7 @@ type Test struct {
 	TestDefinition
 
 	Filename string
-  
+
 	Request            string
 	Responses          map[int]string
 	ResponseHeaders    map[int]map[string]string
@@ -60,6 +60,10 @@ func (t *Test) NeedsCheckingValues() bool {
 
 func (t *Test) GetName() string {
 	return t.Name
+}
+
+func (t *Test) GetStatus() string {
+	return t.Status
 }
 
 func (t *Test) IgnoreArraysOrdering() bool {
