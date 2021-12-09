@@ -97,7 +97,22 @@ func (r *Runner) Run() (*models.Summary, error) {
 	return s, nil
 }
 
+var (
+	errTestSkipped = errors.New("test was skipped")
+	errTestBroken  = errors.New("test was broken")
+)
+
 func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*models.Result, error) {
+
+	if v.GetStatus() != "" {
+		if v.GetStatus() == "broken" {
+			return &models.Result{Test: v}, errTestBroken
+		}
+
+		if v.GetStatus() == "skipped" {
+			return &models.Result{Test: v}, errTestSkipped
+		}
+	}
 
 	r.config.Variables.Load(v.GetVariables())
 	v = r.config.Variables.Apply(v)
