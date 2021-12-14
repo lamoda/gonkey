@@ -68,7 +68,7 @@ func (r *Runner) Run() (*models.Summary, error) {
 	hasFocused := false
 	for test := range loader {
 		tests = append(tests, test)
-		if test.GetStatus() == "focused" {
+		if test.GetStatus() == "focus" {
 			hasFocused = true
 		}
 	}
@@ -86,7 +86,7 @@ func (r *Runner) Run() (*models.Summary, error) {
 	for _, v := range tests {
 		if hasFocused {
 			switch v.GetStatus() {
-			case "focused":
+			case "focus":
 				v.SetStatus("")
 			case "broken":
 				// do nothing

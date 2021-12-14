@@ -8,7 +8,7 @@
       info_id: num.generated
 
 - name: Get info with database
-  status: focused
+  status: focus
   method: GET
   variables:
     info_id: 10
