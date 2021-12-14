@@ -64,6 +64,15 @@ func (r *Runner) Run() (*models.Summary, error) {
 		return nil, err
 	}
 
+	tests := []models.TestInterface{}
+	hasFocused := false
+	for test := range loader {
+		tests = append(tests, test)
+		if test.GetStatus() == "focused" {
+			hasFocused = true
+		}
+	}
+
 	client, err := newClient()
 	if err != nil {
 		return nil, err
@@ -74,7 +83,18 @@ func (r *Runner) Run() (*models.Summary, error) {
 	skippedTests := 0
 	brokenTests := 0
 
-	for v := range loader {
+	for _, v := range tests {
+		if hasFocused {
+			switch v.GetStatus() {
+			case "focused":
+				v.SetStatus("")
+			case "broken":
+				// do nothing
+			default:
+				v.SetStatus("skipped")
+			}
+		}
+
 		testResult, err := r.executeTest(v, client)
 		switch {
 		case err != nil && errors.Is(err, errTestSkipped):

@@ -179,3 +179,7 @@ func (t *Test) SetDbQueryString(query string) {
 func (t *Test) SetDbResponseJson(responses []string) {
 	t.DbResponse = responses
 }
+
+func (t *Test) SetStatus(status string) {
+	t.Status = status
+}

@@ -1,0 +1,24 @@
+- name: Get random number
+  method: GET
+  path: /randint/
+  response:
+    200: '{ "num": {"generated": "$matchRegexp(\\d)" } }'
+  variables_to_set:
+    200:
+      info_id: num.generated
+
+- name: Get info with database
+  status: focused
+  method: GET
+  variables:
+    info_id: 10
+  path: "/info/{{ $info_id }}"
+  variables_to_set:
+    200:
+      golang_id: query_result.0.0
+  response:
+    200: '{"result_id": "{{ $info_id }}", "query_result": [[ {{ $golang_id }}, "golang"], [2, "gonkey"]]}'
+  dbQuery: >
+    SELECT id, name FROM testing WHERE id={{ $golang_id }}
+  dbResponse:
+    - '{"id": {{ $golang_id }}, "name": "golang"}'
