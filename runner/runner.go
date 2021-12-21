@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -63,6 +64,15 @@ func (r *Runner) Run() (*models.Summary, error) {
 		return nil, err
 	}
 
+	tests := []models.TestInterface{}
+	hasFocused := false
+	for test := range loader {
+		tests = append(tests, test)
+		if test.GetStatus() == "focus" {
+			hasFocused = true
+		}
+	}
+
 	client, err := newClient()
 	if err != nil {
 		return nil, err
@@ -70,13 +80,32 @@ func (r *Runner) Run() (*models.Summary, error) {
 
 	totalTests := 0
 	failedTests := 0
+	skippedTests := 0
+	brokenTests := 0
 
-	for v := range loader {
+	for _, v := range tests {
+		if hasFocused {
+			switch v.GetStatus() {
+			case "focus":
+				v.SetStatus("")
+			case "broken":
+				// do nothing
+			default:
+				v.SetStatus("skipped")
+			}
+		}
+
 		testResult, err := r.executeTest(v, client)
-		if err != nil {
+		switch {
+		case err != nil && errors.Is(err, errTestSkipped):
+			skippedTests++
+		case err != nil && errors.Is(err, errTestBroken):
+			brokenTests++
+		case err != nil:
 			// todo: populate error with test name. Currently it is not possible here to get test name.
 			return nil, err
 		}
+
 		totalTests++
 		if len(testResult.Errors) > 0 {
 			failedTests++
@@ -90,6 +119,8 @@ func (r *Runner) Run() (*models.Summary, error) {
 
 	s := &models.Summary{
 		Success: failedTests == 0,
+		Skipped: skippedTests,
+		Broken:  brokenTests,
 		Failed:  failedTests,
 		Total:   totalTests,
 	}
@@ -97,7 +128,22 @@ func (r *Runner) Run() (*models.Summary, error) {
 	return s, nil
 }
 
+var (
+	errTestSkipped = errors.New("test was skipped")
+	errTestBroken  = errors.New("test was broken")
+)
+
 func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*models.Result, error) {
+
+	if v.GetStatus() != "" {
+		if v.GetStatus() == "broken" {
+			return &models.Result{Test: v}, errTestBroken
+		}
+
+		if v.GetStatus() == "skipped" {
+			return &models.Result{Test: v}, errTestSkipped
+		}
+	}
 
 	r.config.Variables.Load(v.GetVariables())
 	v = r.config.Variables.Apply(v)

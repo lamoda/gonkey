@@ -112,5 +112,12 @@ func templateFuncMap() template.FuncMap {
 }
 
 func (o *ConsoleColoredOutput) ShowSummary(summary *models.Summary) {
-	o.coloredPrintf("\nFailed tests: %d/%d\n", summary.Failed, summary.Total)
+	o.coloredPrintf(
+		"\nsuccess %d, failed %d, skipped %d, broken %d, total %d\n",
+		summary.Total-summary.Broken-summary.Failed-summary.Skipped,
+		summary.Failed,
+		summary.Skipped,
+		summary.Broken,
+		summary.Total,
+	)
 }

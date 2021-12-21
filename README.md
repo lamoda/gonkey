@@ -78,6 +78,7 @@ The tests can be now ran with `go test`, for example: `go test ./...`.
 ```yaml
 - name: WHEN the list of orders is requested MUST successfully response
   method: GET
+  status: ""
   path: /jsonrpc/v2/order.getBriefList
   query: ?id=550e8400-e29b-41d4-a716-446655440000&jsonrpc=2.0&user_id=00001
 
@@ -188,6 +189,13 @@ or for elements of map/array (if it's JSON):
             ]
           }
 ```
+
+### Test status
+
+`status` - a parameter, for specially mark tests, can have following values:
+  - `broken` - do not run test, only mark it as broken
+  - `skipped` - do not run test, skip it
+  - `focus` - run only this specific test, and mark all other tests with unset status as `skipped`
 
 ### HTTP-request
 

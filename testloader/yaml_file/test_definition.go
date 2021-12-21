@@ -4,6 +4,7 @@ import "github.com/lamoda/gonkey/models"
 
 type TestDefinition struct {
 	Name                     string                    `json:"name" yaml:"name"`
+	Status                   string                    `json:"status" yaml:"status"`
 	Variables                map[string]string         `json:"variables" yaml:"variables"`
 	VariablesToSet           VariablesToSet            `json:"variables_to_set" yaml:"variables_to_set"`
 	Form                     *models.Form              `json:"form" yaml:"form"`

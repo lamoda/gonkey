@@ -2,7 +2,6 @@ package allure_report
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -56,15 +55,10 @@ func (o *AllureReportOutput) Process(t models.TestInterface, result *models.Resu
 			*bytes.NewBufferString(fmt.Sprintf(`Respone: %s`, result.DbResponse)),
 			"txt")
 	}
-	if !result.Passed() {
-		ers := ""
-		for _, e := range result.Errors {
-			ers = ers + e.Error() + "\n"
-		}
-		o.allure.EndCase("failed", errors.New(ers), time.Now())
-	} else {
-		o.allure.EndCase("passed", nil, time.Now())
-	}
+
+	status, err := result.AllureStatus()
+	o.allure.EndCase(status, err, time.Now())
+
 	return nil
 }
 

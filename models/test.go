@@ -11,6 +11,8 @@ type TestInterface interface {
 	GetResponse(code int) (string, bool)
 	GetResponseHeaders(code int) (map[string]string, bool)
 	GetName() string
+	GetStatus() string
+	SetStatus(string)
 	Fixtures() []string
 	ServiceMocks() map[string]interface{}
 	Pause() int
@@ -57,5 +59,7 @@ type Form struct {
 type Summary struct {
 	Success bool
 	Failed  int
+	Skipped int
+	Broken  int
 	Total   int
 }
