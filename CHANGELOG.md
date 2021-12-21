@@ -1,3 +1,15 @@
+# v1.13.0 (Tue Dec 21 2021)
+
+#### 🚀 Enhancement
+
+- Add `skipped`, `broken` and `focus` statuses for tests definitions & export statuses in allure report's [#115](https://github.com/lamoda/gonkey/pull/115) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
 # v1.12.0 (Thu Dec 09 2021)
 
 #### 🚀 Enhancement
