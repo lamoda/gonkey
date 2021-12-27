@@ -1130,16 +1130,16 @@ Example:
     path: |
       ./cli_scripts/{{.file_name}}
   ...
-    cases:
-      - requestArgs:
-          customer_id: 1
-          customer_email: "customer_1_recalculate@lamoda.ru"
-        responseArgs:
-          200:
-            rrr: 1
-            in_transit: 1
-        scriptArgs:
-          file_name: "cmd_recalculate_customer_1.sh"
+  cases:
+    - requestArgs:
+        customer_id: 1
+        customer_email: "customer_1_recalculate@lamoda.ru"
+      responseArgs:
+        200:
+          rrr: 1
+          in_transit: 1
+      beforeScriptArgs:
+        file_name: "cmd_recalculate_customer_1.sh"
 ```
 
 ### Запрос в Базу данных
