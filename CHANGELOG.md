@@ -1,3 +1,16 @@
+# v1.13.1 (Wed Dec 29 2021)
+
+#### 🐛 Bug Fix
+
+- fix: error in documentation [#116](https://github.com/lamoda/gonkey/pull/116) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### Authors: 2
+
+- [@Alexey19](https://github.com/Alexey19)
+- Alexey Tyuryumov (Alexey.Tyuryumov@acronis.com)
+
+---
+
 # v1.13.0 (Tue Dec 21 2021)
 
 #### 🚀 Enhancement
