@@ -32,9 +32,10 @@ func (c *nopConstraint) Verify(r *http.Request) []error {
 
 type bodyMatchesXMLConstraint struct {
 	expectedBody interface{}
+	compareParams compare.CompareParams
 }
 
-func newBodyMatchesXMLConstraint(expected string) (verifier, error) {
+func newBodyMatchesXMLConstraint(expected string, params compare.CompareParams) (verifier, error) {
 	expectedBody, err := xmlparsing.Parse(expected)
 	if err != nil {
 		return nil, err
@@ -42,6 +43,7 @@ func newBodyMatchesXMLConstraint(expected string) (verifier, error) {
 
 	res := &bodyMatchesXMLConstraint{
 		expectedBody: expectedBody,
+		compareParams: params,
 	}
 	return res, nil
 }
@@ -62,19 +64,17 @@ func (c *bodyMatchesXMLConstraint) Verify(r *http.Request) []error {
 		return []error{err}
 	}
 
-	params := compare.CompareParams{
-		IgnoreArraysOrdering: true,
-	}
-	return compare.Compare(c.expectedBody, actual, params)
+	return compare.Compare(c.expectedBody, actual, c.compareParams)
 }
 
 type bodyMatchesJSONConstraint struct {
 	verifier
 
 	expectedBody interface{}
+	compareParams compare.CompareParams
 }
 
-func newBodyMatchesJSONConstraint(expected string) (verifier, error) {
+func newBodyMatchesJSONConstraint(expected string, params compare.CompareParams) (verifier, error) {
 	var expectedBody interface{}
 	err := json.Unmarshal([]byte(expected), &expectedBody)
 	if err != nil {
@@ -82,6 +82,7 @@ func newBodyMatchesJSONConstraint(expected string) (verifier, error) {
 	}
 	res := &bodyMatchesJSONConstraint{
 		expectedBody: expectedBody,
+		compareParams: params,
 	}
 	return res, nil
 }
@@ -101,18 +102,16 @@ func (c *bodyMatchesJSONConstraint) Verify(r *http.Request) []error {
 	if err != nil {
 		return []error{err}
 	}
-	params := compare.CompareParams{
-		IgnoreArraysOrdering: true,
-	}
-	return compare.Compare(c.expectedBody, actual, params)
+	return compare.Compare(c.expectedBody, actual, c.compareParams)
 }
 
 type bodyJSONFieldMatchesJSONConstraint struct {
 	path     string
 	expected interface{}
+	compareParams compare.CompareParams
 }
 
-func newBodyJSONFieldMatchesJSONConstraint(path, expected string) (verifier, error) {
+func newBodyJSONFieldMatchesJSONConstraint(path, expected string, params compare.CompareParams) (verifier, error) {
 	var v interface{}
 	err := json.Unmarshal([]byte(expected), &v)
 	if err != nil {
@@ -121,6 +120,7 @@ func newBodyJSONFieldMatchesJSONConstraint(path, expected string) (verifier, err
 	res := &bodyJSONFieldMatchesJSONConstraint{
 		path:     path,
 		expected: v,
+		compareParams: params,
 	}
 	return res, nil
 }
@@ -147,10 +147,7 @@ func (c *bodyJSONFieldMatchesJSONConstraint) Verify(r *http.Request) []error {
 	if err != nil {
 		return []error{err}
 	}
-	params := compare.CompareParams{
-		IgnoreArraysOrdering: true,
-	}
-	return compare.Compare(c.expected, actual, params)
+	return compare.Compare(c.expected, actual, c.compareParams)
 }
 
 type methodConstraint struct {
