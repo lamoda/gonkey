@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"text/template"
 
 	"gopkg.in/yaml.v2"
@@ -35,7 +36,18 @@ func parseTestDefinitionFile(absPath string) ([]Test, error) {
 	return tests, nil
 }
 
+const (
+	variableToProtect1 = "{{$"
+	gonkeyReplacement1 = "!gonkey_protect_var1!$"
+
+	variableToProtect2 = "{{ $"
+	gonkeyReplacement2 = "!gonkey_protect_var2!$"
+)
+
 func substituteArgs(tmpl string, args map[string]interface{}) (string, error) {
+	tmpl = strings.ReplaceAll(tmpl, variableToProtect1, gonkeyReplacement1)
+	tmpl = strings.ReplaceAll(tmpl, variableToProtect2, gonkeyReplacement2)
+
 	compiledTmpl, err := template.New("").Parse(tmpl)
 	if err != nil {
 		return "", err
@@ -47,7 +59,9 @@ func substituteArgs(tmpl string, args map[string]interface{}) (string, error) {
 		return "", err
 	}
 
-	return buf.String(), nil
+	tmpl = strings.ReplaceAll(buf.String(), gonkeyReplacement1, variableToProtect1)
+	tmpl = strings.ReplaceAll(tmpl, gonkeyReplacement2, variableToProtect2)
+	return tmpl, nil
 }
 
 func substituteArgsToMap(tmpl map[string]string, args map[string]interface{}) (map[string]string, error) {
