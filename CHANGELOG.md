@@ -1,3 +1,15 @@
+# v1.13.2 (Mon Jan 24 2022)
+
+#### 🐛 Bug Fix
+
+- chore(deps): Upgrade github.com/tidwall/gjson and set dependabot [#121](https://github.com/lamoda/gonkey/pull/121) ([@sashamelentyev](https://github.com/sashamelentyev))
+
+#### Authors: 1
+
+- Sasha Melentyev ([@sashamelentyev](https://github.com/sashamelentyev))
+
+---
+
 # v1.13.1 (Wed Dec 29 2021)
 
 #### 🐛 Bug Fix
