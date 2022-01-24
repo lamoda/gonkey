@@ -21,11 +21,11 @@ func newClient() (*http.Client, error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	if os.Getenv("HTTP_PROXY") != "" {
-		proxyUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+		proxyURL, err := url.Parse(os.Getenv("HTTP_PROXY"))
 		if err != nil {
 			return nil, err
 		}
-		transport.Proxy = http.ProxyURL(proxyUrl)
+		transport.Proxy = http.ProxyURL(proxyURL)
 	}
 
 	return &http.Client{

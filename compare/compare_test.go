@@ -408,8 +408,8 @@ func TestCompareNestedMapsWithDifferentValues(t *testing.T) {
 
 func TestCompareEqualJsonScalars(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte("1"), &json1)
-	json.Unmarshal([]byte("1"), &json2)
+	_ = json.Unmarshal([]byte("1"), &json1)
+	_ = json.Unmarshal([]byte("1"), &json2)
 	errors := Compare(json1, json2, CompareParams{})
 	if len(errors) != 0 {
 		t.Error(
@@ -422,8 +422,8 @@ func TestCompareEqualJsonScalars(t *testing.T) {
 
 func TestCompareDifferJsonScalars(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte("1"), &json1)
-	json.Unmarshal([]byte("2"), &json2)
+	_ = json.Unmarshal([]byte("1"), &json1)
+	_ = json.Unmarshal([]byte("2"), &json2)
 	errors := Compare(json1, json2, CompareParams{})
 	if errors[0].Error() != makeErrorString("$", "values do not match", 1, 2) {
 		t.Error(
@@ -456,8 +456,8 @@ var actualArrayJson = `
 
 func TestCompareEqualArraysWithIgnoreArraysOrdering(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte(expectedArrayJson), &json1)
-	json.Unmarshal([]byte(actualArrayJson), &json2)
+	_ = json.Unmarshal([]byte(expectedArrayJson), &json1)
+	_ = json.Unmarshal([]byte(actualArrayJson), &json2)
 	errors := Compare(json1, json2, CompareParams{
 		IgnoreArraysOrdering: true,
 	})
@@ -472,8 +472,8 @@ func TestCompareEqualArraysWithIgnoreArraysOrdering(t *testing.T) {
 
 func TestCompareEqualComplexJson(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte(complexJson1), &json1)
-	json.Unmarshal([]byte(complexJson1), &json2) // compare json with same json
+	_ = json.Unmarshal([]byte(complexJson1), &json1)
+	_ = json.Unmarshal([]byte(complexJson1), &json2) // compare json with same json
 	errors := Compare(json1, json2, CompareParams{})
 	if len(errors) != 0 {
 		t.Error(
@@ -486,8 +486,8 @@ func TestCompareEqualComplexJson(t *testing.T) {
 
 func TestCompareDifferComplexJson(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte(complexJson1), &json1)
-	json.Unmarshal([]byte(complexJson2), &json2)
+	_ = json.Unmarshal([]byte(complexJson1), &json1)
+	_ = json.Unmarshal([]byte(complexJson2), &json2)
 	errors := Compare(json1, json2, CompareParams{})
 	expectedErr := makeErrorString(
 		"$.paths./api/get-delivery-info.get.parameters[2].$ref",
@@ -3832,7 +3832,7 @@ var complexJson1 = `
                     "example": false
                 },
                 "is_autoreserve_allowed": {
-                    "description": "If True, the choosen interval gets to be reserved right after the order is created",
+                    "description": "If True, the chosen interval gets to be reserved right after the order is created",
                     "type": "boolean"
                 },
                 "has_horizon": {
@@ -8744,7 +8744,7 @@ var complexJson2 = `
                     "example": false
                 },
                 "is_autoreserve_allowed": {
-                    "description": "If True, the choosen interval gets to be reserved right after the order is created",
+                    "description": "If True, the chosen interval gets to be reserved right after the order is created",
                     "type": "boolean"
                 },
                 "has_horizon": {

@@ -1,0 +1,17 @@
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - errcheck
+    - gocyclo
+    - gosimple
+    - govet
+    - makezero
+    - misspell
+    - nilerr
+    - structcheck
+    - typecheck
+    - unparam
+    - unused
+    - varcheck

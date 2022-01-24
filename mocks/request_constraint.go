@@ -211,9 +211,7 @@ type queryConstraint struct {
 
 func newQueryConstraint(query string) (*queryConstraint, error) {
 	// user may begin his query with '?', just omit it in this case
-	if strings.HasPrefix(query, "?") {
-		query = query[1:]
-	}
+	query = strings.TrimPrefix(query, "?")
 	pq, err := url.ParseQuery(query)
 	if err != nil {
 		return nil, err

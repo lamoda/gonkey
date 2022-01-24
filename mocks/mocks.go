@@ -69,7 +69,7 @@ func (m *Mocks) ShutdownContext(ctx context.Context) error {
 }
 
 func (m *Mocks) Service(serviceName string) *ServiceMock {
-	mock, _ := m.mocks[serviceName]
+	mock := m.mocks[serviceName]
 	return mock
 }
 

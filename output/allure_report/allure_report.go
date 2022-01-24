@@ -52,7 +52,7 @@ func (o *AllureReportOutput) Process(t models.TestInterface, result *models.Resu
 			"txt")
 		o.allure.AddAttachment(
 			*bytes.NewBufferString("Db Response"),
-			*bytes.NewBufferString(fmt.Sprintf(`Respone: %s`, result.DbResponse)),
+			*bytes.NewBufferString(fmt.Sprintf(`Response: %s`, result.DbResponse)),
 			"txt")
 	}
 
@@ -63,5 +63,5 @@ func (o *AllureReportOutput) Process(t models.TestInterface, result *models.Resu
 }
 
 func (o *AllureReportOutput) Finalize() {
-	o.allure.EndSuite(time.Now())
+	_ = o.allure.EndSuite(time.Now())
 }

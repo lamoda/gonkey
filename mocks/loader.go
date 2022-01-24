@@ -96,7 +96,7 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 		return &nopReply{}, nil
 	case "uriVary":
 		*ak = append(*ak, "basePath", "uris")
-		return l.loadUriVaryStrategy(path, definition)
+		return l.loadURIVaryStrategy(path, definition)
 	case "methodVary":
 		*ak = append(*ak, "methods")
 		return l.loadMethodVaryStrategy(path, definition)
@@ -114,7 +114,7 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 	}
 }
 
-func (l *Loader) loadUriVaryStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadURIVaryStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
 	var basePath string
 	if b, ok := def["basePath"]; ok {
 		basePath = b.(string)
@@ -134,7 +134,7 @@ func (l *Loader) loadUriVaryStrategy(path string, def map[interface{}]interface{
 			uris[uri.(string)] = def
 		}
 	}
-	return newUriVaryReply(basePath, uris), nil
+	return newURIVaryReply(basePath, uris), nil
 }
 
 func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
@@ -156,7 +156,7 @@ func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interfa
 	return newMethodVaryReply(methods), nil
 }
 
-func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadFileStrategy(_ string, def map[interface{}]interface{}) (replyStrategy, error) {
 	f, ok := def["filename"]
 	if !ok {
 		return nil, errors.New("`file` requires `filename` key")
@@ -176,7 +176,7 @@ func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) 
 	return newFileReplyWithCode(filename, statusCode, headers)
 }
 
-func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadConstantStrategy(_ string, def map[interface{}]interface{}) (replyStrategy, error) {
 	c, ok := def["body"]
 	if !ok {
 		return nil, errors.New("`constant` requires `body` key")
@@ -427,7 +427,7 @@ func (l *Loader) loadBodyMatchesTextConstraint(def map[interface{}]interface{}) 
 }
 
 func validateMapKeys(m map[interface{}]interface{}, allowedKeys ...string) error {
-	for k, _ := range m {
+	for k := range m {
 		k := k.(string)
 		found := false
 		for _, ak := range allowedKeys {

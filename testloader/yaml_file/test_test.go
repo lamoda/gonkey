@@ -53,7 +53,6 @@ func TestNewTestWithCases(t *testing.T) {
 	}
 
 	tests, err := makeTestFromDefinition("cases/example.yaml", data)
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,6 +61,9 @@ func TestNewTestWithCases(t *testing.T) {
 	}
 
 	reqData, err := tests[0].ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(reqData, []byte(`{"foo": "bar", "hello": "world" }`)) {
 		t.Errorf("want request %s, got %s", `{"foo": "bar", "hello": "world" }`, reqData)
 	}
@@ -72,6 +74,9 @@ func TestNewTestWithCases(t *testing.T) {
 	}
 
 	reqData, err = tests[1].ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(reqData, []byte(`{"foo": "bar", "hello": "world2" }`)) {
 		t.Errorf("want request %s, got %s", `{"foo": "bar", "hello": "world2" }`, reqData)
 	}

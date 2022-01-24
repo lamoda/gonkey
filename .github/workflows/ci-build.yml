@@ -11,7 +11,14 @@ env:
   GO111MODULE: 'on'
 
 jobs:
-
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: Run linters
+        uses: golangci/golangci-lint-action@v2.5.2
+        with:
+          version: v1.43.0
   build:
     name: Build on ${{ matrix.os }} for golang ${{ matrix.go }}
     runs-on: ${{ matrix.os }}

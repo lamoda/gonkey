@@ -37,7 +37,9 @@ func (m *ServiceMock) StartServerWithAddr(addr string) error {
 	}
 	m.listener = ln
 	m.server = &http.Server{Addr: addr, Handler: m}
-	go m.server.Serve(ln)
+	go func() {
+		_ = m.server.Serve(ln)
+	}()
 	return nil
 }
 

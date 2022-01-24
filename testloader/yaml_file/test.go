@@ -112,7 +112,7 @@ func (t *Test) Headers() map[string]string {
 
 // TODO: it might make sense to do support of case-insensitive checking
 func (t *Test) ContentType() string {
-	ct, _ := t.HeadersVal["Content-Type"]
+	ct := t.HeadersVal["Content-Type"]
 	return ct
 }
 

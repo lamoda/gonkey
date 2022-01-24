@@ -252,9 +252,9 @@ func (r *Runner) setVariablesFromResponse(t models.TestInterface, contentType, b
 		return nil
 	}
 
-	isJson := strings.Contains(contentType, "json") && body != ""
+	isJSON := strings.Contains(contentType, "json") && body != ""
 
-	vars, err := variables.FromResponse(varTemplates[statusCode], body, isJson)
+	vars, err := variables.FromResponse(varTemplates[statusCode], body, isJSON)
 	if err != nil {
 		return err
 	}

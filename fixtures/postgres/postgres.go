@@ -151,7 +151,7 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		row := make(row, len(fields))
 		for _, field := range fields {
 			key := field.Key.(string)
-			value, _ := field.Value.(interface{})
+			value := field.Value
 			row[key] = value
 		}
 		if base, ok := row["$extend"]; ok {
@@ -167,8 +167,8 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		}
 		ctx.refsDefinition[name] = row
 		if f.debug {
-			rowJson, _ := json.Marshal(row)
-			fmt.Printf("Populating ref %s as %s from template\n", name, string(rowJson))
+			rowJSON, _ := json.Marshal(row)
+			fmt.Printf("Populating ref %s as %s from template\n", name, string(rowJSON))
 		}
 	}
 
@@ -294,13 +294,13 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, t tableName, rows table) er
 				return fmt.Errorf("duplicating ref name %s", name)
 			}
 			// read values
-			var rowJson string
-			if err := insertedRows.Scan(&rowJson); err != nil {
+			var rowJSON string
+			if err := insertedRows.Scan(&rowJSON); err != nil {
 				return err
 			}
 			// decode json
 			values := make(map[string]interface{})
-			if err := json.Unmarshal([]byte(rowJson), &values); err != nil {
+			if err := json.Unmarshal([]byte(rowJSON), &values); err != nil {
 				return err
 			}
 			// add to references
@@ -311,8 +311,8 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, t tableName, rows table) er
 			}
 			ctx.refsInserted[name] = values
 			if f.debug {
-				valuesJson, _ := json.Marshal(values)
-				fmt.Printf("Populating ref %s as %s from inserted values\n", name, string(valuesJson))
+				valuesJSON, _ := json.Marshal(values)
+				fmt.Printf("Populating ref %s as %s from inserted values\n", name, string(valuesJSON))
 			}
 		}
 	}
@@ -423,13 +423,12 @@ func (f *LoaderPostgres) resolveExpression(expr string, ctx *loadContext) (strin
 		re := regexp.MustCompile(`^\$eval\((.+)\)$`)
 		if matches := re.FindStringSubmatch(expr); matches != nil {
 			return "(" + matches[1] + ")", nil
-		} else {
-			return "", fmt.Errorf("icorrect $eval() usage: %s", expr)
 		}
+		return "", fmt.Errorf("icorrect $eval() usage: %s", expr)
 	} else {
 		value, err := f.resolveFieldReference(ctx.refsInserted, expr)
 		if err != nil {
-			return "", nil
+			return "", err
 		}
 		return toDbValue(value)
 	}
