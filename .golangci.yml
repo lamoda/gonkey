@@ -9,8 +9,14 @@ linters:
     - govet
     - makezero
     - misspell
+    - nilerr
     - structcheck
     - typecheck
     - unparam
     - unused
     - varcheck
+issues:
+  exclude-rules:
+    - path: checker/response_body/response_body.go
+      linters:
+        - nilerr
