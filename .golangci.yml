@@ -9,7 +9,6 @@ linters:
     - govet
     - makezero
     - misspell
-    - nilerr
     - structcheck
     - typecheck
     - unparam

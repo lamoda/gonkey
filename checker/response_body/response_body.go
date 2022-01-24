@@ -59,7 +59,7 @@ func compareJsonBody(t models.TestInterface, expectedBody string, result *models
 	// decode actual body
 	var actual interface{}
 	if err := json.Unmarshal([]byte(result.ResponseBody), &actual); err != nil {
-		return []error{errors.New("could not parse response")}, err
+		return []error{errors.New("could not parse response")}, nil
 	}
 
 	params := compare.CompareParams{
