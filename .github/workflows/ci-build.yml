@@ -18,7 +18,7 @@ jobs:
       - name: Run linters
         uses: golangci/golangci-lint-action@v2.5.2
         with:
-          version: v1.43.0
+          version: v1.44.0
   build:
     name: Build on ${{ matrix.os }} for golang ${{ matrix.go }}
     runs-on: ${{ matrix.os }}
