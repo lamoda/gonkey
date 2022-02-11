@@ -195,3 +195,51 @@ func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) 
 	s.count++
 	return def.Execute(w, r)
 }
+
+type definitionWithURI struct {
+	uri string
+	*definition
+}
+
+type basedOnRequestReply struct {
+	sync.Mutex
+	replyStrategy
+	contextAwareStrategy
+
+	basePath string
+	variants []*definitionWithURI
+}
+
+func newBasedOnRequestReply(basePath string, variants []*definitionWithURI) replyStrategy {
+	return &basedOnRequestReply{
+		basePath: strings.TrimRight(basePath, "/") + "/",
+		variants: variants,
+	}
+}
+
+func (s *basedOnRequestReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
+	s.Lock()
+	defer s.Unlock()
+	for _, def := range s.variants {
+		uri := strings.TrimLeft(def.uri, "/")
+		if s.basePath+uri == r.URL.Path &&
+			verifyRequestConstraints(def.requestConstraints, r) {
+			return def.ExecuteWithoutVerifying(w, r)
+		}
+	}
+	return unhandledRequestError(r)
+}
+
+func (s *basedOnRequestReply) ResetRunningContext() {
+	for _, def := range s.variants {
+		def.ResetRunningContext()
+	}
+}
+
+func (s *basedOnRequestReply) EndRunningContext() []error {
+	var errs []error
+	for _, def := range s.variants {
+		errs = append(errs, def.EndRunningContext()...)
+	}
+	return errs
+}

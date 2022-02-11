@@ -78,3 +78,36 @@ func (d *definition) EndRunningContext() []error {
 	}
 	return errs
 }
+
+func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) bool {
+	var errors []error
+	if len(requestConstraints) > 0 {
+		requestDump, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			fmt.Printf("Gonkey internal error: %s\n", err)
+		}
+
+		for _, c := range requestConstraints {
+			errs := c.Verify(r)
+			for _, e := range errs {
+				errors = append(errors, &RequestConstraintError{
+					error:       e,
+					Constraint:  c,
+					RequestDump: requestDump,
+				})
+			}
+		}
+	}
+	return errors == nil
+}
+func (d *definition) ExecuteWithoutVerifying(w http.ResponseWriter, r *http.Request) []error {
+	d.Lock()
+	d.calls++
+	d.Unlock()
+	if d.replyStrategy != nil {
+		return d.replyStrategy.HandleRequest(w, r)
+	}
+	return []error{
+		fmt.Errorf("reply strategy undefined"),
+	}
+}

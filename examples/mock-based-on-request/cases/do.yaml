@@ -1,0 +1,28 @@
+- name: Test concurrent with query mathing
+  mocks:
+    backend:
+      strategy: basedOnRequest
+      uris:
+        - uri: /request
+          strategy: constant
+          body: >
+            {
+              "value": 1
+            }
+          requestConstraints:
+            - kind: queryMatches
+              expectedQuery: "key=value1"
+        - uri: /request
+          strategy: constant
+          body: >
+            {
+              "value": 22
+            }
+          requestConstraints:
+            - kind: queryMatches
+              expectedQuery: "key=value2"
+  method: GET
+  path: /do
+  response:
+    200: |
+      {"total":23}
