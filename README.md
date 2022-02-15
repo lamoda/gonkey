@@ -1054,7 +1054,6 @@ When receiving a request for a resource that is not defined in the parameters, t
 
 Parameters:
 - `uris` (mandatory) - a list of resources, each resource can be configured as a separate mock-service using any available request constraints and response strategies (see example)
-- `basePath` - common base route for all resources, empty by default
 
 Example:
 ```yaml
@@ -1063,8 +1062,7 @@ Example:
     service1:
       strategy: basedOnRequest
       uris:
-        - uri: /request
-          strategy: constant
+        - strategy: constant
           body: >
             {
               "ok": true
@@ -1072,8 +1070,9 @@ Example:
           requestConstraints:
             - kind: queryMatches
               expectedQuery: "key=value1"
-        - uri: /request
-          strategy: constant
+            - kind: pathMatches
+              path: /request
+        - strategy: constant
           body: >
             {
              "ok": true
@@ -1081,6 +1080,8 @@ Example:
           requestConstraints:
             - kind: queryMatches
               expectedQuery: "key=value2"
+            - kind: pathMatches
+              path: /request
     ...
 ```
 

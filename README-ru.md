@@ -1052,7 +1052,6 @@ Example:
 
 Параметры:
 - `uris` (обязательный) - список ресурсов, каждый ресурс можно сконфигурировать как отдельный мок-сервис, используя любые доступные проверки запросов и стратегии ответов (см. пример)
-- `basePath` - общий базовый путь для всех ресурсов, по умолчанию пустой
 
 Example:
 ```yaml
@@ -1061,8 +1060,7 @@ Example:
     service1:
       strategy: basedOnRequest
       uris:
-        - uri: /request
-          strategy: constant
+        - strategy: constant
           body: >
             {
               "ok": true
@@ -1070,8 +1068,9 @@ Example:
           requestConstraints:
             - kind: queryMatches
               expectedQuery: "key=value1"
-        - uri: /request
-          strategy: constant
+            - kind: pathMatches
+              path: /request
+        - strategy: constant
           body: >
             {
              "ok": true
@@ -1079,6 +1078,8 @@ Example:
           requestConstraints:
             - kind: queryMatches
               expectedQuery: "key=value2"
+            - kind: pathMatches
+              path: /request
     ...
 ```
 

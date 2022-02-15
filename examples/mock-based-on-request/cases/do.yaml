@@ -3,8 +3,7 @@
     backend:
       strategy: basedOnRequest
       uris:
-        - uri: /request
-          strategy: constant
+        - strategy: constant
           body: >
             {
               "value": 1
@@ -12,8 +11,9 @@
           requestConstraints:
             - kind: queryMatches
               expectedQuery: "key=value1"
-        - uri: /request
-          strategy: constant
+            - kind: pathMatches
+              path: /request
+        - strategy: constant
           body: >
             {
               "value": 22
@@ -21,6 +21,8 @@
           requestConstraints:
             - kind: queryMatches
               expectedQuery: "key=value2"
+            - kind: pathMatches
+              path: /request
   method: GET
   path: /do
   response:

@@ -196,23 +196,16 @@ func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) 
 	return def.Execute(w, r)
 }
 
-type definitionWithURI struct {
-	uri string
-	*definition
-}
-
 type basedOnRequestReply struct {
 	sync.Mutex
 	replyStrategy
 	contextAwareStrategy
 
-	basePath string
-	variants []*definitionWithURI
+	variants []*definition
 }
 
-func newBasedOnRequestReply(basePath string, variants []*definitionWithURI) replyStrategy {
+func newBasedOnRequestReply(variants []*definition) replyStrategy {
 	return &basedOnRequestReply{
-		basePath: strings.TrimRight(basePath, "/") + "/",
 		variants: variants,
 	}
 }
@@ -221,9 +214,7 @@ func (s *basedOnRequestReply) HandleRequest(w http.ResponseWriter, r *http.Reque
 	s.Lock()
 	defer s.Unlock()
 	for _, def := range s.variants {
-		uri := strings.TrimLeft(def.uri, "/")
-		if s.basePath+uri == r.URL.Path &&
-			verifyRequestConstraints(def.requestConstraints, r) {
+		if verifyRequestConstraints(def.requestConstraints, r) {
 			return def.ExecuteWithoutVerifying(w, r)
 		}
 	}
