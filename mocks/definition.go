@@ -79,14 +79,13 @@ func (d *definition) EndRunningContext() []error {
 	return errs
 }
 
-func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) bool {
+func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) []error {
 	var errors []error
 	if len(requestConstraints) > 0 {
 		requestDump, err := httputil.DumpRequest(r, true)
 		if err != nil {
-			fmt.Printf("Gonkey internal error: %s\n", err)
+			requestDump = []byte(fmt.Sprintf("failed to dump request: %s", err))
 		}
-
 		for _, c := range requestConstraints {
 			errs := c.Verify(r)
 			for _, e := range errs {
@@ -98,7 +97,7 @@ func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) bo
 			}
 		}
 	}
-	return errors == nil
+	return errors
 }
 func (d *definition) ExecuteWithoutVerifying(w http.ResponseWriter, r *http.Request) []error {
 	d.Lock()

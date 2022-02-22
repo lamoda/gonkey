@@ -213,12 +213,16 @@ func newBasedOnRequestReply(variants []*definition) replyStrategy {
 func (s *basedOnRequestReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
 	s.Lock()
 	defer s.Unlock()
+
+	var errors []error
 	for _, def := range s.variants {
-		if verifyRequestConstraints(def.requestConstraints, r) {
+		errs := verifyRequestConstraints(def.requestConstraints, r)
+		if errs == nil {
 			return def.ExecuteWithoutVerifying(w, r)
 		}
+		errors = append(errors, errs...)
 	}
-	return unhandledRequestError(r)
+	return append(errors, unhandledRequestError(r)...)
 }
 
 func (s *basedOnRequestReply) ResetRunningContext() {
