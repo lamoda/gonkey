@@ -1,3 +1,16 @@
+# v1.14.0 (Fri Feb 25 2022)
+
+#### 🚀 Enhancement
+
+- new: basedOnRequest strategy implemented [#130](https://github.com/lamoda/gonkey/pull/130) (eliseeviam@gmail.com [@eliseeviam](https://github.com/eliseeviam))
+
+#### Authors: 2
+
+- Aleksei Eliseev ([@eliseeviam](https://github.com/eliseeviam))
+- eliseeviam (eliseeviam@gmail.com)
+
+---
+
 # v1.13.2 (Mon Jan 24 2022)
 
 #### 🐛 Bug Fix
