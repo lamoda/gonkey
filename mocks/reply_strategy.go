@@ -195,3 +195,46 @@ func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) 
 	s.count++
 	return def.Execute(w, r)
 }
+
+type basedOnRequestReply struct {
+	sync.Mutex
+	replyStrategy
+	contextAwareStrategy
+
+	variants []*definition
+}
+
+func newBasedOnRequestReply(variants []*definition) replyStrategy {
+	return &basedOnRequestReply{
+		variants: variants,
+	}
+}
+
+func (s *basedOnRequestReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
+	s.Lock()
+	defer s.Unlock()
+
+	var errors []error
+	for _, def := range s.variants {
+		errs := verifyRequestConstraints(def.requestConstraints, r)
+		if errs == nil {
+			return def.ExecuteWithoutVerifying(w, r)
+		}
+		errors = append(errors, errs...)
+	}
+	return append(errors, unhandledRequestError(r)...)
+}
+
+func (s *basedOnRequestReply) ResetRunningContext() {
+	for _, def := range s.variants {
+		def.ResetRunningContext()
+	}
+}
+
+func (s *basedOnRequestReply) EndRunningContext() []error {
+	var errs []error
+	for _, def := range s.variants {
+		errs = append(errs, def.EndRunningContext()...)
+	}
+	return errs
+}

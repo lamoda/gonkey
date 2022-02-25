@@ -1046,6 +1046,45 @@ Example:
     ...
 ```
 
+###### basedOnRequest
+
+Allows multiple requests with same request path. Concurrent safe.
+
+When receiving a request for a resource that is not defined in the parameters, the test will be considered failed.
+
+Parameters:
+- `uris` (mandatory) - a list of resources, each resource can be configured as a separate mock-service using any available request constraints and response strategies (see example)
+
+Example:
+```yaml
+  ...
+  mocks:
+    service1:
+      strategy: basedOnRequest
+      uris:
+        - strategy: constant
+          body: >
+            {
+              "ok": true
+            }
+          requestConstraints:
+            - kind: queryMatches
+              expectedQuery: "key=value1"
+            - kind: pathMatches
+              path: /request
+        - strategy: constant
+          body: >
+            {
+             "ok": true
+            }
+          requestConstraints:
+            - kind: queryMatches
+              expectedQuery: "key=value2"
+            - kind: pathMatches
+              path: /request
+    ...
+```
+
 ##### Calls count
 
 You can define, how many times each mock or mock resource must be called (using `uriVary`). If the actual number of calls is different from expected, the test will be considered failed.

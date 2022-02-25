@@ -78,3 +78,35 @@ func (d *definition) EndRunningContext() []error {
 	}
 	return errs
 }
+
+func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) []error {
+	var errors []error
+	if len(requestConstraints) > 0 {
+		requestDump, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			requestDump = []byte(fmt.Sprintf("failed to dump request: %s", err))
+		}
+		for _, c := range requestConstraints {
+			errs := c.Verify(r)
+			for _, e := range errs {
+				errors = append(errors, &RequestConstraintError{
+					error:       e,
+					Constraint:  c,
+					RequestDump: requestDump,
+				})
+			}
+		}
+	}
+	return errors
+}
+func (d *definition) ExecuteWithoutVerifying(w http.ResponseWriter, r *http.Request) []error {
+	d.Lock()
+	d.calls++
+	d.Unlock()
+	if d.replyStrategy != nil {
+		return d.replyStrategy.HandleRequest(w, r)
+	}
+	return []error{
+		fmt.Errorf("reply strategy undefined"),
+	}
+}

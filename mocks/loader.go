@@ -109,6 +109,9 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 	case "sequence":
 		*ak = append(*ak, "sequence")
 		return l.loadSequenceStrategy(path, definition)
+	case "basedOnRequest":
+		*ak = append(*ak, "basePath", "uris")
+		return l.loadBasedOnRequestStrategy(path, definition)
 	default:
 		return nil, fmt.Errorf("unknown strategy: %s", strategyName)
 	}
@@ -213,6 +216,29 @@ func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface
 		strategies[i] = def
 	}
 	return newSequentialReply(strategies), nil
+}
+
+func (l *Loader) loadBasedOnRequestStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+	var uris []*definition
+	if u, ok := def["uris"]; ok {
+		urisList, ok := u.([]interface{})
+		if !ok {
+			return nil, errors.New("`basedOnRequest` requires list under `uris` key")
+		}
+		uris = make([]*definition, 0, len(urisList))
+		for i, v := range urisList {
+			v, ok := v.(map[interface{}]interface{})
+			if !ok {
+				return nil, errors.New("`uris` list item must be a map")
+			}
+			def, err := l.loadDefinition(path+"."+strconv.Itoa(i), v)
+			if err != nil {
+				return nil, err
+			}
+			uris = append(uris, def)
+		}
+	}
+	return newBasedOnRequestReply(uris), nil
 }
 
 func (l *Loader) loadHeaders(def map[interface{}]interface{}) (map[string]string, error) {
