@@ -772,6 +772,25 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
     ...
 ```
 
+###### queryMatchesRegexp
+
+Расширяет `queryMatches` так, чтобы можно было испозовать проверку по регулярному выражению.
+
+Параметры:
+- `expectedQuery` (обязательный) - строка параметров с которой будет сверяться запрос. Порядок параметров не имеет значения.
+
+Пример:
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        # работает аналогично queryMatches с добавлением возможности вызова $matchRegexp
+        - kind: queryMatchesRegexp
+          expectedQuery:  key1=value1&key2=$matchRegexp(\\d+)&key1=value11
+    ...
+```
+
 ###### methodIs
 
 Проверяет, что метод запроса соответствует заданному.
