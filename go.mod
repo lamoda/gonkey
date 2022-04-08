@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/joho/godotenv v1.3.0
 	github.com/kylelemons/godebug v1.1.0
-	github.com/lib/pq v1.3.0
+	github.com/lib/pq v1.10.5
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.13.0
