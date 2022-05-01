@@ -62,6 +62,10 @@ func (t *Test) GetName() string {
 	return t.Name
 }
 
+func (t *Test) GetDescription() string {
+	return t.Description
+}
+
 func (t *Test) GetStatus() string {
 	return t.Status
 }
