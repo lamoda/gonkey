@@ -74,6 +74,10 @@ func (t *Test) DisallowExtraFields() bool {
 	return t.ComparisonParams.DisallowExtraFields
 }
 
+func (t *Test) IgnoreDbOrdering() bool {
+	return t.ComparisonParams.IgnoreDbOrdering
+}
+
 func (t *Test) Fixtures() []string {
 	return t.FixtureFiles
 }

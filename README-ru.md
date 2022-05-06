@@ -1271,3 +1271,24 @@ Example:
         - '{"code":"GIFT100000-000003","partner_id":1}'
 ```
 
+#### Игнорирование порядка записей в ответе на запрос в базу данных
+
+Можно использовать флаг `ignoreDbOrdering` в секции `comparisonParams` для включения/выключения функционала проверки полученных строк в ответе от базы данных не по порядку.
+Это может пригодиться для обхода использования оператора `ORDER BY` в запросах.
+
+- `ignoreDbOrdering` - значение true/false.
+
+Пример:
+```yaml
+  comparisonParams:
+    ignoreDbOrdering: true
+  ...
+  dbQuery: >
+    SELECT id, name, surname FROM users LIMIT 2
+    
+  dbResponse:
+    - '{ "id": 2, "name": "John", "surname": "Doe" }'
+    - '{ "id": 1, "name": "Jane", "surname": "Doe" }'
+```
+
+

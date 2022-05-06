@@ -46,6 +46,7 @@ type TestInterface interface {
 	NeedsCheckingValues() bool
 	IgnoreArraysOrdering() bool
 	DisallowExtraFields() bool
+	IgnoreDbOrdering() bool
 
 	// Clone returns copy of current object
 	Clone() TestInterface

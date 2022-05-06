@@ -63,11 +63,78 @@ func (c *ResponseDbChecker) Check(t models.TestInterface, result *models.Result)
 		return errors, nil
 	}
 	// compare responses as json lists
-	checkErrors, err := compareDbResp(t, result)
+	var checkErrors []error
+	if t.IgnoreDbOrdering() {
+		checkErrors, err = compareDbRespWithoutOrdering(t, result)
+	} else {
+		checkErrors, err = compareDbResp(t, result)
+	}
 	if err != nil {
 		return nil, err
 	}
 	errors = append(errors, checkErrors...)
+
+	return errors, nil
+}
+
+func compareDbRespWithoutOrdering(t models.TestInterface, result *models.Result) ([]error, error) {
+	var errors []error
+	var actualJsons []interface{}
+	var expectedJsons []interface{}
+
+	// gather expected and actual rows
+	for i, row := range t.DbResponseJson() {
+		// decode expected row
+		var expectedJson interface{}
+		if err := json.Unmarshal([]byte(row), &expectedJson); err != nil {
+			return nil, fmt.Errorf(
+				"invalid JSON in the expected DB response for test %s:\n row #%d:\n %s\n error:\n%s",
+				t.GetName(),
+				i,
+				row,
+				err.Error(),
+			)
+		}
+		expectedJsons = append(expectedJsons, expectedJson)
+		// decode actual row
+		var actualJson interface{}
+		if err := json.Unmarshal([]byte(result.DbResponse[i]), &actualJson); err != nil {
+			return nil, fmt.Errorf(
+				"invalid JSON in the actual DB response for test %s:\n row #%d:\n %s\n error:\n%s",
+				t.GetName(),
+				i,
+				result.DbResponse[i],
+				err.Error(),
+			)
+		}
+		actualJsons = append(actualJsons, actualJson)
+	}
+
+	remove := func(array []interface{}, i int) []interface{} {
+		array[i] = array[len(array)-1]
+		return array[:len(array)-1]
+	}
+
+	// compare actual and expected rows
+	for _, actualRow := range actualJsons {
+		for i, expectedRow := range expectedJsons {
+			if diff := pretty.Compare(expectedRow, actualRow); diff == "" {
+				expectedJsons = remove(expectedJsons, i)
+				break
+			}
+		}
+	}
+
+	if len(expectedJsons) > 0 {
+		errorString := "missing expected items in database:"
+
+		for _, expectedRow := range expectedJsons {
+			expectedRowJson, _ := json.Marshal(expectedRow)
+			errorString += fmt.Sprintf("\n - %s", color.CyanString("%s", expectedRowJson))
+		}
+
+		errors = append(errors, fmt.Errorf(errorString))
+	}
 
 	return errors, nil
 }

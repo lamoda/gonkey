@@ -1272,3 +1272,22 @@ Example:
         - '{"code":"GIFT100000-000003","partner_id":1}'
 ```
 
+#### Ignoring ordering in DB response
+
+You can use `ignoreDbOrdering` flag in `comparisonParams` section to toggle DB response ordering ignore feature.
+This can be used to bypass using `ORDER BY` operators in query.
+
+- `ignoreDbOrdering` - true/false value.
+
+Example:
+```yaml
+  comparisonParams:
+    ignoreDbOrdering: true
+  ...
+  dbQuery: >
+    SELECT id, name, surname FROM users LIMIT 2
+    
+  dbResponse:
+    - '{ "id": 2, "name": "John", "surname": "Doe" }'
+    - '{ "id": 1, "name": "Jane", "surname": "Doe" }'
+```
