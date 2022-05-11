@@ -1,3 +1,16 @@
+# v1.14.1 (Wed May 11 2022)
+
+#### 🐛 Bug Fix
+
+- new: add comparisonParams to BodyMatches for Json and XML [#117](https://github.com/lamoda/gonkey/pull/117) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### Authors: 2
+
+- [@Alexey19](https://github.com/Alexey19)
+- Alexey Tyuryumov (Alexey.Tyuryumov@acronis.com)
+
+---
+
 # v1.14.0 (Fri Feb 25 2022)
 
 #### 🚀 Enhancement
