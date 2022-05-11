@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/lamoda/gonkey/compare"
 )
 
 type Loader struct {
@@ -292,10 +294,10 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 	case "nop":
 		return &nopConstraint{}, nil
 	case "bodyMatchesJSON":
-		*ak = append(*ak, "body")
+		*ak = append(*ak, "body", "comparisonParams")
 		return l.loadBodyMatchesJSONConstraint(def)
 	case "bodyJSONFieldMatchesJSON":
-		*ak = append(*ak, "path", "value")
+		*ak = append(*ak, "path", "value", "comparisonParams")
 		return l.loadBodyJSONFieldMatchesJSONConstraint(def)
 	case "queryMatches":
 		*ak = append(*ak, "expectedQuery")
@@ -317,11 +319,51 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 		*ak = append(*ak, "path", "regexp")
 		return l.loadPathMatchesConstraint(def)
 	case "bodyMatchesXML":
-		*ak = append(*ak, "body")
+		*ak = append(*ak, "body", "comparisonParams")
 		return l.loadBodyMatchesXMLConstraint(def)
 	default:
 		return nil, fmt.Errorf("unknown constraint: %s", kind)
 	}
+}
+
+func readCompareParams(def map[interface{}]interface{}) (compare.CompareParams, error) {
+	params := compare.CompareParams{
+		IgnoreArraysOrdering: true,
+	}
+
+	p, ok := def["comparisonParams"]
+	if !ok {
+		return params, nil
+	}
+
+	values, ok := p.(map[interface{}]interface{})
+	if !ok {
+		return params, errors.New("`comparisonParams` can't be parsed")
+	}
+
+	mapping := map[string]*bool{
+		"ignoreValues":         &params.IgnoreValues,
+		"ignoreArraysOrdering": &params.IgnoreArraysOrdering,
+		"disallowExtraFields":  &params.DisallowExtraFields,
+	}
+
+	for key, val := range values {
+		skey, ok := key.(string)
+		if !ok {
+			return params, errors.New("`comparisonParams` has non-string key")
+		}
+
+		bval, ok := val.(bool)
+		if !ok {
+			return params, errors.New("`comparisonParams` has non-bool values")
+		}
+
+		if pbval, ok := mapping[skey]; ok {
+			*pbval = bval
+		}
+
+	}
+	return params, nil
 }
 
 func (l *Loader) loadBodyMatchesJSONConstraint(def map[interface{}]interface{}) (verifier, error) {
@@ -333,7 +375,13 @@ func (l *Loader) loadBodyMatchesJSONConstraint(def map[interface{}]interface{}) 
 	if !ok {
 		return nil, errors.New("`body` must be string")
 	}
-	return newBodyMatchesJSONConstraint(body)
+
+	params, err := readCompareParams(def)
+	if err != nil {
+		return nil, err
+	}
+
+	return newBodyMatchesJSONConstraint(body, params)
 }
 
 func (l *Loader) loadBodyJSONFieldMatchesJSONConstraint(def map[interface{}]interface{}) (verifier, error) {
@@ -354,7 +402,13 @@ func (l *Loader) loadBodyJSONFieldMatchesJSONConstraint(def map[interface{}]inte
 	if !ok {
 		return nil, errors.New("`value` must be string")
 	}
-	return newBodyJSONFieldMatchesJSONConstraint(path, value)
+
+	params, err := readCompareParams(def)
+	if err != nil {
+		return nil, err
+	}
+
+	return newBodyJSONFieldMatchesJSONConstraint(path, value, params)
 }
 
 func (l *Loader) loadBodyMatchesXMLConstraint(def map[interface{}]interface{}) (verifier, error) {
@@ -366,7 +420,13 @@ func (l *Loader) loadBodyMatchesXMLConstraint(def map[interface{}]interface{}) (
 	if !ok {
 		return nil, errors.New("`body` must be string")
 	}
-	return newBodyMatchesXMLConstraint(body)
+
+	params, err := readCompareParams(def)
+	if err != nil {
+		return nil, err
+	}
+
+	return newBodyMatchesXMLConstraint(body, params)
 }
 
 func (l *Loader) loadPathMatchesConstraint(def map[interface{}]interface{}) (verifier, error) {

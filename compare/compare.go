@@ -9,9 +9,9 @@ import (
 )
 
 type CompareParams struct {
-	IgnoreValues         bool
-	IgnoreArraysOrdering bool
-	DisallowExtraFields  bool
+	IgnoreValues         bool `json:"ignoreValues" yaml:"ignoreValues"`
+	IgnoreArraysOrdering bool `json:"ignoreArraysOrdering" yaml:"ignoreArraysOrdering"`
+	DisallowExtraFields  bool `json:"disallowExtraFields" yaml:"disallowExtraFields"`
 	failFast             bool // End compare operation after first error
 }
 
