@@ -12,7 +12,7 @@ type ServiceMock struct {
 	listener          net.Listener
 	mock              *definition
 	defaultDefinition *definition
-	sync.Mutex
+	sync.RWMutex
 	errors []error
 
 	ServiceName string
@@ -85,6 +85,9 @@ func (m *ServiceMock) ResetRunningContext() {
 }
 
 func (m *ServiceMock) EndRunningContext() []error {
+	m.RLock()
+	defer m.RUnlock()
+
 	errs := append(m.errors, m.mock.EndRunningContext()...)
 	for i, e := range errs {
 		errs[i] = &Error{
