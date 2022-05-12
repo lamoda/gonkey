@@ -1,3 +1,35 @@
+# v1.15.0 (Thu May 12 2022)
+
+#### 🚀 Enhancement
+
+- New: regexp in query matching [#132](https://github.com/lamoda/gonkey/pull/132) (lev.marder@lamoda.ru)
+
+#### 🏠 Internal
+
+- Bump github.com/stretchr/testify from 1.7.0 to 1.7.1 [#156](https://github.com/lamoda/gonkey/pull/156) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- #133 | fix data race [#155](https://github.com/lamoda/gonkey/pull/155) ([@architectv](https://github.com/architectv))
+
+#### Authors: 3
+
+- [@dependabot[bot]](https://github.com/dependabot[bot])
+- Alexey Vasyukov ([@architectv](https://github.com/architectv))
+- Lev Marder ([@ikramanop](https://github.com/ikramanop))
+
+---
+
+# v1.14.1 (Wed May 11 2022)
+
+#### 🐛 Bug Fix
+
+- new: add comparisonParams to BodyMatches for Json and XML [#117](https://github.com/lamoda/gonkey/pull/117) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### Authors: 2
+
+- [@Alexey19](https://github.com/Alexey19)
+- Alexey Tyuryumov (Alexey.Tyuryumov@acronis.com)
+
+---
+
 # v1.14.0 (Fri Feb 25 2022)
 
 #### 🚀 Enhancement

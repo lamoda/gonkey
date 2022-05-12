@@ -1,6 +1,9 @@
 package yaml_file
 
-import "github.com/lamoda/gonkey/models"
+import (
+	"github.com/lamoda/gonkey/compare"
+	"github.com/lamoda/gonkey/models"
+)
 
 type TestDefinition struct {
 	Name                     string                    `json:"name" yaml:"name"`
@@ -19,7 +22,7 @@ type TestDefinition struct {
 	HeadersVal               map[string]string         `json:"headers" yaml:"headers"`
 	CookiesVal               map[string]string         `json:"cookies" yaml:"cookies"`
 	Cases                    []CaseData                `json:"cases" yaml:"cases"`
-	ComparisonParams         comparisonParams          `json:"comparisonParams" yaml:"comparisonParams"`
+	ComparisonParams         compare.CompareParams     `json:"comparisonParams" yaml:"comparisonParams"`
 	FixtureFiles             []string                  `json:"fixtures" yaml:"fixtures"`
 	MocksDefinition          map[string]interface{}    `json:"mocks" yaml:"mocks"`
 	PauseValue               int                       `json:"pause" yaml:"pause"`
@@ -35,13 +38,6 @@ type CaseData struct {
 	DbQueryArgs            map[string]interface{}         `json:"dbQueryArgs" yaml:"dbQueryArgs"`
 	DbResponseArgs         map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
 	DbResponse             []string                       `json:"dbResponse" yaml:"dbResponse"`
-}
-
-type comparisonParams struct {
-	IgnoreValues         bool `json:"ignoreValues" yaml:"ignoreValues"`
-	IgnoreArraysOrdering bool `json:"ignoreArraysOrdering" yaml:"ignoreArraysOrdering"`
-	DisallowExtraFields  bool `json:"disallowExtraFields" yaml:"disallowExtraFields"`
-	IgnoreDbOrdering     bool `json:"IgnoreDbOrdering" yaml:"ignoreDbOrdering"`
 }
 
 type scriptParams struct {

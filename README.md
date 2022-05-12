@@ -758,7 +758,7 @@ Checks that the GET request parameters correspond to the ones defined in the `qu
 Parameters:
 - `expectedQuery` (mandatory) - a list of parameters to compare the parameter string to. The order of parameters is not important.
 
-Example:
+Examples:
 ```yaml
   ...
   mocks:
@@ -769,6 +769,25 @@ Example:
         # Keys not mentioned here are omitted while running the check.
         - kind: queryMatches
           expectedQuery:  key1=value1&key2=value2&key1=value11
+    ...
+```
+
+###### queryMatchesRegexp
+
+Expands `queryMatches` so it can be used with regexp pattern matching.
+
+Parameters:
+- `expectedQuery` (mandatory) - a list of parameters to compare the parameter string to. The order of parameters is not important.
+
+Example:
+```yaml
+  ...
+  mocks:
+    service1:
+      requestConstraints:
+        # works similarly to queryMatches with an addition of $matchRegexp usage
+        - kind: queryMatchesRegexp
+          expectedQuery:  key1=value1&key2=$matchRegexp(\\d+)&key1=value11
     ...
 ```
 
@@ -783,7 +802,7 @@ There are also 2 short variations that don't require `method` parameter:
 - `methodIsGET`
 - `methodIsPOST`
 
-Examples:
+Example:
 ```yaml
   ...
   mocks:
