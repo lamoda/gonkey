@@ -1,3 +1,15 @@
+# v1.16.0 (Thu May 26 2022)
+
+#### 🚀 Enhancement
+
+- New: ignore db ordering in dbResponse feature [#154](https://github.com/lamoda/gonkey/pull/154) (lev.marder@lamoda.ru)
+
+#### Authors: 1
+
+- Lev Marder ([@ikramanop](https://github.com/ikramanop))
+
+---
+
 # v1.15.0 (Thu May 12 2022)
 
 #### 🚀 Enhancement
