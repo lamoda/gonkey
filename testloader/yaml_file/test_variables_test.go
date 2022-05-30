@@ -87,7 +87,7 @@ func checkApplied(t *testing.T, test models.TestInterface) {
 
 	assert.Equal(t, "POST", test.GetMethod())
 	assert.Equal(t, "/some/path/part_of_path", test.Path())
-	assert.Equal(t, "query_val", test.ToQuery())
+	assert.Equal(t, "?query_val", test.ToQuery())
 	assert.Equal(t, map[string]string{"header1": "header_val"}, test.Headers())
 
 	resp, ok := test.GetResponse(200)
