@@ -189,6 +189,7 @@ or for elements of map/array (if it's JSON):
             ]
           }
 ```
+Also, "?" in query is optional
 
 ### Test status
 
