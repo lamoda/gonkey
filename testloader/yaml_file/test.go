@@ -1,6 +1,8 @@
 package yaml_file
 
 import (
+	"strings"
+
 	"github.com/lamoda/gonkey/models"
 )
 
@@ -151,8 +153,15 @@ func (t *Test) Clone() models.TestInterface {
 }
 
 func (t *Test) SetQuery(val string) {
-	t.QueryParams = val
+	var query strings.Builder
+	query.Grow(len(val) + 1)
+	if len(val) > 0 && val[0] != '?' {
+		query.WriteString("?")
+	}
+	query.WriteString(val)
+	t.QueryParams = query.String()
 }
+
 func (t *Test) SetMethod(val string) {
 	t.Method = val
 }
