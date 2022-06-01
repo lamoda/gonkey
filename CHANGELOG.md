@@ -1,3 +1,15 @@
+# v1.16.1 (Wed Jun 01 2022)
+
+#### 🐛 Bug Fix
+
+- feat: add ? to query [#159](https://github.com/lamoda/gonkey/pull/159) ([@sashamelentyev](https://github.com/sashamelentyev))
+
+#### Authors: 1
+
+- Sasha Melentyev ([@sashamelentyev](https://github.com/sashamelentyev))
+
+---
+
 # v1.16.0 (Thu May 26 2022)
 
 #### 🚀 Enhancement
