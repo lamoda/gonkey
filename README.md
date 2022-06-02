@@ -5,6 +5,7 @@
 Gonkey will test your services using their API. It can bomb the service with prepared requests and check the responses. Test scenarios are described in YAML-files.
 
 Capabilities:
+
 - works with REST/JSON API
 - tests service API for compliance with OpenAPI-specs
 - seeds the DB with fixtures data (supports PostgreSQL)
@@ -12,7 +13,43 @@ Capabilities:
 - can be used as a library and ran together with unit-tests
 - stores the results as an [Allure](http://allure.qatools.ru/) report
 
-### Using the CLI
+## Table of contents
+
+- [Using the CLI](#using-the-cli)
+- [Using gonkey as a library](#using-gonkey-as-a-library)
+- [Test file example](#test-file-example)
+- [Test status](#test-status)
+- [HTTP-request](#http-request)
+- [HTTP-response](#http-response)
+- [Variables](#variables)
+  - [More detailed about assignment methods](#more-detailed-about-assignment-methods)
+    - [In the description of the test](#in-the-description-of-the-test)
+    - [From the response of the previous test](#from-the-response-of-the-previous-test)
+    - [From the response of currently running test](#from-the-response-of-currently-running-test)
+    - [From environment variables or from env-file](#from-environment-variables-or-from-env-file)
+- [Files uploading](#files-uploading)
+- [Fixtures](#fixtures)
+  - [Deleting data from tables](#deleting-data-from-tables)
+  - [Record templates](#record-templates)
+  - [Record inheritance](#record-inheritance)
+  - [Record linking](#record-linking)
+  - [Expressions](#expressions)
+- [Mocks](#mocks)
+  - [Running mocks while using gonkey as a library](#running-mocks-while-using-gonkey-as-a-library)
+  - [Mocks definition in the test file](#mocks-definition-in-the-test-file)
+    - [Request constraints (requestConstraints)](#request-constraints-requestconstraints)
+    - [Response strategies (strategy)](#response-strategies-strategy)
+    - [Calls count](#calls-count)
+- [CMD interface](#cmd-interface)
+  - [Script definition](#script-definition)
+  - [Running a script with parameterization](#running-a-script-with-parameterization)
+- [A DB query](#a-db-query)
+  - [Query definition](#query-definition)
+  - [Definition of DB request response](#definition-of-db-request-response)
+  - [DB request parameterization](#db-request-parameterization)
+  - [Ignoring ordering in DB response](#ignoring-ordering-in-db-response)
+
+## Using the CLI
 
 To test a service located on a remote host, use gonkey as a console util.
 
@@ -29,7 +66,7 @@ To test a service located on a remote host, use gonkey as a console util.
 
 You can't use mocks in this mode.
 
-### Using gonkey as a library
+## Using gonkey as a library
 
 To integrate functional and native Go tests and run them together, use gonkey as a library.
 
@@ -39,8 +76,8 @@ Import gonkey as a dependency to your project in this file.
 
 ```go
 import (
-	"github.com/lamoda/gonkey/runner"
-	"github.com/lamoda/gonkey/mocks"
+ "github.com/lamoda/gonkey/runner"
+ "github.com/lamoda/gonkey/mocks"
 )
 ```
 
@@ -74,7 +111,8 @@ func TestFuncCases(t *testing.T) {
 
 The tests can be now ran with `go test`, for example: `go test ./...`.
 
-### Test file example
+## Test file example
+
 ```yaml
 - name: WHEN the list of orders is requested MUST successfully response
   method: GET
@@ -170,12 +208,15 @@ The tests can be now ran with `go test`, for example: `go test ./...`.
 
 As you can see in this example, you can use Regexp for checking response body.
 It can be used for all body (if it's plaint text):
-```
+
+```yaml
     response:
         200: "$matchRegexp(^xy+z$)"
 ```
+
 or for elements of map/array (if it's JSON):
-```
+
+```yaml
     response:
         200: |
           {
@@ -189,16 +230,18 @@ or for elements of map/array (if it's JSON):
             ]
           }
 ```
+
 Also, "?" in query is optional
 
-### Test status
+## Test status
 
 `status` - a parameter, for specially mark tests, can have following values:
-  - `broken` - do not run test, only mark it as broken
-  - `skipped` - do not run test, skip it
-  - `focus` - run only this specific test, and mark all other tests with unset status as `skipped`
 
-### HTTP-request
+- `broken` - do not run test, only mark it as broken
+- `skipped` - do not run test, skip it
+- `focus` - run only this specific test, and mark all other tests with unset status as `skipped`
+
+## HTTP-request
 
 `method` - a parameter for HTTP request type, the format is in the example above.
 
@@ -208,13 +251,13 @@ Also, "?" in query is optional
 
 `cookies` - a parameter for cookies, the format is in the example above.
 
-### HTTP-response
+## HTTP-response
 
 `response` - the HTTP response body for the specified HTTP status codes.
 
 `responseHeaders` - all HTTP response headers for the specified HTTP status codes.
 
-### Variables
+## Variables
 
 You can use variables in the description of the test, the following fields are supported:
 
@@ -262,9 +305,9 @@ You can assign values to variables in the following ways (priorities are from to
 - from the response of currently running test
 - from environment variables or from env-file
 
-#### More detailed about assignment methods
+### More detailed about assignment methods
 
-##### In the description of the test
+#### In the description of the test
 
 Example:
 
@@ -286,7 +329,7 @@ Example:
     200: "{{ $resp }}"
 ```
 
-##### From the response of the previous test
+#### From the response of the previous test
 
 Example:
 
@@ -311,7 +354,7 @@ You can access nested fields like this:
 
 Any nesting levels are supported.
 
-##### From the response of currently running test
+#### From the response of currently running test
 
 Example:
 
@@ -330,14 +373,14 @@ Example:
     - '{"id": {{ $golang_id}}, "name": "golang"}'
 ```
 
-
-##### From environment variables or from env-file
+#### From environment variables or from env-file
 
 Gonkey automatically checks if variable exists in the environment variables (case-sensitive) and loads a value from there, if it exists.
 
 If an env-file is specified, variables described in it will be added or will replace the corresponding environment variables.
 
 Example of an env file (standard syntax):
+
 ```.env
 jwt=some_jwt_value
 secret=my_secret
@@ -346,7 +389,7 @@ password=private_password
 
 env-file can be convenient to hide sensitive information from a test (passwords, keys, etc.)
 
-### Files uploading
+## Files uploading
 
 You can upload files in test request. For this you must specify the type of request - POST and header:
 
@@ -370,10 +413,11 @@ Example:
        }
 ```
 
-### Fixtures
+## Fixtures
 
 To seed the DB before the test, gonkey uses fixture files.
-* You can use schema in PostreSQL: schema.table_name
+
+- You can use schema in PostreSQL: schema.table_name
 
 File example:
 
@@ -421,7 +465,7 @@ tables:
 
 Records in fixtures can use templates, inherit and reference each other.
 
-#### Deleting data from tables
+### Deleting data from tables
 
 To clear the table before the test put square brackets next to the table name.
 
@@ -433,13 +477,14 @@ tables:
   posts: []
 ```
 
-#### Record templates
+### Record templates
 
 Usually, to insert a record to a DB, it's necessary to list all the fields without default values. Oftentimes, many of those fields are not important for the test, and their values repeat from one fixture to another, creating unnecessary visual garbage and making the maintenance harder.
 
 With templates you can inherit the fields from template record redefining only the fields that are important for the test.
 
 Template definition example:
+
 ```yaml
 templates:
   dummy_client:
@@ -457,6 +502,7 @@ tables:
 ```
 
 Example of using a template in a fixture:
+
 ```yaml
 templates:
    ...
@@ -471,7 +517,7 @@ tables:
 
 As you might have noticed, templates can be inherited as well with `$extend` keyword, but only if by the time of the dependent template definition the parent template is already defined (in this file or any other referenced with `inherits`).
 
-#### Record inheritance
+### Record inheritance
 
 Records can be inherited as well using `$extend`.
 
@@ -504,7 +550,7 @@ Don't forget to declare the dependency between files in `inherits`, to make sure
 
 It's important to note that record inheritance only works with different fixture files. It's not possible to declare inheritance within one file.
 
-#### Record linking
+### Record linking
 
 Despite the fact that fixture files allow you to set values for autoincrement columns (usually `id`), it's not recommended doing it. It's very difficult to control that all the values for `id` are correct between different files and that they never interfere. In order to let the DB assign autoincrement values its enough to not set the value explicitly.
 
@@ -536,7 +582,7 @@ You can only reference fields of a previously inserted record. It's impossible t
 
 Take a note of a limitation: you can't reference records within one table of one file.
 
-#### Expressions
+### Expressions
 
 When you need to write an expression execution result to the DB and not a static value, you can use `$eval()` construct. Everything inside the brackets will be inserted into the DB as raw, non-escaped data. This way, within `$eval()` you can write everything you would in a regular query.
 
@@ -548,25 +594,25 @@ tables:
     - created_at: $eval(NOW())
 ```
 
-### Mocks
+## Mocks
 
 In order to imitate responses from external services, use mocks.
 
 A mock is a web server that is running on-the-fly, and is populated with certain logic before the execution of each test. The logic defines what the server responses to a certain request. It's defined in the test file.
 
-#### Running mocks while using gonkey as a library
+### Running mocks while using gonkey as a library
 
 Before running tests, all planned mocks are started. It means that gonkey spins up the given number of servers and each one of them gets a random port assigned.
 
 ```go
 // create empty server mocks
 m := mocks.NewNop(
-	"cart",
-	"loyalty",
-	"catalog",
-	"madmin",
-	"okz",
-	"discounts",
+ "cart",
+ "loyalty",
+ "catalog",
+ "madmin",
+ "okz",
+ "discounts",
 )
 
 // spin up mocks
@@ -582,12 +628,12 @@ After spinning up the mock web-servers, we can get their addresses (host and por
 ```go
 // configuring and running the service
 srv := server.NewServer(&server.Config{
-	CartAddr:      m.Service("cart").ServerAddr(),
-	LoyaltyAddr:   m.Service("loyalty").ServerAddr(),
-	CatalogAddr:   m.Service("catalog").ServerAddr(),
-	MadminAddr:    m.Service("madmin").ServerAddr(),
-	OkzAddr:       m.Service("okz").ServerAddr(),
-	DiscountsAddr: m.Service("discounts").ServerAddr(),
+ CartAddr:      m.Service("cart").ServerAddr(),
+ LoyaltyAddr:   m.Service("loyalty").ServerAddr(),
+ CatalogAddr:   m.Service("catalog").ServerAddr(),
+ MadminAddr:    m.Service("madmin").ServerAddr(),
+ OkzAddr:       m.Service("okz").ServerAddr(),
+ DiscountsAddr: m.Service("discounts").ServerAddr(),
 })
 defer srv.Close()
 ```
@@ -602,7 +648,7 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 })
 ```
 
-#### Mocks definition in the test file
+### Mocks definition in the test file
 
 Each test communicates a configuration to the mock-server before running. This configuration defines the responses for specific requests in the mock-server. The configuration is defined in a YAML-file with test in the `mocks` section.
 
@@ -631,6 +677,7 @@ Each mock-service definition consists of:
 The rest of the keys on the first nesting level are parameters to the strategy. Their variety is different for each strategy.
 
 A configuration example for one mock-service:
+
 ```yaml
   ...
   mocks:
@@ -644,7 +691,7 @@ A configuration example for one mock-service:
     ...
 ```
 
-##### Request constraints (requestConstraints)
+#### Request constraints (requestConstraints)
 
 The request to the mock-service can be validated using one or more constraints defined below.
 
@@ -652,13 +699,14 @@ The definition of each constraint contains of the `kind` parameter that indicate
 
 All other keys on this level are constraint parameters. Each constraint has its own parameter set.
 
-###### nop
+##### nop
 
 Empty constraint. Always successful.
 
 No parameters.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -668,14 +716,16 @@ Example:
     ...
 ```
 
-###### bodyMatchesJSON
+##### bodyMatchesJSON
 
 Checks that the request body is JSON, and it corresponds to the JSON defined in the `body` parameter.
 
 Parameters:
+
 - `body` (mandatory) - expected JSON. All keys on all levels defined in this parameter must be present in the request body.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -695,18 +745,20 @@ Example:
     ...
 ```
 
-###### bodyJSONFieldMatchesJSON
+##### bodyJSONFieldMatchesJSON
 
 When request body is JSON, checks that value of particular JSON-field is string-packed JSON
 that matches to JSON defined in `value` parameter.
 
 Parameters:
+
 - `path` (mandatory) - path to string field, containing JSON to check.
 - `value` (mandatory) - expected JSON.
 
 Example:
 
 Origin request that contains string-packed JSON
+
 ```yaml
   {
       "field1": {
@@ -729,15 +781,17 @@ Origin request that contains string-packed JSON
   ...
 ```
 
-###### pathMatches
+##### pathMatches
 
 Checks that the request path corresponds to the expected one.
 
 Parameters:
+
 - `path` - a string with the expected request path value;
 - `regexp` - a regular expression to check the path value against.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -752,14 +806,16 @@ Example:
     ...
 ```
 
-###### queryMatches
+##### queryMatches
 
 Checks that the GET request parameters correspond to the ones defined in the `query` parameter.
 
 Parameters:
+
 - `expectedQuery` (mandatory) - a list of parameters to compare the parameter string to. The order of parameters is not important.
 
 Examples:
+
 ```yaml
   ...
   mocks:
@@ -773,14 +829,16 @@ Examples:
     ...
 ```
 
-###### queryMatchesRegexp
+##### queryMatchesRegexp
 
 Expands `queryMatches` so it can be used with regexp pattern matching.
 
 Parameters:
+
 - `expectedQuery` (mandatory) - a list of parameters to compare the parameter string to. The order of parameters is not important.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -792,18 +850,21 @@ Example:
     ...
 ```
 
-###### methodIs
+##### methodIs
 
 Checks that the request method corresponds to the expected one.
 
 Parameters:
+
 - `method` (mandatory) - string to compare the request method to.
 
 There are also 2 short variations that don't require `method` parameter:
+
 - `methodIsGET`
 - `methodIsPOST`
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -817,16 +878,18 @@ Example:
     ...
 ```
 
-###### headerIs
+##### headerIs
 
 Checks that the request has the defined header and (optional) that its value either equals the pre-defined one or falls under the definition of a regular expression.
 
 Parameters:
+
 - `header` (mandatory) - name of the header that is expected with the request;
 - `value` - a string with the expected request header value;
 - `regexp` - a regular expression to check the header value against.
 
 Examples:
+
 ```yaml
   ...
   mocks:
@@ -843,7 +906,7 @@ Examples:
     ...
 ```
 
-###### bodyMatchesText
+##### bodyMatchesText
 
 Checks that the request has the defined body text, or it falls under the definition of a regular expression.
 
@@ -852,8 +915,8 @@ Parameters:
 - `body` - a string with the expected request body value;
 - `regexp` - a regular expression to check the body value against.
 
-
 Examples:
+
 ```yaml
   ...
   mocks:
@@ -876,14 +939,16 @@ Examples:
     ...
 ```
 
-###### bodyMatchesXML
+##### bodyMatchesXML
 
 Checks that the request body is XML, and it matches to the XML defined in the `body` parameter.
 
 Parameters:
+
 - `body` (mandatory) - expected XML.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -905,11 +970,11 @@ Example:
   ...
 ```
 
-##### Response strategies (strategy)
+#### Response strategies (strategy)
 
 Response strategies define what mock will response to incoming requests.
 
-###### nop
+##### nop
 
 Empty strategy. All requests are served with `204 No Content` and empty body.
 
@@ -925,16 +990,18 @@ Example:
     ...
 ```
 
-###### file
+##### file
 
 Returns a response read from a file.
 
 Parameters:
+
 - `filename` (mandatory) - name of the file that contains the response body;
 - `statusCode` - HTTP-code of the response, the default value is `200`;
 - `headers` - response headers.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -947,16 +1014,18 @@ Example:
     ...
 ```
 
-###### constant
+##### constant
 
 Returns a defined response.
 
 Parameters:
+
 - `body` (mandatory) - sets the response body;
 - `statusCode` - HTTP-code of the response, the default value is `200`;
 - `headers` - response headers.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -972,17 +1041,19 @@ Example:
     ...
 ```
 
-###### uriVary
+##### uriVary
 
 Uses different response strategies, depending on a path of a requested resource.
 
 When receiving a request for a resource that is not defined in the parameters, the test will be considered failed.
 
 Parameters:
+
 - `uris` (mandatory) - a list of resources, each resource can be configured as a separate mock-service using any available request constraints and response strategies (see example)
 - `basePath` - common base route for all resources, empty by default
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -1004,16 +1075,18 @@ Example:
     ...
 ```
 
-###### methodVary
+##### methodVary
 
 Uses various response strategies, depending on the request method.
 
 When receiving a request with a method not defined in methodVary, the test will be considered failed.
 
 Parameters:
+
 - `methods` (mandatory) - a list of methods, each method can be configured as a separate mock-service using any available request constraints and response strategies (see example)
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -1036,16 +1109,18 @@ Example:
     ...
 ```
 
-###### sequence
+##### sequence
 
 With this strategy for each consequent request you will get a reply defined by a consequent nested strategy.
 
 If no nested strategy specified for a request, i.e. arrived more requests than nested strategies specified, the test will be considered failed.
 
 Parameters:
+
 - `sequence` (mandatory) - list of nested strategies.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -1066,16 +1141,18 @@ Example:
     ...
 ```
 
-###### basedOnRequest
+##### basedOnRequest
 
 Allows multiple requests with same request path. Concurrent safe.
 
 When receiving a request for a resource that is not defined in the parameters, the test will be considered failed.
 
 Parameters:
+
 - `uris` (mandatory) - a list of resources, each resource can be configured as a separate mock-service using any available request constraints and response strategies (see example)
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -1105,11 +1182,12 @@ Example:
     ...
 ```
 
-##### Calls count
+#### Calls count
 
 You can define, how many times each mock or mock resource must be called (using `uriVary`). If the actual number of calls is different from expected, the test will be considered failed.
 
 Example:
+
 ```yaml
   ...
   mocks:
@@ -1135,7 +1213,7 @@ Example:
   ...
 ```
 
-### CMD interface
+## CMD interface
 
 When the test is ran, operations are performed in the following order:
 
@@ -1146,7 +1224,7 @@ When the test is ran, operations are performed in the following order:
 5. afterRequestScript execute
 6. The checks are ran
 
-#### Script definition
+### Script definition
 
 To define the script you need to provide 2 parameters:
 
@@ -1154,6 +1232,7 @@ To define the script you need to provide 2 parameters:
 - `timeout` - time in seconds, is responsible for stopping the script on timeout. The default value is `3`.
 
 Example:
+
 ```yaml
   ...
   afterRequestScript:
@@ -1180,11 +1259,12 @@ Example:
   ...
 ```
 
-#### Running a script with parameterization
+### Running a script with parameterization
 
 When tests use parameterized requests, it's possible to use different scripts for each test run.
 
 Example:
+
 ```yaml
   ...
   beforeScript:
@@ -1203,18 +1283,19 @@ Example:
         file_name: "cmd_recalculate_customer_1.sh"
 ```
 
-### A DB query
+## A DB query
 
 After HTTP request execution you can run an SQL query to DB to check the data changes.
 The response can contain several records. Those records are compared to the expected list of records.
 
-#### Query definition
+### Query definition
 
 Query is a SELECT that returns any number of strings.
 
 - `dbQuery` - a string that contains an SQL query.
 
 Example:
+
 ```yaml
   ...
   dbQuery: >
@@ -1222,13 +1303,14 @@ Example:
   ...
 ```
 
-#### Definition of DB request response
+### Definition of DB request response
 
 The response is a list of JSON objects that the DB request should return.
 
 - `dbResponse` - a string that contains a list of JSON objects.
 
 Example:
+
 ```yaml
   ...
   dbResponse:
@@ -1241,11 +1323,13 @@ Example:
   dbResponse:
     # empty list
 ```
-#### DB request parameterization
+
+### DB request parameterization
 
 As well as with the HTTP request body, we can use parameterized requests.
 
 Example:
+
 ```yaml
   ...
     dbQuery: >
@@ -1268,6 +1352,7 @@ Example:
 When different tests contain different number of records, you can redefine the response for a specific test as a whole, while continuing to use a template with parameters in others.
 
 Example:
+
 ```yaml
   ...
     dbQuery: >
@@ -1292,7 +1377,7 @@ Example:
         - '{"code":"GIFT100000-000003","partner_id":1}'
 ```
 
-#### Ignoring ordering in DB response
+### Ignoring ordering in DB response
 
 You can use `ignoreDbOrdering` flag in `comparisonParams` section to toggle DB response ordering ignore feature.
 This can be used to bypass using `ORDER BY` operators in query.
@@ -1300,6 +1385,7 @@ This can be used to bypass using `ORDER BY` operators in query.
 - `ignoreDbOrdering` - true/false value.
 
 Example:
+
 ```yaml
   comparisonParams:
     ignoreDbOrdering: true
