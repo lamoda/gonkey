@@ -22,7 +22,7 @@ Capabilities:
 - [HTTP-request](#http-request)
 - [HTTP-response](#http-response)
 - [Variables](#variables)
-  - [More detailed about assignment methods](#more-detailed-about-assignment-methods)
+  - [Assignment](#assignment)
     - [In the description of the test](#in-the-description-of-the-test)
     - [From the response of the previous test](#from-the-response-of-the-previous-test)
     - [From the response of currently running test](#from-the-response-of-currently-running-test)
@@ -40,7 +40,7 @@ Capabilities:
     - [Request constraints (requestConstraints)](#request-constraints-requestconstraints)
     - [Response strategies (strategy)](#response-strategies-strategy)
     - [Calls count](#calls-count)
-- [CMD interface](#cmd-interface)
+- [Shell scripts usage](#shell-scripts-usage)
   - [Script definition](#script-definition)
   - [Running a script with parameterization](#running-a-script-with-parameterization)
 - [A DB query](#a-db-query)
@@ -305,7 +305,7 @@ You can assign values to variables in the following ways (priorities are from to
 - from the response of currently running test
 - from environment variables or from env-file
 
-### More detailed about assignment methods
+### Assignment
 
 #### In the description of the test
 
@@ -1213,7 +1213,7 @@ Example:
   ...
 ```
 
-## CMD interface
+## Shell scripts usage
 
 When the test is ran, operations are performed in the following order:
 
