@@ -8,7 +8,7 @@ Capabilities:
 
 - works with REST/JSON API
 - tests service API for compliance with OpenAPI-specs
-- seeds the DB with fixtures data (supports PostgreSQL)
+- seeds the DB with fixtures data (supports PostgreSQL, MySQL, Aerospike)
 - provides mocks for external services
 - can be used as a library and ran together with unit-tests
 - stores the results as an [Allure](http://allure.qatools.ru/) report

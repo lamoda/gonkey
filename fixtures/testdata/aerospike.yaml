@@ -1,0 +1,19 @@
+sets:
+  set1:
+    key1:
+      bin1: "value1"
+      bin2: 1
+    key2:
+      bin1: "value2"
+      bin2: 2
+      bin3: 2.569947773654566473
+  set2:
+    key1:
+      bin4: false
+      bin5: null
+      bin1: '"'
+    key2:
+      bin1: "'"
+      bin5:
+        - 1
+        - '2'

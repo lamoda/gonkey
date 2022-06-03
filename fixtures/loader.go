@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"strings"
 
+	aerospikeClient "github.com/aerospike/aerospike-client-go/v5"
 	_ "github.com/lib/pq"
 
+	"github.com/lamoda/gonkey/fixtures/aerospike"
 	"github.com/lamoda/gonkey/fixtures/mysql"
 	"github.com/lamoda/gonkey/fixtures/postgres"
 )
@@ -15,18 +17,21 @@ type DbType int
 const (
 	Postgres DbType = iota
 	Mysql
+	Aerospike
 )
 
 const (
-	PostgresParam = "postgres"
-	MysqlParam    = "mysql"
+	PostgresParam  = "postgres"
+	MysqlParam     = "mysql"
+	AerospikeParam = "aerospike"
 )
 
 type Config struct {
-	DB       *sql.DB
-	DbType   DbType
-	Location string
-	Debug    bool
+	DB        *sql.DB
+	Aerospike *aerospikeClient.Client
+	DbType    DbType
+	Location  string
+	Debug     bool
 }
 
 type Loader interface {
@@ -52,6 +57,12 @@ func NewLoader(cfg *Config) Loader {
 			location,
 			cfg.Debug,
 		)
+	case Aerospike:
+		loader = aerospike.New(
+			cfg.Aerospike,
+			location,
+			cfg.Debug,
+		)
 	default:
 		panic("unknown db type")
 	}
@@ -65,6 +76,8 @@ func FetchDbType(dbType string) DbType {
 		return Postgres
 	case MysqlParam:
 		return Mysql
+	case AerospikeParam:
+		return Aerospike
 	default:
 		panic("unknown db type param")
 	}

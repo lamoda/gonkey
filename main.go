@@ -6,8 +6,10 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
+	"github.com/aerospike/aerospike-client-go/v5"
 	"github.com/joho/godotenv"
 
 	"github.com/lamoda/gonkey/checker/response_body"
@@ -25,6 +27,7 @@ func main() {
 		Host             string
 		TestsLocation    string
 		DbDsn            string
+		AerospikeHost    string
 		FixturesLocation string
 		EnvFile          string
 		Allure           bool
@@ -36,6 +39,7 @@ func main() {
 	flag.StringVar(&config.Host, "host", "", "Target system hostname")
 	flag.StringVar(&config.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&config.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
+	flag.StringVar(&config.AerospikeHost, "aerospike_host", "", "Aerospike host for fixtures in form of '127.0.0.1:3000' (WARNING! Aerospike sets will be truncated)")
 	flag.StringVar(&config.FixturesLocation, "fixtures", "", "Path to fixtures directory")
 	flag.StringVar(&config.EnvFile, "env-file", "", "Path to env-file")
 	flag.BoolVar(&config.Allure, "allure", true, "Make Allure report")
@@ -45,7 +49,7 @@ func main() {
 		&config.DbType,
 		"db-type",
 		fixtures.PostgresParam,
-		"Type of database (options: postgres, mysql)",
+		"Type of database (options: postgres, mysql, aerospike)",
 	)
 
 	flag.Parse()
@@ -72,13 +76,26 @@ func main() {
 		}
 	}
 
+	var (
+		aerospikeClient *aerospike.Client
+		err             error
+	)
+	if config.AerospikeHost != "" {
+		address, port := parseAerospikeHost(config.AerospikeHost)
+		aerospikeClient, err = aerospike.NewClient(address, port)
+		if err != nil {
+			log.Fatal("Couldn't connect to aerospike: ", err)
+		}
+	}
+
 	var fixturesLoader fixtures.Loader
-	if db != nil && config.FixturesLocation != "" {
+	if (db != nil || aerospikeClient != nil) && config.FixturesLocation != "" {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
-			DB:       db,
-			Location: config.FixturesLocation,
-			Debug:    config.Debug,
-			DbType:   fixtures.FetchDbType(config.DbType),
+			DB:        db,
+			Aerospike: aerospikeClient,
+			Location:  config.FixturesLocation,
+			Debug:     config.Debug,
+			DbType:    fixtures.FetchDbType(config.DbType),
 		})
 	} else if config.FixturesLocation != "" {
 		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
@@ -128,4 +145,19 @@ func main() {
 	if !summary.Success {
 		os.Exit(1)
 	}
+}
+
+func parseAerospikeHost(dsn string) (address string, port int) {
+	parts := strings.Split(dsn, ":")
+	if len(parts) > 2 {
+		log.Fatal("couldn't parse aerospike host: " + dsn)
+	}
+
+	address = parts[0]
+	port, err := strconv.Atoi(parts[1])
+	if err != nil {
+		log.Fatal("couldn't parse port: " + parts[1])
+	}
+
+	return
 }
