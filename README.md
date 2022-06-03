@@ -17,7 +17,7 @@ Capabilities:
 
 - [Using the CLI](#using-the-cli)
 - [Using gonkey as a library](#using-gonkey-as-a-library)
-- [Test file example](#test-file-example)
+- [Test scenario example](#test-scenario-example)
 - [Test status](#test-status)
 - [HTTP-request](#http-request)
 - [HTTP-response](#http-response)
@@ -111,7 +111,7 @@ func TestFuncCases(t *testing.T) {
 
 The tests can be now ran with `go test`, for example: `go test ./...`.
 
-## Test file example
+## Test scenario example
 
 ```yaml
 - name: WHEN the list of orders is requested MUST successfully response
