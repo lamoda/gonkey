@@ -1041,6 +1041,34 @@ Example:
     ...
 ```
 
+##### template
+
+Стратегия дает возможность использовать в теле ответа, параметры входящего в мок запроса.
+Реализовано с использованием пакета [text/template](https://pkg.go.dev/text/template).
+Автоматически подгружает запрос в переменную `request`.
+
+Параметры:
+
+- `body` (обязательный) - задает тело ответа, должно быть совместимо с `text/template`;
+- `statusCode` - HTTP-код ответа, по умолчанию `200`;
+- `headers` - заголовки ответа.
+
+Пример:
+
+```yaml
+  ...
+  mocks:
+    service1:
+      strategy: template
+      body: >
+        {
+          "value-from-query": {{ .request.Query "value" }},
+          "data-from-body": {{ default 10 .request.Json.data }}
+        }
+      statusCode: 200
+    ...
+```
+
 ##### uriVary
 
 Использует разные стратегии ответа, в зависимости от пути запрашиваемого ресурса.

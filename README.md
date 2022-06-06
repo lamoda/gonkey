@@ -1041,6 +1041,34 @@ Example:
     ...
 ```
 
+##### template
+
+This strategy gives ability to use incoming request data into mock response.
+Implemented with package [text/template](https://pkg.go.dev/text/template).
+Automatically preload incoming request into variable named `request`.
+
+Parameters:
+
+- `body` (mandatory) - sets the response body, must be valid `text/template` string;
+- `statusCode` - HTTP-code of the response, the default value is `200`;
+- `headers` - response headers.
+
+Example:
+
+```yaml
+  ...
+  mocks:
+    service1:
+      strategy: template
+      body: >
+        {
+          "value-from-query": {{ .request.Query "value" }},
+          "data-from-body": {{ default 10 .request.Json.data }}
+        }
+      statusCode: 200
+    ...
+```
+
 ##### uriVary
 
 Uses different response strategies, depending on a path of a requested resource.
