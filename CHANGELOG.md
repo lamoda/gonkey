@@ -1,3 +1,20 @@
+# v1.17.0 (Wed Jun 08 2022)
+
+#### 🚀 Enhancement
+
+- Add `template` mock strategy for use incoming request inside mock responses [#162](https://github.com/lamoda/gonkey/pull/162) ([@Cdayz](https://github.com/Cdayz))
+
+#### 📝 Documentation
+
+- Added table of contents. Also fixed some markdownlint issues in README. [#160](https://github.com/lamoda/gonkey/pull/160) (vitaly.karpenko@lamoda.ru)
+
+#### Authors: 2
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+- Vitaly Karpenko ([@vitkarpenko](https://github.com/vitkarpenko))
+
+---
+
 # v1.16.1 (Wed Jun 01 2022)
 
 #### 🐛 Bug Fix
