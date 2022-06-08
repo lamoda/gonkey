@@ -108,6 +108,9 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 	case "constant":
 		*ak = append(*ak, "body", "statusCode", "headers")
 		return l.loadConstantStrategy(path, definition)
+	case "template":
+		*ak = append(*ak, "body", "statusCode", "headers")
+		return l.loadTemplateStrategy(path, definition)
 	case "sequence":
 		*ak = append(*ak, "sequence")
 		return l.loadSequenceStrategy(path, definition)
@@ -199,6 +202,26 @@ func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface
 		return nil, err
 	}
 	return newConstantReplyWithCode([]byte(body), statusCode, headers), nil
+}
+
+func (l *Loader) loadTemplateStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+	c, ok := def["body"]
+	if !ok {
+		return nil, errors.New("`template` requires `body` key")
+	}
+	body, ok := c.(string)
+	if !ok {
+		return nil, errors.New("`body` must be string")
+	}
+	statusCode := http.StatusOK
+	if c, ok := def["statusCode"]; ok {
+		statusCode = c.(int)
+	}
+	headers, err := l.loadHeaders(def)
+	if err != nil {
+		return nil, err
+	}
+	return newTemplateReply(body, statusCode, headers)
 }
 
 func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {

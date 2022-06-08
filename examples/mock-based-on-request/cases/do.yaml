@@ -23,8 +23,28 @@
               expectedQuery: "key=value2"
             - kind: pathMatches
               path: /request
+        - strategy: template
+          requestConstraints:
+            - kind: queryMatches
+              expectedQuery: "value=3"
+            - kind: pathMatches
+              path: /request
+          body: >
+            {
+              "value": {{ .request.Query "value" }},
+              "value-unused": {{ default 10 (.request.Query "test") }}
+            }
+        - strategy: template
+          requestConstraints:
+            - kind: queryMatches
+              expectedQuery: "value=4"
+            - kind: pathMatches
+              path: /request
+          body: >
+            {
+              "value": {{ .request.Json.data.value }}
+            }
   method: GET
   path: /do
   response:
-    200: |
-      {"total":23}
+    200: '{"total":36}'
