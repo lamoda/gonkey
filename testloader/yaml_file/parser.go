@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"text/template"
 
+	"github.com/lamoda/gonkey/models"
 	"gopkg.in/yaml.v2"
 )
 
@@ -76,6 +77,13 @@ func makeTestFromDefinition(filePath string, testDefinition TestDefinition) ([]T
 		test.AfterRequestScript = testDefinition.AfterRequestScriptParams.PathTmpl
 		test.DbQuery = testDefinition.DbQueryTmpl
 		test.DbResponse = testDefinition.DbResponseTmpl
+
+		dbChecks := []models.DatabaseCheck{}
+		for _, check := range testDefinition.DatabaseChecks {
+			dbChecks = append(dbChecks, &dbCheck{query: check.DbQueryTmpl, response: check.DbResponseTmpl})
+		}
+		test.DbChecks = dbChecks
+
 		return append(tests, test), nil
 	}
 
@@ -185,6 +193,29 @@ func makeTestFromDefinition(filePath string, testDefinition TestDefinition) ([]T
 				test.DbResponse = testDefinition.DbResponseTmpl
 			}
 		}
+
+		dbChecks := []models.DatabaseCheck{}
+		for _, check := range testDefinition.DatabaseChecks {
+			query, err := substituteArgs(check.DbQueryTmpl, testCase.DbQueryArgs)
+			if err != nil {
+				return nil, err
+			}
+
+			c := &dbCheck{query: query}
+			for _, tpl := range check.DbResponseTmpl {
+				responseString, err := substituteArgs(tpl, testCase.DbResponseArgs)
+				if err != nil {
+					return nil, err
+				}
+
+				c.response = append(c.response, responseString)
+			}
+
+			dbChecks = append(dbChecks, c)
+		}
+
+		test.DbChecks = dbChecks
+
 		tests = append(tests, test)
 	}
 
