@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/lamoda/gonkey/checker"
+	"github.com/lamoda/gonkey/compare"
 	"github.com/lamoda/gonkey/models"
 
 	"github.com/fatih/color"
@@ -84,129 +85,41 @@ func (c *ResponseDbChecker) check(
 		return errors, nil
 	}
 	// compare responses as json lists
-	var checkErrors []error
-	if ignoreOrdering {
-		checkErrors, err = compareDbRespWithoutOrdering(t.DbResponseJson(), actualDbResponse, testName)
-	} else {
-		checkErrors, err = compareDbResp(t.DbResponseJson(), actualDbResponse, testName, t.DbQueryString())
-	}
+	expectedItems, err := toJsonArray(t.DbResponseJson(), "expected", testName)
 	if err != nil {
 		return nil, err
 	}
-	errors = append(errors, checkErrors...)
+	actualItems, err := toJsonArray(actualDbResponse, "actual", testName)
+	if err != nil {
+		return nil, err
+	}
+
+	errs := compare.Compare(expectedItems, actualItems, compare.CompareParams{
+		IgnoreArraysOrdering: ignoreOrdering,
+	})
+
+	errors = append(errors, errs...)
 
 	return errors, nil
 }
 
-func compareDbRespWithoutOrdering(expected, actual []string, testName string) ([]error, error) {
-	var errors []error
-	var actualJsons []interface{}
-	var expectedJsons []interface{}
-
-	// gather expected and actual rows
-	for i, row := range expected {
-		// decode expected row
-		var expectedJson interface{}
-		if err := json.Unmarshal([]byte(row), &expectedJson); err != nil {
+func toJsonArray(items []string, qual, testName string) ([]interface{}, error) {
+	var itemJSONs []interface{}
+	for i, row := range items {
+		var itemJson interface{}
+		if err := json.Unmarshal([]byte(row), &itemJson); err != nil {
 			return nil, fmt.Errorf(
-				"invalid JSON in the expected DB response for test %s:\n row #%d:\n %s\n error:\n%s",
+				"invalid JSON in the %s DB response for test %s:\n row #%d:\n %s\n error:\n%s",
+				qual,
 				testName,
 				i,
 				row,
 				err.Error(),
 			)
 		}
-		expectedJsons = append(expectedJsons, expectedJson)
-		// decode actual row
-		var actualJson interface{}
-		if err := json.Unmarshal([]byte(actual[i]), &actualJson); err != nil {
-			return nil, fmt.Errorf(
-				"invalid JSON in the actual DB response for test %s:\n row #%d:\n %s\n error:\n%s",
-				testName,
-				i,
-				actual[i],
-				err.Error(),
-			)
-		}
-		actualJsons = append(actualJsons, actualJson)
+		itemJSONs = append(itemJSONs, itemJson)
 	}
-
-	remove := func(array []interface{}, i int) []interface{} {
-		array[i] = array[len(array)-1]
-		return array[:len(array)-1]
-	}
-
-	// compare actual and expected rows
-	for _, actualRow := range actualJsons {
-		for i, expectedRow := range expectedJsons {
-			if diff := pretty.Compare(expectedRow, actualRow); diff == "" {
-				expectedJsons = remove(expectedJsons, i)
-				break
-			}
-		}
-	}
-
-	if len(expectedJsons) > 0 {
-		errorString := "missing expected items in database:"
-
-		for _, expectedRow := range expectedJsons {
-			expectedRowJson, _ := json.Marshal(expectedRow)
-			errorString += fmt.Sprintf("\n - %s", color.CyanString("%s", expectedRowJson))
-		}
-
-		errors = append(errors, fmt.Errorf(errorString))
-	}
-
-	return errors, nil
-}
-
-func compareDbResp(expected, actual []string, testName string, query interface{}) ([]error, error) {
-	var errors []error
-	var actualJson interface{}
-	var expectedJson interface{}
-
-	for i, row := range expected {
-		// decode expected row
-		if err := json.Unmarshal([]byte(row), &expectedJson); err != nil {
-			return nil, fmt.Errorf(
-				"invalid JSON in the expected DB response for test %s:\n row #%d:\n %s\n error:\n%s",
-				testName,
-				i,
-				row,
-				err.Error(),
-			)
-		}
-		// decode actual row
-		if err := json.Unmarshal([]byte(actual[i]), &actualJson); err != nil {
-			return nil, fmt.Errorf(
-				"invalid JSON in the actual DB response for test %s:\n row #%d:\n %s\n error:\n%s",
-				testName,
-				i,
-				actual[i],
-				err.Error(),
-			)
-		}
-
-		// compare responses row as jsons
-		if err := compareDbResponseRow(expectedJson, actualJson, query); err != nil {
-			errors = append(errors, err)
-		}
-	}
-
-	return errors, nil
-}
-
-func compareDbResponseRow(expected, actual, query interface{}) error {
-	var err error
-
-	if diff := pretty.Compare(expected, actual); diff != "" {
-		err = fmt.Errorf(
-			"items in database do not match (-expected: +actual):\n     test query:\n%s\n    result diff:\n%s",
-			color.CyanString("%v", query),
-			color.CyanString("%v", diff),
-		)
-	}
-	return err
+	return itemJSONs, nil
 }
 
 func compareDbResponseLength(expected, actual []string, query interface{}) error {
