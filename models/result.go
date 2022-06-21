@@ -2,6 +2,11 @@ package models
 
 import "errors"
 
+type DatabaseResult struct {
+	Query    string
+	Response []string
+}
+
 // Result of test execution
 type Result struct {
 	Path                string // TODO: remove
@@ -12,10 +17,9 @@ type Result struct {
 	ResponseContentType string
 	ResponseBody        string
 	ResponseHeaders     map[string][]string
-	DbQuery             string
-	DbResponse          []string
 	Errors              []error
 	Test                TestInterface
+	DatabaseResult      []DatabaseResult
 }
 
 func allureStatus(status string) bool {

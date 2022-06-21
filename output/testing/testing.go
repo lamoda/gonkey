@@ -60,12 +60,14 @@ Response:
        Body:
 {{ if .ResponseBody }}{{ .ResponseBody }}{{ else }}{{ "<no body>" }}{{ end }}
 
-{{ if .DbQuery }}
-       Db Request:
-{{ .DbQuery }}
-       Db Response:
-{{ range $value := .DbResponse }}
+{{ range $i, $dbr := .DatabaseResult }}
+{{ if $dbr.Query }}
+       Db Request #{{ inc $i }}:
+{{ $dbr.Query }}
+       Db Response #{{ inc $i }}:
+{{ range $value := $dbr.Response }}
 {{ $value }}{{ end }}
+{{ end }}
 {{ end }}
 
 {{ if .Errors }}

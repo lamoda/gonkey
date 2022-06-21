@@ -6,6 +6,16 @@ import (
 	"github.com/lamoda/gonkey/models"
 )
 
+type dbCheck struct {
+	query    string
+	response []string
+}
+
+func (c *dbCheck) DbQueryString() string        { return c.query }
+func (c *dbCheck) DbResponseJson() []string     { return c.response }
+func (c *dbCheck) SetDbQueryString(q string)    { c.query = q }
+func (c *dbCheck) SetDbResponseJson(r []string) { c.response = r }
+
 type Test struct {
 	models.TestInterface
 
@@ -20,6 +30,8 @@ type Test struct {
 	AfterRequestScript string
 	DbQuery            string
 	DbResponse         []string
+
+	DbChecks []models.DatabaseCheck
 }
 
 func (t *Test) ToQuery() string {
@@ -129,6 +141,9 @@ func (t *Test) DbQueryString() string {
 func (t *Test) DbResponseJson() []string {
 	return t.DbResponse
 }
+
+func (t *Test) GetDatabaseChecks() []models.DatabaseCheck       { return t.DbChecks }
+func (t *Test) SetDatabaseChecks(checks []models.DatabaseCheck) { t.DbChecks = checks }
 
 func (t *Test) GetVariables() map[string]string {
 	return t.Variables

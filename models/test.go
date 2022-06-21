@@ -1,5 +1,13 @@
 package models
 
+type DatabaseCheck interface {
+	DbQueryString() string
+	DbResponseJson() []string
+
+	SetDbQueryString(string)
+	SetDbResponseJson([]string)
+}
+
 // Common Test interface
 type TestInterface interface {
 	ToQuery() string
@@ -28,6 +36,8 @@ type TestInterface interface {
 	DbResponseJson() []string
 	GetVariables() map[string]string
 	GetVariablesToSet() map[int]map[string]string
+	GetDatabaseChecks() []DatabaseCheck
+	SetDatabaseChecks([]DatabaseCheck)
 
 	GetFileName() string
 

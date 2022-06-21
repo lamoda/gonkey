@@ -1316,6 +1316,33 @@ Example:
 After HTTP request execution you can run an SQL query to DB to check the data changes.
 The response can contain several records. Those records are compared to the expected list of records.
 
+### Test Format
+
+You can use legacy style for run sql queries, like this:
+```yaml
+- name: my test
+  ...
+  dbQuery: >
+    SELECT ...
+  dbResponse:
+    - ...
+    - ...
+```
+
+But, for now, already acceptable style is:
+```yaml
+- name: my test
+  ...
+  dbChecks:
+    - dbQuery: >
+        SELECT ...
+      dbResponse:
+        - ...
+```
+
+With second variant, you can run any amount of needed queries, after test case runned.
+*NOTE*: All mentioned below techniques are still work with both variants of query format.
+
 ### Query definition
 
 Query is a SELECT that returns any number of strings.

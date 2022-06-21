@@ -13,9 +13,15 @@
   variables_to_set:
     200:
       golang_id: query_result.0.0
+      gonkey_id: query_result.1.0
   response:
     200: '{"result_id": "{{ $info_id }}", "query_result": [[ {{ $golang_id }}, "golang"], [2, "gonkey"]]}'
   dbQuery: >
     SELECT id, name FROM testing WHERE id={{ $golang_id }}
   dbResponse:
     - '{"id": {{ $golang_id }}, "name": "golang"}'
+  dbChecks:
+    - dbQuery: >
+        SELECT id, name FROM testing WHERE id={{ $gonkey_id }}
+      dbResponse:
+        - '{"id": {{ $gonkey_id }}, "name": "gonkey"}'

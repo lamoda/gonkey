@@ -27,6 +27,30 @@ func NewChecker(dbConnect *sql.DB) checker.CheckerInterface {
 
 func (c *ResponseDbChecker) Check(t models.TestInterface, result *models.Result) ([]error, error) {
 	var errors []error
+	errs, err := c.check(t.GetName(), t.IgnoreDbOrdering(), t, result)
+	if err != nil {
+		return nil, err
+	}
+	errors = append(errors, errs...)
+
+	for _, dbCheck := range t.GetDatabaseChecks() {
+		errs, err := c.check(t.GetName(), t.IgnoreDbOrdering(), dbCheck, result)
+		if err != nil {
+			return nil, err
+		}
+		errors = append(errors, errs...)
+	}
+
+	return errors, nil
+}
+
+func (c *ResponseDbChecker) check(
+	testName string,
+	ignoreOrdering bool,
+	t models.DatabaseCheck,
+	result *models.Result,
+) ([]error, error) {
+	var errors []error
 
 	// don't check if there are no data for db test
 	if t.DbQueryString() == "" && t.DbResponseJson() == nil {
@@ -35,18 +59,12 @@ func (c *ResponseDbChecker) Check(t models.TestInterface, result *models.Result)
 
 	// check expected db query exist
 	if t.DbQueryString() == "" {
-		return nil, fmt.Errorf(
-			"DB query not found for test \"%s\"",
-			t.GetName(),
-		)
+		return nil, fmt.Errorf("DB query not found for test \"%s\"", testName)
 	}
 
 	// check expected response exist
 	if t.DbResponseJson() == nil {
-		return nil, fmt.Errorf(
-			"expected DB response not found for test \"%s\"",
-			t.GetName(),
-		)
+		return nil, fmt.Errorf("expected DB response not found for test \"%s\"", testName)
 	}
 
 	// get DB response
@@ -54,20 +72,23 @@ func (c *ResponseDbChecker) Check(t models.TestInterface, result *models.Result)
 	if err != nil {
 		return nil, err
 	}
-	result.DbQuery = t.DbQueryString()
-	result.DbResponse = actualDbResponse
+
+	result.DatabaseResult = append(
+		result.DatabaseResult,
+		models.DatabaseResult{Query: t.DbQueryString(), Response: actualDbResponse},
+	)
 
 	// compare responses length
-	if err := compareDbResponseLength(t.DbResponseJson(), result.DbResponse, result.DbQuery); err != nil {
+	if err := compareDbResponseLength(t.DbResponseJson(), actualDbResponse, t.DbQueryString()); err != nil {
 		errors = append(errors, err)
 		return errors, nil
 	}
 	// compare responses as json lists
 	var checkErrors []error
-	if t.IgnoreDbOrdering() {
-		checkErrors, err = compareDbRespWithoutOrdering(t.DbResponseJson(), result.DbResponse, t.GetName())
+	if ignoreOrdering {
+		checkErrors, err = compareDbRespWithoutOrdering(t.DbResponseJson(), actualDbResponse, testName)
 	} else {
-		checkErrors, err = compareDbResp(t.DbResponseJson(), result.DbResponse, t.GetName(), result.DbQuery)
+		checkErrors, err = compareDbResp(t.DbResponseJson(), actualDbResponse, testName, t.DbQueryString())
 	}
 	if err != nil {
 		return nil, err

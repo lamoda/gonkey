@@ -28,6 +28,7 @@ type TestDefinition struct {
 	PauseValue               int                       `json:"pause" yaml:"pause"`
 	DbQueryTmpl              string                    `json:"dbQuery" yaml:"dbQuery"`
 	DbResponseTmpl           []string                  `json:"dbResponse" yaml:"dbResponse"`
+	DatabaseChecks           []DatabaseCheck           `json:"dbChecks" yaml:"dbChecks"`
 }
 
 type CaseData struct {
@@ -38,6 +39,11 @@ type CaseData struct {
 	DbQueryArgs            map[string]interface{}         `json:"dbQueryArgs" yaml:"dbQueryArgs"`
 	DbResponseArgs         map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
 	DbResponse             []string                       `json:"dbResponse" yaml:"dbResponse"`
+}
+
+type DatabaseCheck struct {
+	DbQueryTmpl    string   `json:"dbQuery" yaml:"dbQuery"`
+	DbResponseTmpl []string `json:"dbResponse" yaml:"dbResponse"`
 }
 
 type scriptParams struct {
