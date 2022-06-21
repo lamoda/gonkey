@@ -1,3 +1,15 @@
+# v1.18.0 (Tue Jun 21 2022)
+
+#### 🚀 Enhancement
+
+- Add dbChecks format, for run multiply sql queries in one test [#164](https://github.com/lamoda/gonkey/pull/164) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
 # v1.17.0 (Wed Jun 08 2022)
 
 #### 🚀 Enhancement
