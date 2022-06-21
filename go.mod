@@ -13,7 +13,7 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.4
 	github.com/tidwall/gjson v1.13.0
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
