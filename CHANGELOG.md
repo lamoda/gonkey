@@ -1,3 +1,15 @@
+# v1.18.1 (Wed Jun 22 2022)
+
+#### 🐛 Bug Fix
+
+- Use regexp matching inside database response checks [#166](https://github.com/lamoda/gonkey/pull/166) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
 # v1.18.0 (Tue Jun 21 2022)
 
 #### 🚀 Enhancement
