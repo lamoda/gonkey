@@ -25,3 +25,6 @@
         SELECT id, name FROM testing WHERE id={{ $gonkey_id }}
       dbResponse:
         - '{"id": {{ $gonkey_id }}, "name": "gonkey"}'
+    - dbQuery: SELECT id, name FROM testing WHERE id={{ $gonkey_id }}
+      dbResponse:
+        - '{"id": {{ $gonkey_id }}, "name": "$matchRegexp(gonkey)"}'

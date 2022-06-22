@@ -1370,7 +1370,10 @@ Example:
   dbResponse:
     - '{"code":"GIFT100000-000002","purchase_date":"2330-02-02T13:15:11.912874","partner_id":1}'
     - '{"code":"GIFT100000-000003","purchase_date":"2330-02-02T13:15:11.912874","partner_id":1}'
+    - '{"code":"$matchRegexp(GIFT([0-9]{6})-([0-9]{6}))","purchase_date":"2330-02-02T13:15:11.912874","partner_id":1}'
 ```
+
+Как видно из примера, вы можете использовать Regexp для проверки ответа БД.
 
 ```yaml
   ...
