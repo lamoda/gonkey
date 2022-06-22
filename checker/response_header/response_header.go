@@ -9,9 +9,7 @@ import (
 	"github.com/lamoda/gonkey/models"
 )
 
-type ResponseHeaderChecker struct {
-	checker.CheckerInterface
-}
+type ResponseHeaderChecker struct{}
 
 func NewChecker() checker.CheckerInterface {
 	return &ResponseHeaderChecker{}

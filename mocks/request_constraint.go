@@ -22,9 +22,7 @@ type verifier interface {
 	Verify(r *http.Request) []error
 }
 
-type nopConstraint struct {
-	verifier
-}
+type nopConstraint struct {}
 
 func (c *nopConstraint) Verify(r *http.Request) []error {
 	return nil
@@ -68,8 +66,6 @@ func (c *bodyMatchesXMLConstraint) Verify(r *http.Request) []error {
 }
 
 type bodyMatchesJSONConstraint struct {
-	verifier
-
 	expectedBody interface{}
 	compareParams compare.CompareParams
 }
@@ -151,8 +147,6 @@ func (c *bodyJSONFieldMatchesJSONConstraint) Verify(r *http.Request) []error {
 }
 
 type methodConstraint struct {
-	verifier
-
 	method string
 }
 
@@ -164,8 +158,6 @@ func (c *methodConstraint) Verify(r *http.Request) []error {
 }
 
 type headerConstraint struct {
-	verifier
-
 	header string
 	value  string
 	regexp *regexp.Regexp
@@ -293,8 +285,6 @@ func (c *queryRegexpConstraint) Verify(r *http.Request) (errors []error) {
 }
 
 type pathConstraint struct {
-	verifier
-
 	path   string
 	regexp *regexp.Regexp
 }
@@ -327,8 +317,6 @@ func (c *pathConstraint) Verify(r *http.Request) []error {
 }
 
 type bodyMatchesTextConstraint struct {
-	verifier
-
 	body   string
 	regexp *regexp.Regexp
 }

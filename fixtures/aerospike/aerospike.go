@@ -7,14 +7,16 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/aerospike/aerospike-client-go/v5"
 	"gopkg.in/yaml.v2"
 )
 
-const namespace = "test"
+type client interface {
+	Truncate(set string) error
+	InsertBinMap(set, key string, binMap map[string]interface{}) error
+}
 
 type LoaderAerospike struct {
-	client   *aerospike.Client
+	client   client
 	location string
 	debug    bool
 }
@@ -38,7 +40,7 @@ type loadContext struct {
 	refsDefinition set
 }
 
-func New(client *aerospike.Client, location string, debug bool) *LoaderAerospike {
+func New(client client, location string, debug bool) *LoaderAerospike {
 	return &LoaderAerospike{
 		client:   client,
 		location: location,
@@ -226,8 +228,7 @@ func (l *LoaderAerospike) loadSets(ctx *loadContext) error {
 
 // truncateTable truncates table
 func (l *LoaderAerospike) truncateSet(name string) error {
-	l.client.Truncate(nil, namespace, name, nil)
-	return nil
+	return l.client.Truncate(name)
 }
 
 func (l *LoaderAerospike) loadSet(ctx *loadContext, set loadedSet) error {
@@ -247,30 +248,13 @@ func (l *LoaderAerospike) loadSet(ctx *loadContext, set loadedSet) error {
 	}
 
 	for key, binmap := range set.data {
-		key, err := aerospike.NewKey(namespace, set.name, key)
-		if err != nil {
-			return err
-		}
-
-		bins := prepareBins(binmap)
-		err = l.client.PutBins(nil, key, bins...)
+		err := l.client.InsertBinMap(set.name, key, binmap)
 		if err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-func prepareBins(binmap binMap) []*aerospike.Bin {
-	var bins []*aerospike.Bin
-	for binName, binData := range binmap {
-		if binName == "$extend" {
-			continue
-		}
-		bins = append(bins, aerospike.NewBin(binName, binData))
-	}
-	return bins
 }
 
 // resolveReference finds previously stored reference by its name

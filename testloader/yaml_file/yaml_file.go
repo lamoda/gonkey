@@ -6,12 +6,9 @@ import (
 	"strings"
 
 	"github.com/lamoda/gonkey/models"
-	"github.com/lamoda/gonkey/testloader"
 )
 
 type YamlFileLoader struct {
-	testloader.LoaderInterface
-
 	testsLocation string
 	fileFilter    string
 }

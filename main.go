@@ -12,6 +12,7 @@ import (
 	"github.com/aerospike/aerospike-client-go/v5"
 	"github.com/joho/godotenv"
 
+	"github.com/lamoda/gonkey/checker/response_aerospike"
 	"github.com/lamoda/gonkey/checker/response_body"
 	"github.com/lamoda/gonkey/checker/response_db"
 	"github.com/lamoda/gonkey/fixtures"
@@ -39,7 +40,7 @@ func main() {
 	flag.StringVar(&config.Host, "host", "", "Target system hostname")
 	flag.StringVar(&config.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&config.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
-	flag.StringVar(&config.AerospikeHost, "aerospike_host", "", "Aerospike host for fixtures in form of '127.0.0.1:3000' (WARNING! Aerospike sets will be truncated)")
+	flag.StringVar(&config.AerospikeHost, "aerospike_host", "", "Aerospike host for fixtures in form of 'host:port/namespace' (WARNING! Aerospike sets will be truncated)")
 	flag.StringVar(&config.FixturesLocation, "fixtures", "", "Path to fixtures directory")
 	flag.StringVar(&config.EnvFile, "env-file", "", "Path to env-file")
 	flag.BoolVar(&config.Allure, "allure", true, "Make Allure report")
@@ -81,7 +82,7 @@ func main() {
 		err             error
 	)
 	if config.AerospikeHost != "" {
-		address, port := parseAerospikeHost(config.AerospikeHost)
+		address, port, namespace := parseAerospikeHost(config.AerospikeHost)
 		aerospikeClient, err = aerospike.NewClient(address, port)
 		if err != nil {
 			log.Fatal("Couldn't connect to aerospike: ", err)
@@ -147,14 +148,15 @@ func main() {
 	}
 }
 
-func parseAerospikeHost(dsn string) (address string, port int) {
-	parts := strings.Split(dsn, ":")
+func parseAerospikeHost(dsn string) (address string, port int, namespace string) {
+	parts := strings.Split(dsn, ":/")
 	if len(parts) > 2 {
 		log.Fatal("couldn't parse aerospike host: " + dsn)
 	}
 
 	address = parts[0]
 	port, err := strconv.Atoi(parts[1])
+	namespace = parts[2]
 	if err != nil {
 		log.Fatal("couldn't parse port: " + parts[1])
 	}

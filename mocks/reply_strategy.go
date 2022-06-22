@@ -19,8 +19,6 @@ type contextAwareStrategy interface {
 }
 
 type constantReply struct {
-	replyStrategy
-
 	replyBody  []byte
 	statusCode int
 	headers    map[string]string
@@ -64,16 +62,13 @@ func (s *constantReply) HandleRequest(w http.ResponseWriter, r *http.Request) []
 	return nil
 }
 
-type failReply struct {
-}
+type failReply struct{}
 
 func (s *failReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
 	return unhandledRequestError(r)
 }
 
-type nopReply struct {
-	replyStrategy
-}
+type nopReply struct{}
 
 func (s *nopReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
 	w.WriteHeader(http.StatusNoContent)
@@ -81,9 +76,6 @@ func (s *nopReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error
 }
 
 type uriVaryReply struct {
-	replyStrategy
-	contextAwareStrategy
-
 	basePath string
 	variants map[string]*definition
 }
@@ -120,9 +112,6 @@ func (s *uriVaryReply) EndRunningContext() []error {
 }
 
 type methodVaryReply struct {
-	replyStrategy
-	contextAwareStrategy
-
 	variants map[string]*definition
 }
 
@@ -198,9 +187,6 @@ func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) 
 
 type basedOnRequestReply struct {
 	sync.Mutex
-	replyStrategy
-	contextAwareStrategy
-
 	variants []*definition
 }
 
