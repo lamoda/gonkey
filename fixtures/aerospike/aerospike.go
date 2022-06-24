@@ -10,13 +10,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type client interface {
+type aerospikeClient interface {
 	Truncate(set string) error
 	InsertBinMap(set, key string, binMap map[string]interface{}) error
 }
 
 type LoaderAerospike struct {
-	client   client
+	client   aerospikeClient
 	location string
 	debug    bool
 }
@@ -40,7 +40,7 @@ type loadContext struct {
 	refsDefinition set
 }
 
-func New(client client, location string, debug bool) *LoaderAerospike {
+func New(client aerospikeClient, location string, debug bool) *LoaderAerospike {
 	return &LoaderAerospike{
 		client:   client,
 		location: location,

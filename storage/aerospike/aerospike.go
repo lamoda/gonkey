@@ -1,13 +1,22 @@
 package aerospike
 
-import "github.com/aerospike/aerospike-client-go/v5"
+import (
+	"log"
+
+	"github.com/aerospike/aerospike-client-go/v5"
+)
 
 type Client struct {
 	*aerospike.Client
 	namespace string
 }
 
-func New(client *aerospike.Client, namespace string) *Client {
+func New(host string, port int, namespace string) *Client {
+	client, err := aerospike.NewClient(host, port)
+	if err != nil {
+		log.Fatal("Couldn't connect to aerospike: ", err)
+	}
+	
 	return &Client{
 		Client:    client,
 		namespace: namespace,

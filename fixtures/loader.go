@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"strings"
 
-	aerospikeClient "github.com/aerospike/aerospike-client-go/v5"
 	_ "github.com/lib/pq"
 
 	"github.com/lamoda/gonkey/fixtures/aerospike"
 	"github.com/lamoda/gonkey/fixtures/mysql"
 	"github.com/lamoda/gonkey/fixtures/postgres"
+	aerospikeClient "github.com/lamoda/gonkey/storage/aerospike"
 )
 
 type DbType int
