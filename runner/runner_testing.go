@@ -2,8 +2,6 @@ package runner
 
 import (
 	"database/sql"
-	"errors"
-	"log"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -81,22 +79,6 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-func initLoaders(storages storages, cfg config) fixtures.Loader {
-	var fixturesLoader fixtures.Loader
-	if (storages.db != nil || storages.aerospike != nil) && cfg.FixturesLocation != "" {
-		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
-			DB:        storages.db,
-			Aerospike: storages.aerospike,
-			Location:  cfg.FixturesLocation,
-			Debug:     cfg.Debug,
-			DbType:    fixtures.FetchDbType(cfg.DbType),
-		})
-	} else if cfg.FixturesLocation != "" {
-		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
-	}
-	return fixturesLoader
 }
 
 func initRunner(params *RunWithTestingParams, mocksLoader *mocks.Loader, fixturesLoader fixtures.Loader) *Runner {
