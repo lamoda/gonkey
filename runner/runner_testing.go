@@ -2,10 +2,13 @@ package runner
 
 import (
 	"database/sql"
+	"errors"
+	"log"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/aerospike/aerospike-client-go/v5"
 	"github.com/joho/godotenv"
 
 	"github.com/lamoda/gonkey/checker"
@@ -17,9 +20,15 @@ import (
 	"github.com/lamoda/gonkey/output"
 	"github.com/lamoda/gonkey/output/allure_report"
 	testingOutput "github.com/lamoda/gonkey/output/testing"
+	aerospikeAdapter "github.com/lamoda/gonkey/storage/aerospike"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
 	"github.com/lamoda/gonkey/variables"
 )
+
+type Aerospike struct {
+	*aerospike.Client
+	Namespace string
+}
 
 type RunWithTestingParams struct {
 	Server      *httptest.Server
@@ -27,6 +36,7 @@ type RunWithTestingParams struct {
 	Mocks       *mocks.Mocks
 	FixturesDir string
 	DB          *sql.DB
+	Aerospike   Aerospike
 	// If DB parameter present, used to recognize type of database, if not set, by default uses Postgres
 	DbType      fixtures.DbType
 	EnvFilePath string
@@ -51,19 +61,49 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	debug := os.Getenv("GONKEY_DEBUG") != ""
 
 	var fixturesLoader fixtures.Loader
-	if params.DB != nil {
+	if params.DB != nil || params.Aerospike.Client != nil {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
-			Location: params.FixturesDir,
-			DB:       params.DB,
-			Debug:    debug,
-			DbType:   params.DbType,
+			Location:  params.FixturesDir,
+			DB:        params.DB,
+			Aerospike: aerospikeAdapter.New(params.Aerospike.Client, params.Aerospike.Namespace),
+			Debug:     debug,
+			DbType:    params.DbType,
 		})
 	}
 
+	runner := initRunner(params, mocksLoader, fixturesLoader)
+
+	setupOutputs(runner, params, t)
+
+	addCheckers(runner, params)
+
+	_, err := runner.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func initLoaders(storages storages, cfg config) fixtures.Loader {
+	var fixturesLoader fixtures.Loader
+	if (storages.db != nil || storages.aerospike != nil) && cfg.FixturesLocation != "" {
+		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
+			DB:        storages.db,
+			Aerospike: storages.aerospike,
+			Location:  cfg.FixturesLocation,
+			Debug:     cfg.Debug,
+			DbType:    fixtures.FetchDbType(cfg.DbType),
+		})
+	} else if cfg.FixturesLocation != "" {
+		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
+	}
+	return fixturesLoader
+}
+
+func initRunner(params *RunWithTestingParams, mocksLoader *mocks.Loader, fixturesLoader fixtures.Loader) *Runner {
 	yamlLoader := yaml_file.NewLoader(params.TestsDir)
 	yamlLoader.SetFileFilter(os.Getenv("GONKEY_FILE_FILTER"))
 
-	r := New(
+	runner := New(
 		&Config{
 			Host:           params.Server.URL,
 			Mocks:          params.Mocks,
@@ -73,7 +113,21 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 		},
 		yamlLoader,
 	)
+	return runner
+}
 
+func addCheckers(runner *Runner, params *RunWithTestingParams) {
+	runner.AddCheckers(response_body.NewChecker())
+	runner.AddCheckers(response_header.NewChecker())
+
+	if params.DB != nil {
+		runner.AddCheckers(response_db.NewChecker(params.DB))
+	}
+
+	runner.AddCheckers(params.Checkers...)
+}
+
+func setupOutputs(r *Runner, params *RunWithTestingParams, t *testing.T) {
 	if params.OutputFunc != nil {
 		r.AddOutput(params.OutputFunc)
 	} else {
@@ -84,19 +138,5 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 		allureOutput := allure_report.NewOutput("Gonkey", os.Getenv("GONKEY_ALLURE_DIR"))
 		defer allureOutput.Finalize()
 		r.AddOutput(allureOutput)
-	}
-
-	r.AddCheckers(response_body.NewChecker())
-	r.AddCheckers(response_header.NewChecker())
-
-	if params.DB != nil {
-		r.AddCheckers(response_db.NewChecker(params.DB))
-	}
-
-	r.AddCheckers(params.Checkers...)
-
-	_, err := r.Run()
-	if err != nil {
-		t.Fatal(err)
 	}
 }

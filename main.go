@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aerospike/aerospike-client-go/v5"
 	"github.com/joho/godotenv"
 
 	"github.com/lamoda/gonkey/checker/response_body"
@@ -17,7 +18,7 @@ import (
 	"github.com/lamoda/gonkey/output/allure_report"
 	"github.com/lamoda/gonkey/output/console_colored"
 	"github.com/lamoda/gonkey/runner"
-	"github.com/lamoda/gonkey/storage/aerospike"
+	aerospikeAdapter "github.com/lamoda/gonkey/storage/aerospike"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
 	"github.com/lamoda/gonkey/variables"
 )
@@ -37,7 +38,7 @@ type config struct {
 
 type storages struct {
 	db        *sql.DB
-	aerospike *aerospike.Client
+	aerospike *aerospikeAdapter.Client
 }
 
 func main() {
@@ -48,11 +49,11 @@ func main() {
 
 	fixturesLoader := initLoaders(storages, cfg)
 
-	r := initRunner(cfg, fixturesLoader)
+	runner := initRunner(cfg, fixturesLoader)
 
-	setupOutputs(r, cfg)
+	addCheckers(runner, storages.db)
 
-	addCheckers(r, storages.db)
+	run(runner, cfg)
 }
 
 func initStorages(cfg config) storages {
@@ -108,7 +109,7 @@ func addCheckers(r *runner.Runner, db *sql.DB) {
 	}
 }
 
-func setupOutputs(r *runner.Runner, cfg config) {
+func run(r *runner.Runner, cfg config) {
 	consoleOutput := console_colored.NewOutput(cfg.Verbose)
 	r.AddOutput(consoleOutput)
 
@@ -145,10 +146,14 @@ func initRunner(cfg config, fixturesLoader fixtures.Loader) *runner.Runner {
 	)
 }
 
-func initAerospike(cfg config) *aerospike.Client {
+func initAerospike(cfg config) *aerospikeAdapter.Client {
 	if cfg.AerospikeHost != "" {
 		address, port, namespace := parseAerospikeHost(cfg.AerospikeHost)
-		return aerospike.New(address, port, namespace)
+		client, err := aerospike.NewClient(address, port)
+		if err != nil {
+			log.Fatal("Couldn't connect to aerospike: ", err)
+		}
+		return aerospikeAdapter.New(client, namespace)
 	}
 
 	return nil
