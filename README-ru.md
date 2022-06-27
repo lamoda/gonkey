@@ -90,10 +90,10 @@ func TestFuncCases(t *testing.T) {
     // проинициализируйте моки, если нужно (подробнее - ниже)
     //m := mocks.NewNop(...)
 
-    // проинициализирйте базу для загрузки фикстур, если нужно (подробнее - ниже)
+    // проинициализируйте базу для загрузки фикстур, если нужно (подробнее - ниже)
     //db := ...
 
-    // проинициализирйте Aerospike для загрузки фикстур, если нужно (подробнее - ниже)
+    // проинициализируйте Aerospike для загрузки фикстур, если нужно (подробнее - ниже)
     //aerospikeClient := ...
 
     // создайте экземпляр сервера вашего приложения
@@ -110,7 +110,7 @@ func TestFuncCases(t *testing.T) {
             Client: aerospikeClient,
             Namespace: "test",
         }
-        // Тип используемой базы данных, возможные значения fixtures.Postgres, fixtures.Mysql
+        // Тип используемой базы данных, возможные значения fixtures.Postgres, fixtures.Mysql, fixtures.Aerospike
         // Если в параметр DB не пустой, а данный параметр не назначен, будет использоваться тип бд fixtures.Postgresql
         DbType:      fixtures.Postgres,
         FixturesDir: "fixtures",
