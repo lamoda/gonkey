@@ -389,6 +389,29 @@ password=private_password
 
 env-файл, например, удобно использовать, когда нужно вынести из теста приватную информацию (пароли, ключи и т.п.)
 
+### Faker
+
+Если вам нужны рандомные данные при тестах, можно использовать faker. В значении переменной указываем faker и через точку нужный тип данных, например UUID: `faker.uuid`.
+С полным списком данных можно ознакомится [здесь](https://github.com/neotoolkit/faker)
+
+```yaml
+- method: "{{ $method }}"
+  path: "/some/path/{{ $pathPart }}"
+  variables:
+    reqParam: "faker.uuid" // UUID
+    method: "POST"
+    pathPart: "part_of_path"
+    query: "query_val"
+    header: "header_val"
+    resp: "resp_val"
+  query: "{{ $query }}"
+  headers:
+    header1: "{{ $header }}"
+  request: '{"reqParam": "{{ $reqParam }}"}'
+  response:
+    200: "{{ $resp }}"
+```
+
 ## Загрузка файлов
 
 В тестовом запросе можно загружать файлы. Для этого нужно указать тип запроса - POST и заголовок:
