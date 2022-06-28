@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/neotoolkit/faker"
+	"github.com/lamoda/gonkey/faker"
 )
 
 type Variable struct {
@@ -22,10 +22,8 @@ func NewVariable(name, value string) *Variable {
 	name = regexp.QuoteMeta(name)
 	rx := regexp.MustCompile(fmt.Sprintf(`{{\s*\$%s\s*}}`, name))
 
-	if strings.HasPrefix(value, "faker.") {
-		f := faker.NewFaker()
-		fName := strings.Trim(value, "faker.")
-		value = f.Faker(fName)
+	if strings.HasPrefix(value, "$faker") {
+		value = faker.Faker(value)
 	}
 
 	return &Variable{
