@@ -10,6 +10,7 @@ Gonkey протестирует ваши сервисы, используя их
 - моки для имитации внешних сервисов
 - можно подключить к проекту как библиотеку и запускать вместе с юнит-тестами
 - запись результата тестов в виде отчета [Allure](http://allure.qatools.ru/)
+- имеется [JSON-schema](#json-schema) для автодополнения и валидации YAML-файлов Gonkey 
 
 ## Содержание
 
@@ -1455,3 +1456,71 @@ Example:
     - '{ "id": 2, "name": "John", "surname": "Doe" }'
     - '{ "id": 1, "name": "Jane", "surname": "Doe" }'
 ```
+
+## JSON-schema
+Для упрощения написания тестов на Gonkey, используйте [файл со схемой](https://raw.githubusercontent.com/lamoda/gonkey/master/gonkey.json)
+
+Он добавляет in-line документацию и авто-дополнение в IDE которые это поддерживают.
+
+
+Пример работы в IDE Jetbrains:
+![Example Jetbrains](https://i.imgur.com/oYuPuR3.gif)
+
+Пример работы в IDE VSCode:
+![Example Jetbrains](https://i.imgur.com/hBIGjP9.gif)
+
+
+### Настройка на IDE Jetbrains
+Скачайте [файл со схемой](https://raw.githubusercontent.com/lamoda/gonkey/master/gonkey.json). 
+В настройках Languages & Frameworks > Schemas and DTDs > JSON Schema Mappings
+
+![Jetbrains IDE Settings](https://i.imgur.com/xkO22by.png)
+
+Добавьте новую схему 
+
+![Add schema](https://i.imgur.com/XHw14GJ.png)
+
+Задайте имя схемы, выберите скачанный файл, а также выберите версию схем Draft 7
+
+![Name, file, version](https://i.imgur.com/LfJfis0.png)
+
+После этого добавьте маппинг. Можно выбрать файл, папку с тестами или маску.
+
+![Mapping](https://i.imgur.com/iFjm0Ld.png)
+
+Выберите то что удобно для вас. 
+
+![Mapping pattern](https://i.imgur.com/WIK6sZW.png)
+
+После этого сохраните настройки, и если вы всё сделали правильно в нижнем правом углу окна IDE не должно
+отображатся No JSON Schema
+![No Schema](https://i.imgur.com/zLqv1Zv.png)
+
+А должно быть ваше название схемы.
+
+![Schema Name](https://i.imgur.com/DDXdCO7.png)
+
+### Настройка на IDE VSCode
+
+Для начала вам нужно установить плагин для работы с YAML 
+Откройте меню Code(File)->Preferences->Extensions
+
+![VSCode Preferences](https://i.imgur.com/X7bk5Kh.png)
+
+Наберите в поиске YAML, и установите расширение YAML Language Support by Red Hat
+
+![Yaml Extension](https://i.imgur.com/57onioF.png)
+
+Откройте меню Code(File)->Preferences->Settings
+Наберите YAML:Schemas и нажмите на ссылку _Edit in settings.json_
+![Yaml link](https://i.imgur.com/IEwxWyG.png)
+
+Добавьте маппинг файла и путь к схеме 
+```
+"yaml.schemas": {
+  "C:\\Users\\Leo\\gonkey.json": ["*.gonkey.yaml"]          
+}
+```
+
+В примере выше, схема из файла C:\Users\Leo\gonkey.json будет применяться ко всем файлам 
+с расширением .gonkey.yaml
