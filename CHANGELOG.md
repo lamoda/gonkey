@@ -1,3 +1,15 @@
+# v1.18.2 (Fri Jul 08 2022)
+
+#### 🐛 Bug Fix
+
+- Aerospike fixtures support [#168](https://github.com/lamoda/gonkey/pull/168) ([@vitkarpenko](https://github.com/vitkarpenko))
+
+#### Authors: 1
+
+- Vitaly Karpenko ([@vitkarpenko](https://github.com/vitkarpenko))
+
+---
+
 # v1.18.1 (Wed Jun 22 2022)
 
 #### 🐛 Bug Fix
