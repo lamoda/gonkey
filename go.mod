@@ -11,7 +11,7 @@ require (
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/kylelemons/godebug v1.1.0
-	github.com/lib/pq v1.3.0
+	github.com/lib/pq v1.10.6
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
