@@ -15,8 +15,6 @@ import (
 )
 
 type ResponseDbChecker struct {
-	checker.CheckerInterface
-
 	db *sql.DB
 }
 

@@ -1,0 +1,16 @@
+templates:
+  base_tmpl:
+    bin1: value1
+  extended_tmpl:
+    $extend: base_tmpl
+    bin2: value2
+
+sets:
+  set1:
+    key1:
+      $extend: base_tmpl
+      bin1: overwritten
+  set2:
+    key1:
+      $extend: extended_tmpl
+      bin2: overwritten

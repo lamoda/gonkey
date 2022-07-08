@@ -6,11 +6,9 @@ import (
 	"text/template"
 
 	"github.com/lamoda/gonkey/models"
-	"github.com/lamoda/gonkey/output"
 )
 
 type TestingOutput struct {
-	output.OutputInterface
 	testing *testing.T
 }
 

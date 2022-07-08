@@ -17,8 +17,6 @@ func (c *dbCheck) SetDbQueryString(q string)    { c.query = q }
 func (c *dbCheck) SetDbResponseJson(r []string) { c.response = r }
 
 type Test struct {
-	models.TestInterface
-
 	TestDefinition
 
 	Filename string

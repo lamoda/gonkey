@@ -3832,7 +3832,7 @@ var complexJson1 = `
                     "example": false
                 },
                 "is_autoreserve_allowed": {
-                    "description": "If True, the choosen interval gets to be reserved right after the order is created",
+                    "description": "If True, the chosen interval gets to be reserved right after the order is created",
                     "type": "boolean"
                 },
                 "has_horizon": {
@@ -8744,7 +8744,7 @@ var complexJson2 = `
                     "example": false
                 },
                 "is_autoreserve_allowed": {
-                    "description": "If True, the choosen interval gets to be reserved right after the order is created",
+                    "description": "If True, the chosen interval gets to be reserved right after the order is created",
                     "type": "boolean"
                 },
                 "has_horizon": {

@@ -6,14 +6,11 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/lamoda/gonkey/models"
-	"github.com/lamoda/gonkey/output"
 )
 
 const dotsPerLine = 80
 
 type ConsoleColoredOutput struct {
-	output.OutputInterface
-
 	verbose       bool
 	dots          int
 	coloredPrintf func(format string, a ...interface{})

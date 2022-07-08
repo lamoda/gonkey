@@ -8,12 +8,9 @@ import (
 	"time"
 
 	"github.com/lamoda/gonkey/models"
-	"github.com/lamoda/gonkey/output"
 )
 
 type AllureReportOutput struct {
-	output.OutputInterface
-
 	reportLocation string
 	allure         Allure
 }
@@ -54,7 +51,7 @@ func (o *AllureReportOutput) Process(t models.TestInterface, result *models.Resu
 				"txt")
 			o.allure.AddAttachment(
 				*bytes.NewBufferString(fmt.Sprintf("Db Response #%d", i+1)),
-				*bytes.NewBufferString(fmt.Sprintf(`Respone: %s`, dbresult.Response)),
+				*bytes.NewBufferString(fmt.Sprintf(`Response: %s`, dbresult.Response)),
 				"txt")
 		}
 	}

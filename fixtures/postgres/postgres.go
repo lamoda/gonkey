@@ -28,19 +28,18 @@ type table []row
 type rowsDict map[string]row
 
 type fixture struct {
-	Version   string
 	Inherits  []string
 	Tables    yaml.MapSlice
 	Templates yaml.MapSlice
 }
 
 type loadedTable struct {
-	Name tableName
-	Rows table
+	name tableName
+	rows table
 }
 type tableName struct {
-	Name   string
-	Schema string
+	name   string
+	schema string
 }
 
 func newTableName(source string) tableName {
@@ -52,12 +51,12 @@ func newTableName(source string) tableName {
 	case parts[0] == "":
 		parts[0] = "public"
 	}
-	lt := tableName{Schema: parts[0], Name: parts[1]}
+	lt := tableName{schema: parts[0], name: parts[1]}
 	return lt
 }
 
 func (t *tableName) getFullName() string {
-	return fmt.Sprintf("\"%s\".\"%s\"", t.Schema, t.Name)
+	return fmt.Sprintf("\"%s\".\"%s\"", t.schema, t.name)
 }
 
 type loadContext struct {
@@ -108,7 +107,7 @@ func (f *LoaderPostgres) loadFile(name string, ctx *loadContext) error {
 		return err
 	}
 	// skip previously loaded files
-	if inArray(file, &(*ctx).files) {
+	if inArray(file, ctx.files) {
 		return nil
 	}
 	if f.debug {
@@ -118,7 +117,7 @@ func (f *LoaderPostgres) loadFile(name string, ctx *loadContext) error {
 	if err != nil {
 		return err
 	}
-	(*ctx).files = append((*ctx).files, file)
+	ctx.files = append(ctx.files, file)
 	return f.loadYml(data, ctx)
 }
 
@@ -136,7 +135,7 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		}
 	}
 
-	// loadedFixture.Templates
+	// loadedFixture.templates
 	// yaml.MapSlice{
 	//    string => yaml.MapSlice{
 	//        string => interface{}
@@ -172,7 +171,7 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		}
 	}
 
-	// loadedFixture.Tables
+	// loadedFixture.tables
 	// yaml.MapSlice{
 	//    string => []interface{
 	//        yaml.MapSlice{
@@ -195,10 +194,10 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 			rows[i] = fields
 		}
 		lt := loadedTable{
-			Name: newTableName(sourceTable.Key.(string)),
-			Rows: rows,
+			name: newTableName(sourceTable.Key.(string)),
+			rows: rows,
 		}
-		(*ctx).tables = append((*ctx).tables, lt)
+		ctx.tables = append(ctx.tables, lt)
 	}
 	return nil
 }
@@ -213,22 +212,22 @@ func (f *LoaderPostgres) loadTables(ctx *loadContext) error {
 	// truncate first
 	truncatedTables := make(map[string]bool)
 	for _, lt := range ctx.tables {
-		if _, ok := truncatedTables[lt.Name.getFullName()]; ok {
+		if _, ok := truncatedTables[lt.name.getFullName()]; ok {
 			// already truncated
 			continue
 		}
-		if err := f.truncateTable(lt.Name); err != nil {
+		if err := f.truncateTable(lt.name); err != nil {
 			return err
 		}
-		truncatedTables[lt.Name.getFullName()] = true
+		truncatedTables[lt.name.getFullName()] = true
 	}
 	// then load data
 	for _, lt := range ctx.tables {
-		if len(lt.Rows) == 0 {
+		if len(lt.rows) == 0 {
 			continue
 		}
-		if err := f.loadTable(ctx, lt.Name, lt.Rows); err != nil {
-			return fmt.Errorf("failed to load table '%s' because:\n%s", lt.Name, err)
+		if err := f.loadTable(ctx, lt.name, lt.rows); err != nil {
+			return fmt.Errorf("failed to load table '%s' because:\n%s", lt.name, err)
 		}
 	}
 	// alter the sequences so they contain max id + 1
@@ -473,8 +472,8 @@ func (f *LoaderPostgres) resolveFieldReference(refs rowsDict, ref string) (inter
 }
 
 // inArray checks whether the needle is present in haystack slice
-func inArray(needle string, haystack *[]string) bool {
-	for _, e := range *haystack {
+func inArray(needle string, haystack []string) bool {
+	for _, e := range haystack {
 		if needle == e {
 			return true
 		}

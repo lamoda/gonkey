@@ -8,7 +8,7 @@ Capabilities:
 
 - works with REST/JSON API
 - tests service API for compliance with OpenAPI-specs
-- seeds the DB with fixtures data (supports PostgreSQL)
+- seeds the DB with fixtures data (supports PostgreSQL, MySQL, Aerospike)
 - provides mocks for external services
 - can be used as a library and ran together with unit-tests
 - stores the results as an [Allure](http://allure.qatools.ru/) report
@@ -34,6 +34,7 @@ Capabilities:
   - [Record inheritance](#record-inheritance)
   - [Record linking](#record-linking)
   - [Expressions](#expressions)
+  - [Aerospike](#aerospike)
 - [Mocks](#mocks)
   - [Running mocks while using gonkey as a library](#running-mocks-while-using-gonkey-as-a-library)
   - [Mocks definition in the test file](#mocks-definition-in-the-test-file)
@@ -44,6 +45,7 @@ Capabilities:
   - [Script definition](#script-definition)
   - [Running a script with parameterization](#running-a-script-with-parameterization)
 - [A DB query](#a-db-query)
+  - [Test Format](#test-format)
   - [Query definition](#query-definition)
   - [Definition of DB request response](#definition-of-db-request-response)
   - [DB request parameterization](#db-request-parameterization)
@@ -58,6 +60,8 @@ To test a service located on a remote host, use gonkey as a console util.
 - `-spec <...>` path to a file or URL with the swagger-specs for the service
 - `-host <...>` service host:port
 - `-tests <...>` test file or directory
+- `-db-type <...>` - database type. PostgreSQL and Aerospike are currently supported.
+- `-aerospike_host <...>` when using Aerospike - connection URL in form of `host:port/namespace`
 - `-db_dsn <...>` DSN for the test DB (the DB will be cleared before seeding!), supports only PostgreSQL
 - `-fixtures <...>` fixtures directory
 - `-allure` generate an Allure-report
@@ -76,8 +80,8 @@ Import gonkey as a dependency to your project in this file.
 
 ```go
 import (
- "github.com/lamoda/gonkey/runner"
- "github.com/lamoda/gonkey/mocks"
+    "github.com/lamoda/gonkey/runner"
+    "github.com/lamoda/gonkey/mocks"
 )
 ```
 
@@ -91,6 +95,9 @@ func TestFuncCases(t *testing.T) {
     // init the DB to load the fixtures if needed (details below)
     //db := ...
 
+    // init Aerospike to load the fixtures if needed (details below)
+    //aerospikeClient := ...
+
     // create a server instance of your app
     srv := server.NewServer()
     defer srv.Close()
@@ -101,6 +108,10 @@ func TestFuncCases(t *testing.T) {
         TestsDir:    "cases",
         Mocks:       m,
         DB:          db,
+        Aerospike: runner.Aerospike{
+            Client: aerospikeClient,
+            Namespace: "test",
+        }
         // Type of database, can be fixtures.Postgres or fixtures.Mysql
         // if DB parameter present, by default uses fixtures.Postgres database type
         DbType:      fixtures.Postgres,
@@ -594,6 +605,57 @@ tables:
     - created_at: $eval(NOW())
 ```
 
+### Aerospike
+
+Fixtures for Aerospike are also supported. While using gonkey as CLI application do not forget the flag `-db-type aerospike`; add `DbType: fixtures.Aerospike` to runner's configuration if gonkey is used as library.
+
+Fixtures files format is a bit different, yet the same basic principles applies:
+
+```yaml
+sets:
+  set1:
+    key1:
+      bin1: "value1"
+      bin2: 1
+    key2:
+      bin1: "value2"
+      bin2: 2
+      bin3: 2.569947773654566473
+  set2:
+    key1:
+      bin4: false
+      bin5: null
+      bin1: '"'
+    key2:
+      bin1: "'"
+      bin5:
+        - 1
+        - '2'
+```
+
+Fixtures templates are also supported:
+
+```yaml
+templates:
+  base_tmpl:
+    bin1: value1
+  extended_tmpl:
+    $extend: base_tmpl
+    bin2: value2
+
+sets:
+  set1:
+    key1:
+      $extend: base_tmpl
+      bin1: overwritten
+  set2:
+    key1:
+      $extend: extended_tmpl
+      bin2: overwritten
+```
+
+Records linking and expressions are currently not supported.
+
 ## Mocks
 
 In order to imitate responses from external services, use mocks.
@@ -607,12 +669,12 @@ Before running tests, all planned mocks are started. It means that gonkey spins 
 ```go
 // create empty server mocks
 m := mocks.NewNop(
- "cart",
- "loyalty",
- "catalog",
- "madmin",
- "okz",
- "discounts",
+    "cart",
+    "loyalty",
+    "catalog",
+    "madmin",
+    "okz",
+    "discounts",
 )
 
 // spin up mocks
