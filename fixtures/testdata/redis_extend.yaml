@@ -1,0 +1,115 @@
+templates:
+  keys:
+    - $name: parentKeys
+      values:
+        a:
+          value: 1
+        b:
+          value: 2
+    - $name: childKeys
+      $extend: parentKeys
+      values:
+        c:
+          value: 3
+        d:
+          value: 4
+  sets:
+    - $name: parentSet
+      expiration: 10s
+      values:
+        - value: a
+        - value: b
+    - $name: childSet
+      $extend: parentSet
+      values:
+        - value: c
+  hashes:
+    - $name: parentMap
+      values:
+        - key: a1
+          value: 1
+        - key: b1
+          value: 2
+    - $name: childMap
+      $extend: parentMap
+      values:
+        - key: c1
+          value: 3
+  lists:
+    - $name: parentList
+      values:
+        - value: 1
+        - value: 2
+    - $name: childList
+      $extend: parentList
+      values:
+        - value: 3
+        - value: 4
+  zsets:
+    - $name: parentZSet
+      values:
+        - value: 1
+          score: 1.2
+        - value: 2
+          score: 3.4
+    - $name: childZSet
+      $extend: parentZSet
+      values:
+        - value: 3
+          score: 5.6
+        - value: 4
+          score: 7.8
+
+databases:
+  1:
+    keys:
+      $extend: childKeys
+      values:
+        key1:
+          value: value1
+        key2:
+          expiration: 10s
+          value: value2
+    sets:
+      values:
+        set1:
+          $extend: childSet
+          values:
+            - value: d
+        set2:
+          expiration: 10s
+          values:
+            - value: x
+            - value: y
+    hashes:
+      values:
+        map1:
+          $extend: childMap
+          $name: baseMap
+          values:
+            - key: a
+              value: 1
+            - key: b
+              value: 2
+        map2:
+          values:
+            - key: c
+              value: 3
+            - key: d
+              value: 4
+    lists:
+      values:
+        list1:
+          $name: list1
+          $extend: childList
+          values:
+            - value: 10
+            - value: 11
+    zsets:
+      values:
+        zset1:
+          $name: zset1
+          $extend: childZSet
+          values:
+            - value: 5
+              score: 10.1

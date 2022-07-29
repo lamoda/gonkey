@@ -1,3 +1,14 @@
+# v1.18.3 (Mon Aug 08 2022)
+
+#### Enhancement
+
+- Redis fixtures support
+- Custom loader support if using gonkey as a library with a FixtureLoader configuration attribute
+
+#### Authors: 1
+
+- Alexander Nemtarev [#178](https://github.com/lamoda/gonkey/pull/176) ([@anemtarev](https://github.com/anemtarev))
+
 # v1.18.2 (Fri Jul 08 2022)
 
 #### 🐛 Bug Fix

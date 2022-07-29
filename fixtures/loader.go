@@ -18,20 +18,24 @@ const (
 	Postgres DbType = iota
 	Mysql
 	Aerospike
+	Redis
+	CustomLoader // using external loader if gonkey used as a library
 )
 
 const (
 	PostgresParam  = "postgres"
 	MysqlParam     = "mysql"
 	AerospikeParam = "aerospike"
+	RedisParam     = "redis"
 )
 
 type Config struct {
-	DB        *sql.DB
-	Aerospike *aerospikeClient.Client
-	DbType    DbType
-	Location  string
-	Debug     bool
+	DB            *sql.DB
+	Aerospike     *aerospikeClient.Client
+	DbType        DbType
+	Location      string
+	Debug         bool
+	FixtureLoader Loader
 }
 
 type Loader interface {
@@ -64,6 +68,9 @@ func NewLoader(cfg *Config) Loader {
 			cfg.Debug,
 		)
 	default:
+		if cfg.FixtureLoader != nil {
+			return cfg.FixtureLoader
+		}
 		panic("unknown db type")
 	}
 
@@ -78,6 +85,8 @@ func FetchDbType(dbType string) DbType {
 		return Mysql
 	case AerospikeParam:
 		return Aerospike
+	case RedisParam:
+		return Redis
 	default:
 		panic("unknown db type param")
 	}

@@ -232,7 +232,7 @@ func (l *LoaderAerospike) truncateSet(name string) error {
 }
 
 func (l *LoaderAerospike) loadSet(ctx *loadContext, set loadedSet) error {
-	// $extend keyword allows to import values from a named row
+	// $extend keyword allows, to import values from a named row
 	for key, binMap := range set.data {
 		if base, ok := binMap["$extend"]; ok {
 			baseName := base.(string)
@@ -258,7 +258,7 @@ func (l *LoaderAerospike) loadSet(ctx *loadContext, set loadedSet) error {
 }
 
 // resolveReference finds previously stored reference by its name
-func (f *LoaderAerospike) resolveReference(refs set, refName string) (binMap, error) {
+func (l *LoaderAerospike) resolveReference(refs set, refName string) (binMap, error) {
 	target, ok := refs[refName]
 	if !ok {
 		return nil, fmt.Errorf("undefined reference %s", refName)

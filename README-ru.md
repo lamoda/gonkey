@@ -6,7 +6,7 @@ Gonkey протестирует ваши сервисы, используя их
 
 - работает с REST/JSON API
 - проверка API сервиса на соответствие OpenAPI-спеке
-- заполнение БД сервиса данными из фикстур (поддерживается PostgreSQL, MySQL, Aerospike)
+- заполнение БД сервиса данными из фикстур (поддерживается PostgreSQL, MySQL, Aerospike, Redis)
 - моки для имитации внешних сервисов
 - можно подключить к проекту как библиотеку и запускать вместе с юнит-тестами
 - запись результата тестов в виде отчета [Allure](http://allure.qatools.ru/)
@@ -33,6 +33,7 @@ Gonkey протестирует ваши сервисы, используя их
   - [Связывание записей](#связывание-записей)
   - [Выражения](#выражения)
   - [Aerospike](#aerospike)
+  - [Redis](#redis)
 - [Моки](#моки)
   - [Запуск моков при использовании gonkey как библиотеки](#запуск-моков-при-использовании-gonkey-как-библиотеки)
   - [Описание моков в файле с тестом](#описание-моков-в-файле-с-тестом)
@@ -58,9 +59,10 @@ Gonkey протестирует ваши сервисы, используя их
 - `-spec <...>` путь к файлу или URL со swagger-спецификацией сервиса
 - `-host <...>` хост:порт сервиса
 - `-tests <...>` файл или директория с тестами
-- `-db-type <...>` - тип базы данных. В данный момент поддерживается PostgreSQL и Aerospike.
+- `-db-type <...>` - тип базы данных. В данный момент поддерживается PostgreSQL, Aerospike, Redis.
 - `-db_dsn <...>` dsn для вашей тестовой SQL базы данных (бд будет очищена перед наполнением!), поддерживается только PostgreSQL
 - `-aerospike_host <...>` при использовании Aerospike - URL для подключения к нему в формате `host:port/namespace`
+- `-redis_url <...>` при использовании Redis - адрес для подключения к Redis, например `redis://user:password@localhost:6789/1?dial_timeout=1&db=1&read_timeout=6s&max_retries=2`
 - `-fixtures <...>` директория с вашими фикстурами
 - `-allure` генерировать allure-отчет
 - `-v` подробный вывод
@@ -86,35 +88,93 @@ import (
 Создайте функцию с тестом.
 
 ```go
+package test
+
+import (
+  "testing"
+
+  "github.com/lamoda/gonkey/fixtures"
+  "github.com/lamoda/gonkey/mocks"
+  "github.com/lamoda/gonkey/runner"
+)
+
 func TestFuncCases(t *testing.T) {
-    // проинициализируйте моки, если нужно (подробнее - ниже)
-    //m := mocks.NewNop(...)
+  // проинициализируйте моки, если нужно (подробнее - ниже)
+  // m := mocks.NewNop(...)
 
-    // проинициализируйте базу для загрузки фикстур, если нужно (подробнее - ниже)
-    //db := ...
+  // проинициализируйте базу для загрузки фикстур, если нужно (подробнее - ниже)
+  // db := ...
 
-    // проинициализируйте Aerospike для загрузки фикстур, если нужно (подробнее - ниже)
-    //aerospikeClient := ...
+  // проинициализируйте Aerospike для загрузки фикстур, если нужно (подробнее - ниже)
+  // aerospikeClient := ...
 
-    // создайте экземпляр сервера вашего приложения
-    srv := server.NewServer()
-    defer srv.Close()
+  // создайте экземпляр сервера вашего приложения
+  srv := server.NewServer()
+  defer srv.Close()
 
-    // запустите выполнение тестов из директории cases с записью в отчет Allure
-    runner.RunWithTesting(t, &runner.RunWithTestingParams{
-        Server:      srv,
-        TestsDir:    "cases",
-        Mocks:       m,
-        DB:          db,
-        Aerospike: runner.Aerospike{
-            Client: aerospikeClient,
-            Namespace: "test",
-        }
-        // Тип используемой базы данных, возможные значения fixtures.Postgres, fixtures.Mysql, fixtures.Aerospike
-        // Если в параметр DB не пустой, а данный параметр не назначен, будет использоваться тип бд fixtures.Postgresql
-        DbType:      fixtures.Postgres,
-        FixturesDir: "fixtures",
-    })
+  // запустите выполнение тестов из директории cases с записью в отчет Allure
+  runner.RunWithTesting(t, &runner.RunWithTestingParams{
+    Server:   srv,
+    TestsDir: "cases",
+    Mocks:    m,
+    DB:       db,
+    Aerospike: runner.Aerospike{
+      Client:    aerospikeClient,
+      Namespace: "test",
+    },
+    // Тип используемой базы данных, возможные значения fixtures.Postgres, fixtures.Mysql, fixtures.Aerospike, fixtures.CustomLoader
+    // Если в параметр DB не пустой, а данный параметр не назначен, будет использоваться тип бд fixtures.Postgresql
+    DbType:      fixtures.Postgres,
+    FixturesDir: "fixtures",
+  })
+}
+```
+
+Начиная с версии 1.18.3, добавлена поддержка внешних модулей для загрузки тестовых данных из фикстур, если gonkey используется как библиотека.
+Чтобы начать использовать внешний загрузчик, вы должны импортировать модуль, содержащий реализацию интерфейса fixtures.Loader.
+
+Пример для загрузки данных в Redis
+
+```go
+package test
+
+import (
+  "net/http"
+  "net/http/httptest"
+  "testing"
+
+  "github.com/lamoda/gonkey/fixtures"
+  redisLoader "github.com/lamoda/gonkey/fixtures/redis"
+  // redisLoader "custom_module/gonkey-redis" // внешняя библиотека, содержащая реализацию интерфейса fixtures.Loader
+  redisClient "github.com/go-redis/redis/v9"
+  "github.com/lamoda/gonkey/runner"
+)
+
+func TestFuncCases(t *testing.T) {
+  serveMux := http.NewServeMux()
+  
+  serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    _, _ = w.Write([]byte("ok"))
+  })
+  
+  srv := httptest.NewServer(serveMux)
+  
+  clientOptions, err := redisClient.ParseURL("redis://user:password@localhost:6789/1?dial_timeout=1&db=1&read_timeout=6s&max_retries=2")
+  if err != nil {
+      panic(err)
+  }
+
+  redisFixtureLoader := redisLoader.New(redisLoader.LoaderOptions{
+    FixtureDir: "./fixtures",
+    Redis:      clientOptions,
+  })
+
+  runner.RunWithTesting(t, &runner.RunWithTestingParams{
+    Server:        srv,
+    TestsDir:      "./cases",
+    DbType:        fixtures.CustomLoader,
+    FixtureLoader: redisFixtureLoader,
+  })
 }
 ```
 
@@ -607,7 +667,7 @@ tables:
 
 Для хранилища Aerospike также поддерживается заливка тестовых данных. Для этого важно не забыть при запуске gonkey как CLI-приложение использовать флаг `-db-type aerospike`, а при использовании в качестве библиотеки в конфигурации раннера: `DbType: fixtures.Aerospike`.
 
-Формат файлов с фикстурами для аэроспайка отличается, но смысл остаётся прежним:
+Формат файлов с фикстурами для Aerospike отличается, но смысл остаётся прежним:
 ```yaml
 sets:
   set1:
@@ -651,6 +711,147 @@ sets:
 ```
 
 Связывание записей и выражения на данный момент не поддерживаются.
+
+### Redis
+
+Поддерживается загрузка тестовых данных через фикстуры для хранилища ключ/значение Redis
+
+Список, поддерживаемых структур данных:
+
+- Пара ключ/значение
+- Set
+- Hash
+- List
+- ZSet (sorted set)
+
+Связывание записей и выражения на данный момент не поддерживаются.
+
+Пример файла фикстуры:
+
+```yaml
+inherits:
+  - template1
+  - template2
+  - other_fixture
+templates:
+  keys:
+    - $name: parentKeyTemplate
+      values:
+        baseKey:
+          expiration: 1s
+          value: 1
+    - $name: childKeyTemplate
+      $extend: parentKeyTemplate
+      values:
+        otherKey:
+          value: 2
+  sets:
+    - $name: parentSetTemplate
+      expiration: 10s
+      values:
+        - value: a
+    - $name: childSetTemplate
+      $extend: parentSetTemplate
+      values:
+        - value: b
+  hashes:
+    - $name: parentHashTemplate
+      values:
+        - key: a
+          value: 1
+        - key: b
+          value: 2
+    - $name: childHashTemplate
+      $extend: parentHashTemplate
+      values:
+        - key: c
+          value: 3
+        - key: d
+          value: 4
+  lists:
+    - $name: parentListTemplate
+      values:
+        - value: 1
+        - value: 2
+    - $name: childListTemplate
+      values:
+        - value: 3
+        - value: 4
+  zsets:
+    - $name: parentZSetTemplate
+      values:
+        - value: 1
+          score: 2.1
+        - value: 2
+          score: 4.3
+    - $name: childZSetTemplate
+      value:
+        - value: 3
+          score: 6.5
+        - value: 4
+          score: 8.7
+databases:
+  1:
+    keys:
+      $extend: childKeyTemplate
+      values:
+        key1:
+          value: value1
+        key2:
+          expiration: 10s
+          value: value2
+    sets:
+      values:
+        set1:
+          $extend: childSetTemplate
+          expiration: 10s
+          values:
+            - value: a
+            - value: b
+        set3:
+          expiration: 5s
+          values:
+            - value: x
+            - value: y
+    hashes:
+      values:
+        map1:
+          $extend: childHashTemplate
+          values:
+            - key: a
+              value: 1
+            - key: b
+              value: 2
+        map2:
+          values:
+            - key: c
+              value: 3
+            - key: d
+              value: 4
+    lists:
+      values:
+        list1:
+          $extend: childListTemplate
+          values:
+            - value: 1
+            - value: 100
+            - value: 200
+    zsets:
+      values:
+        zset1:
+          $extend: childZSetTemplate
+          values:
+            - value: 5
+              score: 10.1
+  2:
+    keys:
+      values:
+        key3:
+          value: value3
+        key4:
+          expiration: 5s
+          value: value4
+```
 
 ## Моки
 

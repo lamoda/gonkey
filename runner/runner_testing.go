@@ -29,17 +29,18 @@ type Aerospike struct {
 }
 
 type RunWithTestingParams struct {
-	Server      *httptest.Server
-	TestsDir    string
-	Mocks       *mocks.Mocks
-	FixturesDir string
-	DB          *sql.DB
-	Aerospike   Aerospike
+	Server        *httptest.Server
+	TestsDir      string
+	Mocks         *mocks.Mocks
+	FixturesDir   string
+	DB            *sql.DB
+	Aerospike     Aerospike
 	// If DB parameter present, used to recognize type of database, if not set, by default uses Postgres
-	DbType      fixtures.DbType
-	EnvFilePath string
-	OutputFunc  output.OutputInterface
-	Checkers    []checker.CheckerInterface
+	DbType        fixtures.DbType
+	EnvFilePath   string
+	OutputFunc    output.OutputInterface
+	Checkers      []checker.CheckerInterface
+	FixtureLoader fixtures.Loader
 }
 
 // RunWithTesting is a helper function the wraps the common Run and provides simple way
@@ -59,13 +60,14 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	debug := os.Getenv("GONKEY_DEBUG") != ""
 
 	var fixturesLoader fixtures.Loader
-	if params.DB != nil || params.Aerospike.Client != nil {
+	if params.DB != nil || params.Aerospike.Client != nil || params.FixtureLoader != nil  {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
-			Location:  params.FixturesDir,
-			DB:        params.DB,
-			Aerospike: aerospikeAdapter.New(params.Aerospike.Client, params.Aerospike.Namespace),
-			Debug:     debug,
-			DbType:    params.DbType,
+			Location:      params.FixturesDir,
+			DB:            params.DB,
+			Aerospike:     aerospikeAdapter.New(params.Aerospike.Client, params.Aerospike.Namespace),
+			Debug:         debug,
+			DbType:        params.DbType,
+			FixtureLoader: params.FixtureLoader,
 		})
 	}
 
