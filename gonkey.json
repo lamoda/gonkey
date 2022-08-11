@@ -1,0 +1,551 @@
+{
+  "$id": "https://raw.githubusercontent.com/lamoda/gonkey/master/gonkey.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gonkey test automation tool",
+  "description": "Gonkey described here https://github.com/lamoda/gonkey",
+  "anyOf": [
+    { "$ref": "#/$defs/gonkeyTest" },
+    {
+      "type": "array",
+      "items": { "$ref": "#/$defs/gonkeyTest" }
+    }
+  ],
+  "$defs": {
+    "gonkeyTest": {
+      "type": "object",
+      "properties": {
+        "name":{
+          "type": "string",
+          "description": "test name"
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP request type",
+          "enum": [
+            "GET",
+            "POST",
+            "HEAD",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+            "TRACE",
+            "PATCH",
+            "CONNECT"
+          ]
+        },
+        "path":{
+          "type": "string",
+          "description": "HTTP request path"
+        },
+        "query":{
+          "type": "string",
+          "description": "HTTP request query"
+        },
+        "headers":{
+          "$ref": "#/$defs/headers"
+        },
+        "cookies":{
+          "type":"object",
+          "description": "map of HTTP request cookies",
+          "additionalProperties": { "type": "string" }
+        },
+        "fixtures":{
+          "type": "array",
+          "description": "a list of strings, containing paths to database fixtures",
+          "items": {"type":"string"}
+        },
+        "comparisonParams":{
+          "type":"object",
+          "description": "Boolean switches to conrol response checks",
+          "properties": {
+            "ignoreValues": { "type": "boolean", "description": "Ignore response body JSON values, validate only parameters names" },
+            "DisallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters in response body" },
+            "ignoreArraysOrdering": { "type": "boolean", "description": "Ignore JSON arrays elements ordering in response body" },
+            "ignoreDbOrdering ": { "type": "boolean", "description": "Toggles ignore ordering in DB response" }
+
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "Test status",
+          "anyOf": [
+            {
+              "const": "focus",
+              "title": "run only this specific test, and mark all other tests with unset status as skipped"
+            },
+            {
+              "const": "broken",
+              "title": "do not run test, only mark it as broken"
+            },
+            {
+              "const": "skipped",
+              "title": "do not run test, skip it"
+            }
+          ]
+        },
+        "mocks":{
+          "type":"object",
+          "description": "map of service mocks",
+          "additionalProperties": {"$ref": "#/$defs/mock"}
+        },
+        "beforeScript": {
+          "type":"object",
+          "description": "script, that executes after mocks setup and before the HTTP-request is sent",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "string with a path to the script file."
+            },
+            "timeout ": {
+              "type": "integer",
+              "description": "time in seconds, until stopping the script on timeout. The default value is 3"
+            }
+          },
+          "required": ["path"]
+        },
+        "afterRequestScript": {
+          "type":"object",
+          "description": "script, that executes after the HTTP-request was sent",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "string with a path to the script file."
+            },
+            "timeout ": {
+              "type": "integer",
+              "description": "time in seconds, until stopping the script on timeout. The default value is 3"
+            }
+          },
+          "required": ["path"]
+        },
+        "dbQuery":{
+          "type": "string",
+          "description": "a string that contains an SQL query"
+        },
+        "dbResponse":{
+          "type": "array",
+          "description": "a list of strings, containing JSON objects that the DB request should return",
+          "items": {"type":"string"}
+        },
+        "variables":{
+          "type":"object",
+          "description": "map of strings that substituted in placeholders. example of placeholder: {{ $my_variable }}"
+        },
+        "request":{
+          "type":"string",
+          "description": "string that contains HTTP request body"
+        },
+        "response":{
+          "type":"object",
+          "description": "numeric HTTP response code (i.e. 200:) with desired response body"
+        },
+        "cases":{
+          "type": "array",
+          "description": "a list of cases, containing parameters to substitute into variables",
+          "items": {
+            "type":"object",
+            "properties":{
+              "requestArgs": {"$ref": "#/$defs/requestArgs"},
+              "responseArgs": {"$ref": "#/$defs/responseArgs"},
+              "dbQueryArgs": {"$ref": "#/$defs/dbQueryArgs"},
+              "dbResponseArgs": {"$ref": "#/$defs/requestArgs"}
+            }
+          }
+        }
+      }
+    },
+    "statusCode": {
+      "type": "integer",
+      "description": "HTTP-code of the response, the default value is 200"
+    },
+    "dbQueryArgs":{
+      "type":"object",
+      "description": "map of database request parametrization arguments"
+    },
+    "dbResponseArgs":{
+      "type":"object",
+      "description": "map of database response parametrization arguments"
+    },
+    "requestArgs":{
+      "type":"object",
+      "description": "map of HTTP request parametrization arguments"
+    },
+    "responseArgs":{
+      "type":"object",
+      "description": "numeric HTTP response code (i.e. 200:) with map of parametrization arguments"
+    },
+    "headers":{
+      "type":"object",
+      "description": "map of HTTP request headers",
+      "additionalProperties": { "type": "string" }
+    },
+    "mock":{
+      "type": "object",
+      "required": ["strategy"],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "description": "mock strategy",
+          "anyOf": [
+            {
+              "const": "nop",
+              "title": "Empty strategy. All requests are served with 204 No Content and empty body. No parameters."
+            },
+            {
+              "const": "file",
+              "title": "Returns a response read from a file."
+            },
+            {
+              "const": "constant",
+              "title": "Returns a defined response."
+            },
+            {
+              "const": "template",
+              "title": "This strategy gives ability to use incoming request data into mock response. Implemented with package text/template. Automatically preload incoming request into variable named request"
+            },
+            {
+              "const": "uriVary",
+              "title": "Uses different response strategies, depending on a path of a requested resource."
+            },
+            {
+              "const": "methodVary",
+              "title": "Uses various response strategies, depending on the request method."
+            },
+            {
+              "const": "sequence",
+              "title": "With this strategy for each consequent request you will get a reply defined by a consequent nested strategy."
+            }
+          ]
+        },
+        "calls": {
+          "type": "integer",
+          "description": "how many times each mock or mock resource must be called"
+        },
+        "requestConstraints": {
+          "description": "list of mock request constraints",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/requestConstraint"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "strategy": { "const": "file" } }
+          },
+          "then": {
+            "properties": {
+              "filename": {
+                "type": "string",
+                "description": "name of the file that contains the response body"
+              },
+              "statusCode": {
+                "$ref": "#/$defs/statusCode"
+              },
+              "headers":{
+                "$ref": "#/$defs/headers"
+              }
+            },
+            "required": ["filename"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "strategy": { "const": "constant" } }
+          },
+          "then": {
+            "properties": {
+              "body": {
+                "type": "string",
+                "description": "sets the response body"
+              },
+              "statusCode": {
+                "$ref": "#/$defs/statusCode"
+              },
+              "headers":{
+                "$ref": "#/$defs/headers"
+              }
+            },
+            "required": ["body"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "strategy": { "const": "template" } }
+          },
+          "then": {
+            "properties": {
+              "body": {
+                "type": "string",
+                "description": "sets the response body, must be valid text/template string"
+              },
+              "statusCode": {
+                "$ref": "#/$defs/statusCode"
+              },
+              "headers":{
+                "$ref": "#/$defs/headers"
+              }
+            },
+            "required": ["body"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "strategy": { "const": "uriVary" } }
+          },
+          "then": {
+            "properties": {
+              "uris": {
+                "description": "a map of resources, each resource can be configured as a separate mock-service using any available request constraints and response strategies",
+                "$ref": "#/$defs/gonkeyTest/properties/mocks"
+              },
+              "basePath ":{
+                "type": "string",
+                "description": "common base route for all resources, empty by default"
+              }
+            },
+            "required": ["uris"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "strategy": { "const": "methodVary" } }
+          },
+          "then": {
+            "properties": {
+              "methods": {
+                "description": "a map of methods (GET, POST, etc), each method can be configured as a separate mock-service using any available request constraints and response strategies",
+                "$ref": "#/$defs/gonkeyTest/properties/mocks"
+              }
+            },
+            "required": ["methods"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "strategy": { "const": "sequence" } }
+          },
+          "then": {
+            "properties": {
+              "sequence": {
+                "description": "list of nested mock strategies",
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/mock"
+                }
+              }
+            },
+            "required": ["sequence"]
+          }
+        }
+      ]
+    },
+    "requestConstraint":{
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "description": "request constraint type",
+          "anyOf": [
+            {
+              "const": "nop",
+              "title": "Empty constraint. Always successful. No parameters."
+            },
+            {
+              "const": "bodyMatchesJSON",
+              "title": "Checks that the request body is JSON, and it corresponds to the JSON defined in the body parameter."
+            },
+            {
+              "const": "bodyJSONFieldMatchesJSON",
+              "title": "When request body is JSON, checks that value of particular JSON-field is string-packed JSON that matches to JSON defined in value parameter"
+            },
+            {
+              "const": "pathMatches",
+              "title": "Checks that the request path corresponds to the expected one."
+            },
+            {
+              "const": "queryMatches",
+              "title": "Checks that the GET request parameters correspond to the ones defined in the query parameter."
+            },
+            {
+              "const": "queryMatchesRegexp",
+              "title": "Checks that the GET request parameters correspond regexp pattern."
+            },
+            {
+              "const": "methodIs",
+              "title": "Checks that the request method corresponds to the expected one."
+            },
+            {
+              "const": "methodIsGET",
+              "title": "Checks that the request method corresponds to GET"
+            },
+            {
+              "const": "methodIsPOST",
+              "title": "Checks that the request method corresponds to POST"
+            },
+            {
+              "const": "headerIs",
+              "title": "Checks that the request has the defined header and (optional) that its value either equals the pre-defined one or falls under the definition of a regular expression."
+            },
+            {
+              "const": "bodyMatchesText",
+              "title": "Checks that the request has the defined body text, or it falls under the definition of a regular expression."
+            },
+            {
+              "const": "bodyMatchesXML",
+              "title": "Checks that the request body is XML, and it matches to the XML defined in the body parameter."
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "bodyMatchesJSON" } }
+          },
+          "then": {
+            "properties": {
+              "body": {
+                "type": "string",
+                "description": "expected JSON. All keys on all levels defined in this parameter must be present in the request body."
+              }
+            },
+            "required": ["body"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "bodyJSONFieldMatchesJSON" } }
+          },
+          "then": {
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "path to string field, containing JSON to check"
+              },
+              "value": {
+                "type": "string",
+                "description": "expected JSON"
+              }
+            },
+            "required": ["path","value"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "pathMatches" } }
+          },
+          "then": {
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "a string with the expected request path value"
+              },
+              "regexp": {
+                "type": "string",
+                "description": "a regular expression to check the path value against"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "queryMatches" } }
+          },
+          "then": {
+            "properties": {
+              "expectedQuery": {
+                "type": "string",
+                "description": "a list of parameters to compare the parameter string to. The order of parameters is not important"
+              }
+            },
+            "required": ["expectedQuery"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "queryMatchesRegexp" } }
+          },
+          "then": {
+            "properties": {
+              "expectedQuery": {
+                "type": "string",
+                "description": "a list of parameters to compare the parameter string to. The order of parameters is not important"
+              }
+            },
+            "required": ["expectedQuery"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "methodIs" } }
+          },
+          "then": {
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "string to compare the request method to"
+              }
+            },
+            "required": ["method"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "headerIs" } }
+          },
+          "then": {
+            "properties": {
+              "header": {
+                "type": "string",
+                "description": "name of the header that is expected with the request"
+              },
+              "value": {
+                "type": "string",
+                "description": "a string with the expected request header value"
+              },
+              "regexp": {
+                "type": "string",
+                "description": "a regular expression to check the header value against"
+              }
+            },
+            "required": ["header"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "bodyMatchesText" } }
+          },
+          "then": {
+            "properties": {
+              "body": {
+                "type": "string",
+                "description": "a string with the expected request body value"
+              },
+              "regexp": {
+                "type": "string",
+                "description": "a regular expression to check the body value against"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "bodyMatchesXML" } }
+          },
+          "then": {
+            "properties": {
+              "body": {
+                "type": "string",
+                "description": "a string with the expected request body value"
+              }
+            },
+            "required": ["body"]
+          }
+        }
+      ]
+    }
+  }
+}
