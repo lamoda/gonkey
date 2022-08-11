@@ -10,11 +10,13 @@ import (
 	"strings"
 
 	"github.com/aerospike/aerospike-client-go/v5"
+	"github.com/go-redis/redis/v9"
 	"github.com/joho/godotenv"
 
 	"github.com/lamoda/gonkey/checker/response_body"
 	"github.com/lamoda/gonkey/checker/response_db"
 	"github.com/lamoda/gonkey/fixtures"
+	redisLoader "github.com/lamoda/gonkey/fixtures/redis"
 	"github.com/lamoda/gonkey/output/allure_report"
 	"github.com/lamoda/gonkey/output/console_colored"
 	"github.com/lamoda/gonkey/runner"
@@ -28,6 +30,7 @@ type config struct {
 	TestsLocation    string
 	DbDsn            string
 	AerospikeHost    string
+	RedisURL         string
 	FixturesLocation string
 	EnvFile          string
 	Allure           bool
@@ -49,11 +52,11 @@ func main() {
 
 	fixturesLoader := initLoaders(storages, cfg)
 
-	runner := initRunner(cfg, fixturesLoader)
+	runnerInstance := initRunner(cfg, fixturesLoader)
 
-	addCheckers(runner, storages.db)
+	addCheckers(runnerInstance, storages.db)
 
-	run(runner, cfg)
+	run(runnerInstance, cfg)
 }
 
 func initStorages(cfg config) storages {
@@ -67,16 +70,27 @@ func initStorages(cfg config) storages {
 
 func initLoaders(storages storages, cfg config) fixtures.Loader {
 	var fixturesLoader fixtures.Loader
-	if (storages.db != nil || storages.aerospike != nil) && cfg.FixturesLocation != "" {
-		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
-			DB:        storages.db,
-			Aerospike: storages.aerospike,
-			Location:  cfg.FixturesLocation,
-			Debug:     cfg.Debug,
-			DbType:    fixtures.FetchDbType(cfg.DbType),
-		})
-	} else if cfg.FixturesLocation != "" {
-		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
+	if cfg.FixturesLocation != "" {
+		if storages.db != nil || storages.aerospike != nil {
+			fixturesLoader = fixtures.NewLoader(&fixtures.Config{
+				DB:        storages.db,
+				Aerospike: storages.aerospike,
+				Location:  cfg.FixturesLocation,
+				Debug:     cfg.Debug,
+				DbType:    fixtures.FetchDbType(cfg.DbType),
+			})
+		} else if cfg.DbType == fixtures.RedisParam {
+			redisOptions, err := redis.ParseURL(cfg.RedisURL)
+			if err != nil {
+				log.Panic("redis_url attribute is not a valid URL")
+			}
+			fixturesLoader = redisLoader.New(redisLoader.LoaderOptions{
+				FixtureDir: cfg.FixturesLocation,
+				Redis:      redisOptions,
+			})
+		} else {
+			log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
+		}
 	}
 	return fixturesLoader
 }
@@ -179,6 +193,7 @@ func getConfig() config {
 	flag.StringVar(&cfg.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&cfg.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
 	flag.StringVar(&cfg.AerospikeHost, "aerospike_host", "", "Aerospike host for fixtures in form of 'host:port/namespace' (WARNING! Aerospike sets will be truncated)")
+	flag.StringVar(&cfg.RedisURL, "redis_url", "", "Redis server URL for fixture loading")
 	flag.StringVar(&cfg.FixturesLocation, "fixtures", "", "Path to fixtures directory")
 	flag.StringVar(&cfg.EnvFile, "env-file", "", "Path to env-file")
 	flag.BoolVar(&cfg.Allure, "allure", true, "Make Allure report")
@@ -188,7 +203,7 @@ func getConfig() config {
 		&cfg.DbType,
 		"db-type",
 		fixtures.PostgresParam,
-		"Type of database (options: postgres, mysql, aerospike)",
+		"Type of database (options: postgres, mysql, aerospike, redis)",
 	)
 
 	flag.Parse()
