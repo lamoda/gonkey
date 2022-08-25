@@ -29,12 +29,12 @@ type Aerospike struct {
 }
 
 type RunWithTestingParams struct {
-	Server        *httptest.Server
-	TestsDir      string
-	Mocks         *mocks.Mocks
-	FixturesDir   string
-	DB            *sql.DB
-	Aerospike     Aerospike
+	Server      *httptest.Server
+	TestsDir    string
+	Mocks       *mocks.Mocks
+	FixturesDir string
+	DB          *sql.DB
+	Aerospike   Aerospike
 	// If DB parameter present, used to recognize type of database, if not set, by default uses Postgres
 	DbType        fixtures.DbType
 	EnvFilePath   string
@@ -60,7 +60,7 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	debug := os.Getenv("GONKEY_DEBUG") != ""
 
 	var fixturesLoader fixtures.Loader
-	if params.DB != nil || params.Aerospike.Client != nil || params.FixtureLoader != nil  {
+	if params.DB != nil || params.Aerospike.Client != nil || params.FixtureLoader != nil {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
 			Location:      params.FixturesDir,
 			DB:            params.DB,
@@ -73,7 +73,17 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 
 	runner := initRunner(params, mocksLoader, fixturesLoader)
 
-	setupOutputs(runner, params, t)
+	if params.OutputFunc != nil {
+		runner.AddOutput(params.OutputFunc)
+	} else {
+		runner.AddOutput(testingOutput.NewOutput(t))
+	}
+
+	if os.Getenv("GONKEY_ALLURE_DIR") != "" {
+		allureOutput := allure_report.NewOutput("Gonkey", os.Getenv("GONKEY_ALLURE_DIR"))
+		defer allureOutput.Finalize()
+		runner.AddOutput(allureOutput)
+	}
 
 	addCheckers(runner, params)
 
@@ -109,18 +119,4 @@ func addCheckers(runner *Runner, params *RunWithTestingParams) {
 	}
 
 	runner.AddCheckers(params.Checkers...)
-}
-
-func setupOutputs(r *Runner, params *RunWithTestingParams, t *testing.T) {
-	if params.OutputFunc != nil {
-		r.AddOutput(params.OutputFunc)
-	} else {
-		r.AddOutput(testingOutput.NewOutput(t))
-	}
-
-	if os.Getenv("GONKEY_ALLURE_DIR") != "" {
-		allureOutput := allure_report.NewOutput("Gonkey", os.Getenv("GONKEY_ALLURE_DIR"))
-		defer allureOutput.Finalize()
-		r.AddOutput(allureOutput)
-	}
 }
