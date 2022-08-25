@@ -1,3 +1,24 @@
+# v1.18.3 (Thu Aug 25 2022)
+
+#### 🐛 Bug Fix
+
+- Fix finalizing allure reports. [#179](https://github.com/lamoda/gonkey/pull/179) ([@vitkarpenko](https://github.com/vitkarpenko))
+- With-db-example .PHONY fix. [#172](https://github.com/lamoda/gonkey/pull/172) ([@vitkarpenko](https://github.com/vitkarpenko))
+- feature: redis fixtures support [#176](https://github.com/lamoda/gonkey/pull/176) (aleksandr.nemtarev@lamoda.ru [@anemtarev](https://github.com/anemtarev))
+
+#### 📝 Documentation
+
+- Added JSON-Schema and how to set it up in readme [#171](https://github.com/lamoda/gonkey/pull/171) ([@leorush](https://github.com/leorush))
+
+#### Authors: 4
+
+- [@anemtarev](https://github.com/anemtarev)
+- Alexander Nemtarev (aleksandr.nemtarev@lamoda.ru)
+- Lev ([@leorush](https://github.com/leorush))
+- Vitaly Karpenko ([@vitkarpenko](https://github.com/vitkarpenko))
+
+---
+
 # v1.18.3 (Mon Aug 08 2022)
 
 #### Enhancement
