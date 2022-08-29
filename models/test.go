@@ -35,6 +35,7 @@ type TestInterface interface {
 	DbQueryString() string
 	DbResponseJson() []string
 	GetVariables() map[string]string
+	GetCombinedVariables() map[string]string
 	GetVariablesToSet() map[int]map[string]string
 	GetDatabaseChecks() []DatabaseCheck
 	SetDatabaseChecks([]DatabaseCheck)

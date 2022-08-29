@@ -4,11 +4,21 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"regexp"
+	"strings"
 	"text/template"
 
 	"github.com/lamoda/gonkey/models"
+
 	"gopkg.in/yaml.v2"
 )
+
+const (
+	gonkeyVariableLeftPart  = "{{ $"
+	gonkeyProtectSubstitute = "!protect!"
+)
+
+var gonkeyProtectTemplate = regexp.MustCompile("{{\\s*\\$")
 
 func parseTestDefinitionFile(absPath string) ([]Test, error) {
 	data, err := ioutil.ReadFile(absPath)
@@ -37,6 +47,8 @@ func parseTestDefinitionFile(absPath string) ([]Test, error) {
 }
 
 func substituteArgs(tmpl string, args map[string]interface{}) (string, error) {
+	tmpl = gonkeyProtectTemplate.ReplaceAllString(tmpl, gonkeyProtectSubstitute)
+
 	compiledTmpl, err := template.New("").Parse(tmpl)
 	if err != nil {
 		return "", err
@@ -48,7 +60,9 @@ func substituteArgs(tmpl string, args map[string]interface{}) (string, error) {
 		return "", err
 	}
 
-	return buf.String(), nil
+	tmpl = strings.ReplaceAll(buf.String(), gonkeyProtectSubstitute, gonkeyVariableLeftPart)
+
+	return tmpl, nil
 }
 
 func substituteArgsToMap(tmpl map[string]string, args map[string]interface{}) (map[string]string, error) {
@@ -77,6 +91,7 @@ func makeTestFromDefinition(filePath string, testDefinition TestDefinition) ([]T
 		test.AfterRequestScript = testDefinition.AfterRequestScriptParams.PathTmpl
 		test.DbQuery = testDefinition.DbQueryTmpl
 		test.DbResponse = testDefinition.DbResponseTmpl
+		test.CombinedVariables = testDefinition.Variables
 
 		dbChecks := []models.DatabaseCheck{}
 		for _, check := range testDefinition.DatabaseChecks {
@@ -97,6 +112,11 @@ func makeTestFromDefinition(filePath string, testDefinition TestDefinition) ([]T
 	headersValTmpl := testDefinition.HeadersVal
 	cookiesValTmpl := testDefinition.CookiesVal
 	responseHeadersTmpl := testDefinition.ResponseHeaders
+	combinedVariables := map[string]string{}
+
+	if testDefinition.Variables != nil {
+		combinedVariables = testDefinition.Variables
+	}
 
 	// produce as many tests as cases defined
 	for caseIdx, testCase := range testDefinition.Cases {
@@ -174,6 +194,11 @@ func makeTestFromDefinition(filePath string, testDefinition TestDefinition) ([]T
 		if err != nil {
 			return nil, err
 		}
+
+		for key, value := range testCase.Variables {
+			combinedVariables[key] = value.(string)
+		}
+		test.CombinedVariables = combinedVariables
 
 		// compile DbResponse
 		if testCase.DbResponse != nil {

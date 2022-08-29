@@ -50,12 +50,31 @@ func TestParseTestsWithVariables(t *testing.T) {
 	testApplied := vars.Apply(testOriginal)
 
 	// check that original test is not changed
-	checkOriginal(t, testOriginal)
+	checkOriginal(t, testOriginal, false)
 
-	checkApplied(t, testApplied)
+	checkApplied(t, testApplied, false)
 }
 
-func checkOriginal(t *testing.T, test models.TestInterface) {
+func TestParseTestsWithCombinedVariables(t *testing.T) {
+
+	tests, err := parseTestDefinitionFile("testdata/combined-variables.yaml")
+	require.NoError(t, err)
+
+	testOriginal := &tests[0]
+
+	vars := variables.New()
+	vars.Load(testOriginal.GetCombinedVariables())
+	assert.NoError(t, err)
+
+	testApplied := vars.Apply(testOriginal)
+
+	// check that original test is not changed
+	checkOriginal(t, testOriginal, true)
+
+	checkApplied(t, testApplied, true)
+}
+
+func checkOriginal(t *testing.T, test models.TestInterface, combined bool) {
 
 	t.Helper()
 
@@ -75,9 +94,15 @@ func checkOriginal(t *testing.T, test models.TestInterface) {
 	resp, ok = test.GetResponse(404)
 	assert.True(t, ok)
 	assert.Equal(t, "{{ $respRx }}", resp)
+
+	if combined {
+		resp, ok = test.GetResponse(501)
+		assert.True(t, ok)
+		assert.Equal(t, "{{ $newVar }} - {{ $redefinedVar }}", resp)
+	}
 }
 
-func checkApplied(t *testing.T, test models.TestInterface) {
+func checkApplied(t *testing.T, test models.TestInterface, combined bool) {
 
 	t.Helper()
 
@@ -109,4 +134,11 @@ func checkApplied(t *testing.T, test models.TestInterface) {
 	mockBody, ok := mockMap["body"]
 	assert.True(t, ok)
 	assert.Equal(t, "{\"reqParam\": \"reqParam_value\"}", mockBody)
+
+	if combined {
+		resp, ok = test.GetResponse(501)
+		assert.True(t, ok)
+		t.Log(resp)
+		assert.Equal(t, "some_value - redefined_value", resp)
+	}
 }

@@ -1,0 +1,32 @@
+- method: "{{ $method }}"
+  path: "/some/path/{{ $pathPart }}"
+  variables:
+    tag: "some_tag"
+    reqParam: "reqParam_value"
+    method: "POST"
+    pathPart: "part_of_path"
+    query: "query_val"
+    header: "header_val"
+    resp: "resp_val"
+    respRx: "$matchRegexp(^[0-9.]+$)"
+    jsonParam: "jsonParam_val"
+    existingVar: "existingVar_Value"
+    redefinedVar: "initial_value"
+  query: "{{ $query }}"
+  headers:
+    header1: "{{ $header }}"
+  request: '{"reqParam": "{{ $reqParam }}"}'
+  response:
+    200: "{{ $resp }}"
+    404: "{{ $respRx }}"
+    500: "{{ $existingVar }} - {{ $notExistingVar }}"
+    501: "{{ $newVar }} - {{ $redefinedVar }}"
+  mocks:
+    server:
+      strategy: constant
+      body: '{"reqParam": "{{ $reqParam }}"}'
+      statusCode: 200
+  cases:
+    - variables:
+        newVar: "some_value"
+        redefinedVar: "redefined_value"
