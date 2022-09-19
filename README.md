@@ -461,6 +461,26 @@ password=private_password
 
 env-file can be convenient to hide sensitive information from a test (passwords, keys, etc.)
 
+#### From cases
+
+You can describe variables in *cases* section of a test.
+
+Example:
+
+```yaml
+- name: Get user info
+  method: GET
+  path: "/user/1"
+  response:
+    200: '{ "user_id": "1", "name": "{{ $name }}", "surname": "{{ $surname }}" }'
+  cases:
+    - variables:
+        name: John
+        surname: Doe
+```
+
+Variables like these will be available through another cases if not redefined.
+
 ## Files uploading
 
 You can upload files in test request. For this you must specify the type of request - POST and header:
