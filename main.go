@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"log"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -50,13 +51,41 @@ func main() {
 
 	storages := initStorages(cfg)
 
+	testHandler := runner.NewConsoleHandler()
 	fixturesLoader := initLoaders(storages, cfg)
 
-	runnerInstance := initRunner(cfg, fixturesLoader)
+	proxyURL, err := proxyURLFromEnv()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	addCheckers(runnerInstance, storages.db)
+	testsRunner := initRunner(cfg, fixturesLoader, testHandler, proxyURL)
 
-	run(runnerInstance, cfg)
+	consoleOutput := console_colored.NewOutput(cfg.Verbose)
+	testsRunner.AddOutput(consoleOutput)
+
+	addCheckers(testsRunner, storages.db)
+
+	var allureOutput *allure_report.AllureReportOutput
+	if cfg.Allure {
+		allureOutput = allure_report.NewOutput("Gonkey", "./allure-results")
+		testsRunner.AddOutput(allureOutput)
+	}
+
+	err = testsRunner.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if allureOutput != nil {
+		allureOutput.Finalize()
+	}
+
+	summary := testHandler.Summary()
+	consoleOutput.ShowSummary(summary)
+	if !summary.Success {
+		os.Exit(1)
+	}
 }
 
 func initStorages(cfg config) storages {
@@ -123,40 +152,21 @@ func addCheckers(r *runner.Runner, db *sql.DB) {
 	}
 }
 
-func run(r *runner.Runner, cfg config) {
-	consoleOutput := console_colored.NewOutput(cfg.Verbose)
-	r.AddOutput(consoleOutput)
-
-	var allureOutput *allure_report.AllureReportOutput
-	if cfg.Allure {
-		allureOutput = allure_report.NewOutput("Gonkey", "./allure-results")
-		r.AddOutput(allureOutput)
-	}
-
-	summary, err := r.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	consoleOutput.ShowSummary(summary)
-
-	if allureOutput != nil {
-		allureOutput.Finalize()
-	}
-
-	if !summary.Success {
-		os.Exit(1)
-	}
-}
-
-func initRunner(cfg config, fixturesLoader fixtures.Loader) *runner.Runner {
+func initRunner(
+	cfg config,
+	fixturesLoader fixtures.Loader,
+	handler *runner.ConsoleHandler,
+	proxyURL *url.URL,
+) *runner.Runner {
 	return runner.New(
 		&runner.Config{
 			Host:           cfg.Host,
 			FixturesLoader: fixturesLoader,
 			Variables:      variables.New(),
+			HttpProxyURL:   proxyURL,
 		},
 		yaml_file.NewLoader(cfg.TestsLocation),
+		handler.HandleTest,
 	)
 }
 
@@ -226,4 +236,15 @@ func parseAerospikeHost(dsn string) (address string, port int, namespace string)
 	}
 
 	return
+}
+
+func proxyURLFromEnv() (*url.URL, error) {
+	if os.Getenv("HTTP_PROXY") != "" {
+		httpUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+		if err != nil {
+			return nil, err
+		}
+		return httpUrl, nil
+	}
+	return nil, nil
 }
