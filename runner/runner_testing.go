@@ -2,7 +2,9 @@ package runner
 
 import (
 	"database/sql"
+	"errors"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"testing"
 
@@ -15,6 +17,7 @@ import (
 	"github.com/lamoda/gonkey/checker/response_header"
 	"github.com/lamoda/gonkey/fixtures"
 	"github.com/lamoda/gonkey/mocks"
+	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/output"
 	"github.com/lamoda/gonkey/output/allure_report"
 	testingOutput "github.com/lamoda/gonkey/output/testing"
@@ -71,12 +74,21 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 		})
 	}
 
-	runner := initRunner(params, mocksLoader, fixturesLoader)
+	var proxyURL *url.URL
+	if os.Getenv("HTTP_PROXY") != "" {
+		httpUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		proxyURL = httpUrl
+	}
+
+	runner := initRunner(t, params, mocksLoader, fixturesLoader, proxyURL)
 
 	if params.OutputFunc != nil {
 		runner.AddOutput(params.OutputFunc)
 	} else {
-		runner.AddOutput(testingOutput.NewOutput(t))
+		runner.AddOutput(testingOutput.NewOutput())
 	}
 
 	if os.Getenv("GONKEY_ALLURE_DIR") != "" {
@@ -87,16 +99,17 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 
 	addCheckers(runner, params)
 
-	_, err := runner.Run()
+	err := runner.Run()
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func initRunner(params *RunWithTestingParams, mocksLoader *mocks.Loader, fixturesLoader fixtures.Loader) *Runner {
+func initRunner(t *testing.T, params *RunWithTestingParams, mocksLoader *mocks.Loader, fixturesLoader fixtures.Loader, proxyURL *url.URL) *Runner {
 	yamlLoader := yaml_file.NewLoader(params.TestsDir)
 	yamlLoader.SetFileFilter(os.Getenv("GONKEY_FILE_FILTER"))
 
+	handler := testingHandler{t}
 	runner := New(
 		&Config{
 			Host:           params.Server.URL,
@@ -104,8 +117,10 @@ func initRunner(params *RunWithTestingParams, mocksLoader *mocks.Loader, fixture
 			MocksLoader:    mocksLoader,
 			FixturesLoader: fixturesLoader,
 			Variables:      variables.New(),
+			HttpProxyURL:   proxyURL,
 		},
 		yamlLoader,
+		handler.HandleTest,
 	)
 	return runner
 }
@@ -119,4 +134,28 @@ func addCheckers(runner *Runner, params *RunWithTestingParams) {
 	}
 
 	runner.AddCheckers(params.Checkers...)
+}
+
+type testingHandler struct {
+	t *testing.T
+}
+
+func (h testingHandler) HandleTest(test models.TestInterface, executeTest testExecutor) error {
+	var returnErr error
+	h.t.Run(test.GetName(), func(t *testing.T) {
+		result, err := executeTest(test)
+		if err != nil {
+			returnErr = err
+			t.Fatal(err)
+		}
+
+		if errors.Is(err, errTestSkipped) || errors.Is(err, errTestBroken) {
+			t.Skip()
+		}
+
+		if !result.Passed() {
+			t.Fail()
+		}
+	})
+	return returnErr
 }

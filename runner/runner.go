@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -24,20 +25,28 @@ type Config struct {
 	Mocks          *mocks.Mocks
 	MocksLoader    *mocks.Loader
 	Variables      *variables.Variables
+	HttpProxyURL   *url.URL
 }
 
+type testExecutor func(models.TestInterface) (*models.Result, error)
+type testHandler func(models.TestInterface, testExecutor) error
+
 type Runner struct {
-	loader   testloader.LoaderInterface
-	output   []output.OutputInterface
-	checkers []checker.CheckerInterface
+	loader               testloader.LoaderInterface
+	testExecutionHandler testHandler
+	output               []output.OutputInterface
+	checkers             []checker.CheckerInterface
+	client               *http.Client
 
 	config *Config
 }
 
-func New(config *Config, loader testloader.LoaderInterface) *Runner {
+func New(config *Config, loader testloader.LoaderInterface, handler testHandler) *Runner {
 	return &Runner{
-		config: config,
-		loader: loader,
+		config:               config,
+		loader:               loader,
+		testExecutionHandler: handler,
+		client:               newClient(config.HttpProxyURL),
 	}
 }
 
@@ -49,83 +58,49 @@ func (r *Runner) AddCheckers(c ...checker.CheckerInterface) {
 	r.checkers = append(r.checkers, c...)
 }
 
-func (r *Runner) Run() (*models.Summary, error) {
-	if r.loader == nil {
-		s := &models.Summary{
-			Success: true,
-			Failed:  0,
-			Total:   0,
-		}
-		return s, nil
-	}
-
-	loader, err := r.loader.Load()
+func (r *Runner) Run() error {
+	tests, err := r.loader.Load()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	tests := []models.TestInterface{}
-	hasFocused := false
-	for test := range loader {
-		tests = append(tests, test)
-		if test.GetStatus() == "focus" {
-			hasFocused = true
-		}
-	}
-
-	client, err := newClient()
-	if err != nil {
-		return nil, err
-	}
-
-	totalTests := 0
-	failedTests := 0
-	skippedTests := 0
-	brokenTests := 0
-
-	for _, v := range tests {
+	hasFocused := checkHasFocused(tests)
+	for _, t := range tests {
+		// make a copy because go test runner runs tests in separate goroutines
+		// and without copy tests will override each other
+		test := t
 		if hasFocused {
-			switch v.GetStatus() {
+			switch test.GetStatus() {
 			case "focus":
-				v.SetStatus("")
+				test.SetStatus("")
 			case "broken":
 				// do nothing
 			default:
-				v.SetStatus("skipped")
+				test.SetStatus("skipped")
 			}
 		}
 
-		testResult, err := r.executeTest(v, client)
-		switch {
-		case err != nil && errors.Is(err, errTestSkipped):
-			skippedTests++
-		case err != nil && errors.Is(err, errTestBroken):
-			brokenTests++
-		case err != nil:
-			// todo: populate error with test name. Currently it is not possible here to get test name.
-			return nil, err
-		}
-
-		totalTests++
-		if len(testResult.Errors) > 0 {
-			failedTests++
-		}
-		for _, o := range r.output {
-			if err := o.Process(v, testResult); err != nil {
+		testExecutor := func(testInterface models.TestInterface) (*models.Result, error) {
+			testResult, err := r.executeTest(test)
+			if err != nil {
 				return nil, err
 			}
+
+			for _, o := range r.output {
+				if err := o.Process(test, testResult); err != nil {
+					return nil, err
+				}
+			}
+			return testResult, nil
 		}
+		err := r.testExecutionHandler(test, testExecutor)
+		if err != nil {
+			return fmt.Errorf("test %s error: %s", test.GetName(), err)
+		}
+
 	}
 
-	s := &models.Summary{
-		Success: failedTests == 0,
-		Skipped: skippedTests,
-		Broken:  brokenTests,
-		Failed:  failedTests,
-		Total:   totalTests,
-	}
-
-	return s, nil
+	return nil
 }
 
 var (
@@ -133,7 +108,7 @@ var (
 	errTestBroken  = errors.New("test was broken")
 )
 
-func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*models.Result, error) {
+func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 
 	if v.GetStatus() != "" {
 		if v.GetStatus() == "broken" {
@@ -188,7 +163,7 @@ func (r *Runner) executeTest(v models.TestInterface, client *http.Client) (*mode
 		return nil, err
 	}
 
-	resp, err := client.Do(req)
+	resp, err := r.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -266,4 +241,13 @@ func (r *Runner) setVariablesFromResponse(t models.TestInterface, contentType, b
 	r.config.Variables.Merge(vars)
 
 	return nil
+}
+
+func checkHasFocused(tests []models.TestInterface) bool {
+	for _, test := range tests {
+		if test.GetStatus() == "focus" {
+			return true
+		}
+	}
+	return false
 }

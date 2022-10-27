@@ -5,5 +5,5 @@ import (
 )
 
 type LoaderInterface interface {
-	Load() (chan models.TestInterface, error)
+	Load() ([]models.TestInterface, error)
 }

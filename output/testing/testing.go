@@ -2,20 +2,16 @@ package testing
 
 import (
 	"bytes"
-	"testing"
+	"fmt"
 	"text/template"
 
 	"github.com/lamoda/gonkey/models"
 )
 
-type TestingOutput struct {
-	testing *testing.T
-}
+type TestingOutput struct{}
 
-func NewOutput(t *testing.T) *TestingOutput {
-	return &TestingOutput{
-		testing: t,
-	}
+func NewOutput() *TestingOutput {
+	return &TestingOutput{}
 }
 
 func (o *TestingOutput) Process(t models.TestInterface, result *models.Result) error {
@@ -24,7 +20,7 @@ func (o *TestingOutput) Process(t models.TestInterface, result *models.Result) e
 		if err != nil {
 			return err
 		}
-		o.testing.Error(text)
+		fmt.Println(text)
 	}
 	return nil
 }

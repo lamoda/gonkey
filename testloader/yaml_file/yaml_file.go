@@ -19,19 +19,18 @@ func NewLoader(testsLocation string) *YamlFileLoader {
 	}
 }
 
-func (l *YamlFileLoader) Load() (chan models.TestInterface, error) {
+func (l *YamlFileLoader) Load() ([]models.TestInterface, error) {
 	fileTests, err := l.parseTestsWithCases(l.testsLocation)
 	if err != nil {
 		return nil, err
 	}
-	ch := make(chan models.TestInterface)
-	go func() {
-		for i := range fileTests {
-			ch <- &fileTests[i]
-		}
-		close(ch)
-	}()
-	return ch, nil
+
+	ret := make([]models.TestInterface, len(fileTests))
+	for i, test := range fileTests {
+		test := test
+		ret[i] = &test
+	}
+	return ret, nil
 }
 
 func (l *YamlFileLoader) SetFileFilter(f string) {
