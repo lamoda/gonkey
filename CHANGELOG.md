@@ -1,3 +1,15 @@
+# v1.19.0 (Thu Oct 27 2022)
+
+#### 🚀 Enhancement
+
+- #187 Wrap test in subtest for go test runner [#188](https://github.com/lamoda/gonkey/pull/188) ([@fetinin](https://github.com/fetinin))
+
+#### Authors: 1
+
+- Denis ([@fetinin](https://github.com/fetinin))
+
+---
+
 # v1.18.3 (Thu Aug 25 2022)
 
 #### 🐛 Bug Fix
