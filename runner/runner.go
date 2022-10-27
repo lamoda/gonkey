@@ -66,6 +66,8 @@ func (r *Runner) Run() error {
 
 	hasFocused := checkHasFocused(tests)
 	for _, t := range tests {
+		// make a copy because go test runner runs tests in separate goroutines
+		// and without copy tests will override each other
 		test := t
 		if hasFocused {
 			switch test.GetStatus() {
