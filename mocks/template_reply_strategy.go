@@ -41,7 +41,7 @@ func (tr *templateRequest) Json() (map[string]interface{}, error) {
 	return tr.jsonData, nil
 }
 
-func newTemplateReply(content string, statusCode int, headers map[string]string) (replyStrategy, error) {
+func newTemplateReply(content string, statusCode int, headers map[string]string) (ReplyStrategy, error) {
 	tmpl, err := template.New("").Funcs(sprig.GenericFuncMap()).Parse(content)
 	if err != nil {
 		return nil, fmt.Errorf("template syntax error: %w", err)

@@ -27,18 +27,18 @@ func (l *Loader) Load(mocksDefinition map[string]interface{}) error {
 		}
 		def, err := l.loadDefinition("$", definition)
 		if err != nil {
-			return fmt.Errorf("unable to load definition for %s: %v", serviceName, err)
+			return fmt.Errorf("unable to load Definition for %s: %v", serviceName, err)
 		}
-		// load the definition into the mock
+		// load the Definition into the mock
 		service.SetDefinition(def)
 	}
 	return nil
 }
 
-func (l *Loader) loadDefinition(path string, rawDef interface{}) (*definition, error) {
+func (l *Loader) loadDefinition(path string, rawDef interface{}) (*Definition, error) {
 	def, ok := rawDef.(map[interface{}]interface{})
 	if !ok {
-		return nil, fmt.Errorf("at path %s: definition must be key-values", path)
+		return nil, fmt.Errorf("at path %s: Definition must be key-values", path)
 	}
 
 	// load request constraints
@@ -78,7 +78,7 @@ func (l *Loader) loadDefinition(path string, rawDef interface{}) (*definition, e
 		return nil, err
 	}
 
-	callsConstraint := callsNoConstraint
+	callsConstraint := CallsNoConstraint
 	if _, ok = def["calls"]; ok {
 		if value, ok := def["calls"].(int); ok {
 			callsConstraint = value
@@ -89,10 +89,10 @@ func (l *Loader) loadDefinition(path string, rawDef interface{}) (*definition, e
 		return nil, err
 	}
 
-	return newDefinition(path, requestConstraints, replyStrategy, callsConstraint), nil
+	return NewDefinition(path, requestConstraints, replyStrategy, callsConstraint), nil
 }
 
-func (l *Loader) loadStrategy(path, strategyName string, definition map[interface{}]interface{}, ak *[]string) (replyStrategy, error) {
+func (l *Loader) loadStrategy(path, strategyName string, definition map[interface{}]interface{}, ak *[]string) (ReplyStrategy, error) {
 	switch strategyName {
 	case "nop":
 		return &nopReply{}, nil
@@ -122,18 +122,18 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 	}
 }
 
-func (l *Loader) loadUriVaryStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadUriVaryStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	var basePath string
 	if b, ok := def["basePath"]; ok {
 		basePath = b.(string)
 	}
-	var uris map[string]*definition
+	var uris map[string]*Definition
 	if u, ok := def["uris"]; ok {
 		urisMap, ok := u.(map[interface{}]interface{})
 		if !ok {
 			return nil, errors.New("`uriVary` requires map under `uris` key")
 		}
-		uris = make(map[string]*definition, len(urisMap))
+		uris = make(map[string]*Definition, len(urisMap))
 		for uri, v := range urisMap {
 			def, err := l.loadDefinition(path+"."+uri.(string), v)
 			if err != nil {
@@ -142,17 +142,17 @@ func (l *Loader) loadUriVaryStrategy(path string, def map[interface{}]interface{
 			uris[uri.(string)] = def
 		}
 	}
-	return newUriVaryReply(basePath, uris), nil
+	return NewUriVaryReply(basePath, uris), nil
 }
 
-func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
-	var methods map[string]*definition
+func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
+	var methods map[string]*Definition
 	if u, ok := def["methods"]; ok {
 		methodsMap, ok := u.(map[interface{}]interface{})
 		if !ok {
 			return nil, errors.New("`methodVary` requires map under `methods` key")
 		}
-		methods = make(map[string]*definition, len(methodsMap))
+		methods = make(map[string]*Definition, len(methodsMap))
 		for method, v := range methodsMap {
 			def, err := l.loadDefinition(path+"."+method.(string), v)
 			if err != nil {
@@ -161,10 +161,10 @@ func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interfa
 			methods[method.(string)] = def
 		}
 	}
-	return newMethodVaryReply(methods), nil
+	return NewMethodVaryReply(methods), nil
 }
 
-func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	f, ok := def["filename"]
 	if !ok {
 		return nil, errors.New("`file` requires `filename` key")
@@ -181,10 +181,10 @@ func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) 
 	if err != nil {
 		return nil, err
 	}
-	return newFileReplyWithCode(filename, statusCode, headers)
+	return NewFileReplyWithCode(filename, statusCode, headers)
 }
 
-func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	c, ok := def["body"]
 	if !ok {
 		return nil, errors.New("`constant` requires `body` key")
@@ -201,10 +201,10 @@ func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface
 	if err != nil {
 		return nil, err
 	}
-	return newConstantReplyWithCode([]byte(body), statusCode, headers), nil
+	return NewConstantReplyWithCode([]byte(body), statusCode, headers), nil
 }
 
-func (l *Loader) loadTemplateStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadTemplateStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	c, ok := def["body"]
 	if !ok {
 		return nil, errors.New("`template` requires `body` key")
@@ -224,7 +224,7 @@ func (l *Loader) loadTemplateStrategy(path string, def map[interface{}]interface
 	return newTemplateReply(body, statusCode, headers)
 }
 
-func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	if _, ok := def["sequence"]; !ok {
 		return nil, errors.New("`sequence` requires `sequence` key")
 	}
@@ -232,7 +232,7 @@ func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface
 	if !ok {
 		return nil, errors.New("`sequence` must be a list")
 	}
-	strategies := make([]*definition, len(seqSlice))
+	strategies := make([]*Definition, len(seqSlice))
 	for i, v := range seqSlice {
 		def, err := l.loadDefinition(path+"."+strconv.Itoa(i), v)
 		if err != nil {
@@ -240,17 +240,17 @@ func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface
 		}
 		strategies[i] = def
 	}
-	return newSequentialReply(strategies), nil
+	return NewSequentialReply(strategies), nil
 }
 
-func (l *Loader) loadBasedOnRequestStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
-	var uris []*definition
+func (l *Loader) loadBasedOnRequestStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
+	var uris []*Definition
 	if u, ok := def["uris"]; ok {
 		urisList, ok := u.([]interface{})
 		if !ok {
 			return nil, errors.New("`basedOnRequest` requires list under `uris` key")
 		}
-		uris = make([]*definition, 0, len(urisList))
+		uris = make([]*Definition, 0, len(urisList))
 		for i, v := range urisList {
 			v, ok := v.(map[interface{}]interface{})
 			if !ok {

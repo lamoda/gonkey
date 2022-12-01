@@ -7,19 +7,19 @@ import (
 	"sync"
 )
 
-const callsNoConstraint = -1
+const CallsNoConstraint = -1
 
-type definition struct {
+type Definition struct {
 	path               string
 	requestConstraints []verifier
-	replyStrategy      replyStrategy
+	replyStrategy      ReplyStrategy
 	sync.Mutex
 	calls           int
 	callsConstraint int
 }
 
-func newDefinition(path string, constraints []verifier, strategy replyStrategy, callsConstraint int) *definition {
-	return &definition{
+func NewDefinition(path string, constraints []verifier, strategy ReplyStrategy, callsConstraint int) *Definition {
+	return &Definition{
 		path:               path,
 		requestConstraints: constraints,
 		replyStrategy:      strategy,
@@ -27,7 +27,7 @@ func newDefinition(path string, constraints []verifier, strategy replyStrategy, 
 	}
 }
 
-func (d *definition) Execute(w http.ResponseWriter, r *http.Request) []error {
+func (d *Definition) Execute(w http.ResponseWriter, r *http.Request) []error {
 	d.Lock()
 	d.calls++
 	d.Unlock()
@@ -55,7 +55,7 @@ func (d *definition) Execute(w http.ResponseWriter, r *http.Request) []error {
 	return errors
 }
 
-func (d *definition) ResetRunningContext() {
+func (d *Definition) ResetRunningContext() {
 	if s, ok := d.replyStrategy.(contextAwareStrategy); ok {
 		s.ResetRunningContext()
 	}
@@ -64,14 +64,14 @@ func (d *definition) ResetRunningContext() {
 	d.Unlock()
 }
 
-func (d *definition) EndRunningContext() []error {
+func (d *Definition) EndRunningContext() []error {
 	d.Lock()
 	defer d.Unlock()
 	var errs []error
 	if s, ok := d.replyStrategy.(contextAwareStrategy); ok {
 		errs = s.EndRunningContext()
 	}
-	if d.callsConstraint != callsNoConstraint && d.calls != d.callsConstraint {
+	if d.callsConstraint != CallsNoConstraint && d.calls != d.callsConstraint {
 		err := fmt.Errorf("at path %s: number of calls does not match: expected %d, actual %d",
 			d.path, d.callsConstraint, d.calls)
 		errs = append(errs, err)
@@ -99,7 +99,7 @@ func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) []
 	}
 	return errors
 }
-func (d *definition) ExecuteWithoutVerifying(w http.ResponseWriter, r *http.Request) []error {
+func (d *Definition) ExecuteWithoutVerifying(w http.ResponseWriter, r *http.Request) []error {
 	d.Lock()
 	d.calls++
 	d.Unlock()
