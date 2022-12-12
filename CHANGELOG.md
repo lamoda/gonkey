@@ -1,3 +1,16 @@
+# v1.19.1 (Mon Dec 12 2022)
+
+#### 🐛 Bug Fix
+
+- the ability to create custom mock services [#194](https://github.com/lamoda/gonkey/pull/194) (andrey.suchilov@lamoda.ru [@nofuture17](https://github.com/nofuture17))
+
+#### Authors: 2
+
+- andrey.suchilov (andrey.suchilov@lamoda.ru)
+- Suchilov Andrey ([@nofuture17](https://github.com/nofuture17))
+
+---
+
 # v1.19.0 (Thu Oct 27 2022)
 
 #### 🚀 Enhancement
