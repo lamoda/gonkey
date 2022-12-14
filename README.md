@@ -1473,6 +1473,22 @@ Example:
     ...
 ```
 
+##### dropRequest
+
+The strategy that by default drops the connection on any request. Used to emulate the network problems.
+
+No parameters.
+
+Example:
+
+```yaml
+  ...
+  mocks:
+    service1:
+      strategy: dropRequest
+    ...
+```
+
 #### Calls count
 
 You can define, how many times each mock or mock resource must be called (using `uriVary`). If the actual number of calls is different from expected, the test will be considered failed.

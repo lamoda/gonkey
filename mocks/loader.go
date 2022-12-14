@@ -117,6 +117,8 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 	case "basedOnRequest":
 		*ak = append(*ak, "basePath", "uris")
 		return l.loadBasedOnRequestStrategy(path, definition)
+	case "dropRequest":
+		return l.loadDropRequestStrategy(path, definition)
 	default:
 		return nil, fmt.Errorf("unknown strategy: %s", strategyName)
 	}
@@ -202,6 +204,10 @@ func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface
 		return nil, err
 	}
 	return NewConstantReplyWithCode([]byte(body), statusCode, headers), nil
+}
+
+func (l *Loader) loadDropRequestStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
+	return NewDropRequestReply(), nil
 }
 
 func (l *Loader) loadTemplateStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
