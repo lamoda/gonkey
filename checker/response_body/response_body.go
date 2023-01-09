@@ -11,9 +11,7 @@ import (
 	"github.com/lamoda/gonkey/models"
 )
 
-type ResponseBodyChecker struct {
-	checker.CheckerInterface
-}
+type ResponseBodyChecker struct{}
 
 func NewChecker() checker.CheckerInterface {
 	return &ResponseBodyChecker{}

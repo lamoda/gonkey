@@ -24,7 +24,7 @@ func New(mocks ...*ServiceMock) *Mocks {
 func NewNop(serviceNames ...string) *Mocks {
 	mocksMap := make(map[string]*ServiceMock, len(serviceNames))
 	for _, name := range serviceNames {
-		mocksMap[name] = NewServiceMock(name, newDefinition("$", nil, &failReply{}, callsNoConstraint))
+		mocksMap[name] = NewServiceMock(name, NewDefinition("$", nil, &failReply{}, CallsNoConstraint))
 	}
 	return &Mocks{
 		mocks: mocksMap,
@@ -66,6 +66,10 @@ func (m *Mocks) ShutdownContext(ctx context.Context) error {
 		return errors.New(strings.Join(errs, "; "))
 	}
 	return nil
+}
+
+func (m *Mocks) SetMock(mock *ServiceMock) {
+	m.mocks[mock.ServiceName] = mock
 }
 
 func (m *Mocks) Service(serviceName string) *ServiceMock {

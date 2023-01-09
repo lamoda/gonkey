@@ -1,6 +1,9 @@
 package yaml_file
 
-import "github.com/lamoda/gonkey/models"
+import (
+	"github.com/lamoda/gonkey/compare"
+	"github.com/lamoda/gonkey/models"
+)
 
 type TestDefinition struct {
 	Name                     string                    `json:"name" yaml:"name"`
@@ -20,12 +23,13 @@ type TestDefinition struct {
 	HeadersVal               map[string]string         `json:"headers" yaml:"headers"`
 	CookiesVal               map[string]string         `json:"cookies" yaml:"cookies"`
 	Cases                    []CaseData                `json:"cases" yaml:"cases"`
-	ComparisonParams         comparisonParams          `json:"comparisonParams" yaml:"comparisonParams"`
+	ComparisonParams         compare.CompareParams     `json:"comparisonParams" yaml:"comparisonParams"`
 	FixtureFiles             []string                  `json:"fixtures" yaml:"fixtures"`
 	MocksDefinition          map[string]interface{}    `json:"mocks" yaml:"mocks"`
 	PauseValue               int                       `json:"pause" yaml:"pause"`
 	DbQueryTmpl              string                    `json:"dbQuery" yaml:"dbQuery"`
 	DbResponseTmpl           []string                  `json:"dbResponse" yaml:"dbResponse"`
+	DatabaseChecks           []DatabaseCheck           `json:"dbChecks" yaml:"dbChecks"`
 }
 
 type CaseData struct {
@@ -37,12 +41,12 @@ type CaseData struct {
 	DbResponseArgs         map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
 	DbResponse             []string                       `json:"dbResponse" yaml:"dbResponse"`
 	Description            string                         `json:"description" yaml:"description"`
+	Variables              map[string]interface{}         `json:"variables" yaml:"variables"`
 }
 
-type comparisonParams struct {
-	IgnoreValues         bool `json:"ignoreValues" yaml:"ignoreValues"`
-	IgnoreArraysOrdering bool `json:"ignoreArraysOrdering" yaml:"ignoreArraysOrdering"`
-	DisallowExtraFields  bool `json:"disallowExtraFields" yaml:"disallowExtraFields"`
+type DatabaseCheck struct {
+	DbQueryTmpl    string   `json:"dbQuery" yaml:"dbQuery"`
+	DbResponseTmpl []string `json:"dbResponse" yaml:"dbResponse"`
 }
 
 type scriptParams struct {
@@ -54,22 +58,22 @@ type VariablesToSet map[int]map[string]string
 
 /*
 There can be two types of data in yaml-file:
-1) JSON-paths:
-	VariablesToSet:
-		<code1>:
-			<varName1>: <JSON_Path1>
-			<varName2>: <JSON_Path2>
-2) Plain text:
-	 VariablesToSet:
-		<code1>: <varName1>
-		<code2>: <varName2>
-		...
-   In this case we unmarshall values to format similar to JSON-paths format with empty paths:
-	 VariablesToSet:
-		<code1>:
-			<varName1>: ""
-		<code2>:
-			<varName2>: ""
+ 1. JSON-paths:
+    VariablesToSet:
+    <code1>:
+    <varName1>: <JSON_Path1>
+    <varName2>: <JSON_Path2>
+ 2. Plain text:
+    VariablesToSet:
+    <code1>: <varName1>
+    <code2>: <varName2>
+    ...
+    In this case we unmarshall values to format similar to JSON-paths format with empty paths:
+    VariablesToSet:
+    <code1>:
+    <varName1>: ""
+    <code2>:
+    <varName2>: ""
 */
 func (v *VariablesToSet) UnmarshalYAML(unmarshal func(interface{}) error) error {
 

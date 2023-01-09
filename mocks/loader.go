@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/lamoda/gonkey/compare"
 )
 
 type Loader struct {
@@ -25,18 +27,18 @@ func (l *Loader) Load(mocksDefinition map[string]interface{}) error {
 		}
 		def, err := l.loadDefinition("$", definition)
 		if err != nil {
-			return fmt.Errorf("unable to load definition for %s: %v", serviceName, err)
+			return fmt.Errorf("unable to load Definition for %s: %v", serviceName, err)
 		}
-		// load the definition into the mock
+		// load the Definition into the mock
 		service.SetDefinition(def)
 	}
 	return nil
 }
 
-func (l *Loader) loadDefinition(path string, rawDef interface{}) (*definition, error) {
+func (l *Loader) loadDefinition(path string, rawDef interface{}) (*Definition, error) {
 	def, ok := rawDef.(map[interface{}]interface{})
 	if !ok {
-		return nil, fmt.Errorf("at path %s: definition must be key-values", path)
+		return nil, fmt.Errorf("at path %s: Definition must be key-values", path)
 	}
 
 	// load request constraints
@@ -76,7 +78,7 @@ func (l *Loader) loadDefinition(path string, rawDef interface{}) (*definition, e
 		return nil, err
 	}
 
-	callsConstraint := callsNoConstraint
+	callsConstraint := CallsNoConstraint
 	if _, ok = def["calls"]; ok {
 		if value, ok := def["calls"].(int); ok {
 			callsConstraint = value
@@ -87,10 +89,10 @@ func (l *Loader) loadDefinition(path string, rawDef interface{}) (*definition, e
 		return nil, err
 	}
 
-	return newDefinition(path, requestConstraints, replyStrategy, callsConstraint), nil
+	return NewDefinition(path, requestConstraints, replyStrategy, callsConstraint), nil
 }
 
-func (l *Loader) loadStrategy(path, strategyName string, definition map[interface{}]interface{}, ak *[]string) (replyStrategy, error) {
+func (l *Loader) loadStrategy(path, strategyName string, definition map[interface{}]interface{}, ak *[]string) (ReplyStrategy, error) {
 	switch strategyName {
 	case "nop":
 		return &nopReply{}, nil
@@ -106,6 +108,9 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 	case "constant":
 		*ak = append(*ak, "body", "statusCode", "headers")
 		return l.loadConstantStrategy(path, definition)
+	case "template":
+		*ak = append(*ak, "body", "statusCode", "headers")
+		return l.loadTemplateStrategy(path, definition)
 	case "sequence":
 		*ak = append(*ak, "sequence")
 		return l.loadSequenceStrategy(path, definition)
@@ -117,18 +122,18 @@ func (l *Loader) loadStrategy(path, strategyName string, definition map[interfac
 	}
 }
 
-func (l *Loader) loadUriVaryStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadUriVaryStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	var basePath string
 	if b, ok := def["basePath"]; ok {
 		basePath = b.(string)
 	}
-	var uris map[string]*definition
+	var uris map[string]*Definition
 	if u, ok := def["uris"]; ok {
 		urisMap, ok := u.(map[interface{}]interface{})
 		if !ok {
 			return nil, errors.New("`uriVary` requires map under `uris` key")
 		}
-		uris = make(map[string]*definition, len(urisMap))
+		uris = make(map[string]*Definition, len(urisMap))
 		for uri, v := range urisMap {
 			def, err := l.loadDefinition(path+"."+uri.(string), v)
 			if err != nil {
@@ -137,17 +142,17 @@ func (l *Loader) loadUriVaryStrategy(path string, def map[interface{}]interface{
 			uris[uri.(string)] = def
 		}
 	}
-	return newUriVaryReply(basePath, uris), nil
+	return NewUriVaryReply(basePath, uris), nil
 }
 
-func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
-	var methods map[string]*definition
+func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
+	var methods map[string]*Definition
 	if u, ok := def["methods"]; ok {
 		methodsMap, ok := u.(map[interface{}]interface{})
 		if !ok {
 			return nil, errors.New("`methodVary` requires map under `methods` key")
 		}
-		methods = make(map[string]*definition, len(methodsMap))
+		methods = make(map[string]*Definition, len(methodsMap))
 		for method, v := range methodsMap {
 			def, err := l.loadDefinition(path+"."+method.(string), v)
 			if err != nil {
@@ -156,10 +161,10 @@ func (l *Loader) loadMethodVaryStrategy(path string, def map[interface{}]interfa
 			methods[method.(string)] = def
 		}
 	}
-	return newMethodVaryReply(methods), nil
+	return NewMethodVaryReply(methods), nil
 }
 
-func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	f, ok := def["filename"]
 	if !ok {
 		return nil, errors.New("`file` requires `filename` key")
@@ -176,10 +181,10 @@ func (l *Loader) loadFileStrategy(path string, def map[interface{}]interface{}) 
 	if err != nil {
 		return nil, err
 	}
-	return newFileReplyWithCode(filename, statusCode, headers)
+	return NewFileReplyWithCode(filename, statusCode, headers)
 }
 
-func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	c, ok := def["body"]
 	if !ok {
 		return nil, errors.New("`constant` requires `body` key")
@@ -196,10 +201,30 @@ func (l *Loader) loadConstantStrategy(path string, def map[interface{}]interface
 	if err != nil {
 		return nil, err
 	}
-	return newConstantReplyWithCode([]byte(body), statusCode, headers), nil
+	return NewConstantReplyWithCode([]byte(body), statusCode, headers), nil
 }
 
-func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
+func (l *Loader) loadTemplateStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
+	c, ok := def["body"]
+	if !ok {
+		return nil, errors.New("`template` requires `body` key")
+	}
+	body, ok := c.(string)
+	if !ok {
+		return nil, errors.New("`body` must be string")
+	}
+	statusCode := http.StatusOK
+	if c, ok := def["statusCode"]; ok {
+		statusCode = c.(int)
+	}
+	headers, err := l.loadHeaders(def)
+	if err != nil {
+		return nil, err
+	}
+	return newTemplateReply(body, statusCode, headers)
+}
+
+func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
 	if _, ok := def["sequence"]; !ok {
 		return nil, errors.New("`sequence` requires `sequence` key")
 	}
@@ -207,7 +232,7 @@ func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface
 	if !ok {
 		return nil, errors.New("`sequence` must be a list")
 	}
-	strategies := make([]*definition, len(seqSlice))
+	strategies := make([]*Definition, len(seqSlice))
 	for i, v := range seqSlice {
 		def, err := l.loadDefinition(path+"."+strconv.Itoa(i), v)
 		if err != nil {
@@ -215,17 +240,17 @@ func (l *Loader) loadSequenceStrategy(path string, def map[interface{}]interface
 		}
 		strategies[i] = def
 	}
-	return newSequentialReply(strategies), nil
+	return NewSequentialReply(strategies), nil
 }
 
-func (l *Loader) loadBasedOnRequestStrategy(path string, def map[interface{}]interface{}) (replyStrategy, error) {
-	var uris []*definition
+func (l *Loader) loadBasedOnRequestStrategy(path string, def map[interface{}]interface{}) (ReplyStrategy, error) {
+	var uris []*Definition
 	if u, ok := def["uris"]; ok {
 		urisList, ok := u.([]interface{})
 		if !ok {
 			return nil, errors.New("`basedOnRequest` requires list under `uris` key")
 		}
-		uris = make([]*definition, 0, len(urisList))
+		uris = make([]*Definition, 0, len(urisList))
 		for i, v := range urisList {
 			v, ok := v.(map[interface{}]interface{})
 			if !ok {
@@ -292,14 +317,17 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 	case "nop":
 		return &nopConstraint{}, nil
 	case "bodyMatchesJSON":
-		*ak = append(*ak, "body")
+		*ak = append(*ak, "body", "comparisonParams")
 		return l.loadBodyMatchesJSONConstraint(def)
 	case "bodyJSONFieldMatchesJSON":
-		*ak = append(*ak, "path", "value")
+		*ak = append(*ak, "path", "value", "comparisonParams")
 		return l.loadBodyJSONFieldMatchesJSONConstraint(def)
 	case "queryMatches":
 		*ak = append(*ak, "expectedQuery")
 		return l.loadQueryMatchesConstraint(def)
+	case "queryMatchesRegexp":
+		*ak = append(*ak, "expectedQuery")
+		return l.loadQueryMatchesRegexpConstraint(def)
 	case "methodIsGET":
 		return &methodConstraint{method: "GET"}, nil
 	case "methodIsPOST":
@@ -317,11 +345,51 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 		*ak = append(*ak, "path", "regexp")
 		return l.loadPathMatchesConstraint(def)
 	case "bodyMatchesXML":
-		*ak = append(*ak, "body")
+		*ak = append(*ak, "body", "comparisonParams")
 		return l.loadBodyMatchesXMLConstraint(def)
 	default:
 		return nil, fmt.Errorf("unknown constraint: %s", kind)
 	}
+}
+
+func readCompareParams(def map[interface{}]interface{}) (compare.CompareParams, error) {
+	params := compare.CompareParams{
+		IgnoreArraysOrdering: true,
+	}
+
+	p, ok := def["comparisonParams"]
+	if !ok {
+		return params, nil
+	}
+
+	values, ok := p.(map[interface{}]interface{})
+	if !ok {
+		return params, errors.New("`comparisonParams` can't be parsed")
+	}
+
+	mapping := map[string]*bool{
+		"ignoreValues":         &params.IgnoreValues,
+		"ignoreArraysOrdering": &params.IgnoreArraysOrdering,
+		"disallowExtraFields":  &params.DisallowExtraFields,
+	}
+
+	for key, val := range values {
+		skey, ok := key.(string)
+		if !ok {
+			return params, errors.New("`comparisonParams` has non-string key")
+		}
+
+		bval, ok := val.(bool)
+		if !ok {
+			return params, errors.New("`comparisonParams` has non-bool values")
+		}
+
+		if pbval, ok := mapping[skey]; ok {
+			*pbval = bval
+		}
+
+	}
+	return params, nil
 }
 
 func (l *Loader) loadBodyMatchesJSONConstraint(def map[interface{}]interface{}) (verifier, error) {
@@ -333,7 +401,13 @@ func (l *Loader) loadBodyMatchesJSONConstraint(def map[interface{}]interface{}) 
 	if !ok {
 		return nil, errors.New("`body` must be string")
 	}
-	return newBodyMatchesJSONConstraint(body)
+
+	params, err := readCompareParams(def)
+	if err != nil {
+		return nil, err
+	}
+
+	return newBodyMatchesJSONConstraint(body, params)
 }
 
 func (l *Loader) loadBodyJSONFieldMatchesJSONConstraint(def map[interface{}]interface{}) (verifier, error) {
@@ -354,7 +428,13 @@ func (l *Loader) loadBodyJSONFieldMatchesJSONConstraint(def map[interface{}]inte
 	if !ok {
 		return nil, errors.New("`value` must be string")
 	}
-	return newBodyJSONFieldMatchesJSONConstraint(path, value)
+
+	params, err := readCompareParams(def)
+	if err != nil {
+		return nil, err
+	}
+
+	return newBodyJSONFieldMatchesJSONConstraint(path, value, params)
 }
 
 func (l *Loader) loadBodyMatchesXMLConstraint(def map[interface{}]interface{}) (verifier, error) {
@@ -366,7 +446,13 @@ func (l *Loader) loadBodyMatchesXMLConstraint(def map[interface{}]interface{}) (
 	if !ok {
 		return nil, errors.New("`body` must be string")
 	}
-	return newBodyMatchesXMLConstraint(body)
+
+	params, err := readCompareParams(def)
+	if err != nil {
+		return nil, err
+	}
+
+	return newBodyMatchesXMLConstraint(body, params)
 }
 
 func (l *Loader) loadPathMatchesConstraint(def map[interface{}]interface{}) (verifier, error) {
@@ -396,6 +482,18 @@ func (l *Loader) loadQueryMatchesConstraint(def map[interface{}]interface{}) (ve
 		return nil, errors.New("`expectedQuery` must be string")
 	}
 	return newQueryConstraint(query)
+}
+
+func (l *Loader) loadQueryMatchesRegexpConstraint(def map[interface{}]interface{}) (verifier, error) {
+	c, ok := def["expectedQuery"]
+	if !ok {
+		return nil, errors.New("`queryMatchesRegexp` requires `expectedQuery` key")
+	}
+	query, ok := c.(string)
+	if !ok {
+		return nil, errors.New("`expectedQuery` must be string")
+	}
+	return newQueryRegexpConstraint(query)
 }
 
 func (l *Loader) loadMethodIsConstraint(def map[interface{}]interface{}) (verifier, error) {

@@ -2,22 +2,16 @@ package testing
 
 import (
 	"bytes"
-	"testing"
+	"fmt"
 	"text/template"
 
 	"github.com/lamoda/gonkey/models"
-	"github.com/lamoda/gonkey/output"
 )
 
-type TestingOutput struct {
-	output.OutputInterface
-	testing *testing.T
-}
+type TestingOutput struct{}
 
-func NewOutput(t *testing.T) *TestingOutput {
-	return &TestingOutput{
-		testing: t,
-	}
+func NewOutput() *TestingOutput {
+	return &TestingOutput{}
 }
 
 func (o *TestingOutput) Process(t models.TestInterface, result *models.Result) error {
@@ -26,7 +20,7 @@ func (o *TestingOutput) Process(t models.TestInterface, result *models.Result) e
 		if err != nil {
 			return err
 		}
-		o.testing.Error(text)
+		fmt.Println(text)
 	}
 	return nil
 }
@@ -62,12 +56,14 @@ Response:
        Body:
 {{ if .ResponseBody }}{{ .ResponseBody }}{{ else }}{{ "<no body>" }}{{ end }}
 
-{{ if .DbQuery }}
-       Db Request:
-{{ .DbQuery }}
-       Db Response:
-{{ range $value := .DbResponse }}
+{{ range $i, $dbr := .DatabaseResult }}
+{{ if $dbr.Query }}
+       Db Request #{{ inc $i }}:
+{{ $dbr.Query }}
+       Db Response #{{ inc $i }}:
+{{ range $value := $dbr.Response }}
 {{ $value }}{{ end }}
+{{ end }}
 {{ end }}
 
 {{ if .Errors }}

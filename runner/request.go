@@ -16,16 +16,10 @@ import (
 	"github.com/lamoda/gonkey/models"
 )
 
-func newClient() (*http.Client, error) {
+func newClient(proxyURL *url.URL) *http.Client {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	if os.Getenv("HTTP_PROXY") != "" {
-		proxyUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
-		if err != nil {
-			return nil, err
-		}
-		transport.Proxy = http.ProxyURL(proxyUrl)
+		Proxy:           http.ProxyURL(proxyURL),
 	}
 
 	return &http.Client{
@@ -33,7 +27,7 @@ func newClient() (*http.Client, error) {
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
-	}, nil
+	}
 }
 
 func newRequest(host string, test models.TestInterface) (req *http.Request, err error) {

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/lamoda/gonkey/checker"
+	"github.com/lamoda/gonkey/compare"
 	"github.com/lamoda/gonkey/models"
 
 	"github.com/fatih/color"
@@ -14,8 +15,6 @@ import (
 )
 
 type ResponseDbChecker struct {
-	checker.CheckerInterface
-
 	db *sql.DB
 }
 
@@ -27,6 +26,30 @@ func NewChecker(dbConnect *sql.DB) checker.CheckerInterface {
 
 func (c *ResponseDbChecker) Check(t models.TestInterface, result *models.Result) ([]error, error) {
 	var errors []error
+	errs, err := c.check(t.GetName(), t.IgnoreDbOrdering(), t, result)
+	if err != nil {
+		return nil, err
+	}
+	errors = append(errors, errs...)
+
+	for _, dbCheck := range t.GetDatabaseChecks() {
+		errs, err := c.check(t.GetName(), t.IgnoreDbOrdering(), dbCheck, result)
+		if err != nil {
+			return nil, err
+		}
+		errors = append(errors, errs...)
+	}
+
+	return errors, nil
+}
+
+func (c *ResponseDbChecker) check(
+	testName string,
+	ignoreOrdering bool,
+	t models.DatabaseCheck,
+	result *models.Result,
+) ([]error, error) {
+	var errors []error
 
 	// don't check if there are no data for db test
 	if t.DbQueryString() == "" && t.DbResponseJson() == nil {
@@ -35,18 +58,12 @@ func (c *ResponseDbChecker) Check(t models.TestInterface, result *models.Result)
 
 	// check expected db query exist
 	if t.DbQueryString() == "" {
-		return nil, fmt.Errorf(
-			"DB query not found for test \"%s\"",
-			t.GetName(),
-		)
+		return nil, fmt.Errorf("DB query not found for test \"%s\"", testName)
 	}
 
 	// check expected response exist
 	if t.DbResponseJson() == nil {
-		return nil, fmt.Errorf(
-			"expected DB response not found for test \"%s\"",
-			t.GetName(),
-		)
+		return nil, fmt.Errorf("expected DB response not found for test \"%s\"", testName)
 	}
 
 	// get DB response
@@ -54,71 +71,53 @@ func (c *ResponseDbChecker) Check(t models.TestInterface, result *models.Result)
 	if err != nil {
 		return nil, err
 	}
-	result.DbQuery = t.DbQueryString()
-	result.DbResponse = actualDbResponse
+
+	result.DatabaseResult = append(
+		result.DatabaseResult,
+		models.DatabaseResult{Query: t.DbQueryString(), Response: actualDbResponse},
+	)
 
 	// compare responses length
-	if err := compareDbResponseLength(t.DbResponseJson(), result.DbResponse, result.DbQuery); err != nil {
+	if err := compareDbResponseLength(t.DbResponseJson(), actualDbResponse, t.DbQueryString()); err != nil {
 		errors = append(errors, err)
 		return errors, nil
 	}
 	// compare responses as json lists
-	checkErrors, err := compareDbResp(t, result)
+	expectedItems, err := toJsonArray(t.DbResponseJson(), "expected", testName)
 	if err != nil {
 		return nil, err
 	}
-	errors = append(errors, checkErrors...)
+	actualItems, err := toJsonArray(actualDbResponse, "actual", testName)
+	if err != nil {
+		return nil, err
+	}
+
+	errs := compare.Compare(expectedItems, actualItems, compare.CompareParams{
+		IgnoreArraysOrdering: ignoreOrdering,
+	})
+
+	errors = append(errors, errs...)
 
 	return errors, nil
 }
 
-func compareDbResp(t models.TestInterface, result *models.Result) ([]error, error) {
-	var errors []error
-	var actualJson interface{}
-	var expectedJson interface{}
-
-	for i, row := range t.DbResponseJson() {
-		// decode expected row
-		if err := json.Unmarshal([]byte(row), &expectedJson); err != nil {
+func toJsonArray(items []string, qual, testName string) ([]interface{}, error) {
+	var itemJSONs []interface{}
+	for i, row := range items {
+		var itemJson interface{}
+		if err := json.Unmarshal([]byte(row), &itemJson); err != nil {
 			return nil, fmt.Errorf(
-				"invalid JSON in the expected DB response for test %s:\n row #%d:\n %s\n error:\n%s",
-				t.GetName(),
+				"invalid JSON in the %s DB response for test %s:\n row #%d:\n %s\n error:\n%s",
+				qual,
+				testName,
 				i,
 				row,
 				err.Error(),
 			)
 		}
-		// decode actual row
-		if err := json.Unmarshal([]byte(result.DbResponse[i]), &actualJson); err != nil {
-			return nil, fmt.Errorf(
-				"invalid JSON in the actual DB response for test %s:\n row #%d:\n %s\n error:\n%s",
-				t.GetName(),
-				i,
-				result.DbResponse[i],
-				err.Error(),
-			)
-		}
-
-		// compare responses row as jsons
-		if err := compareDbResponseRow(expectedJson, actualJson, result.DbQuery); err != nil {
-			errors = append(errors, err)
-		}
+		itemJSONs = append(itemJSONs, itemJson)
 	}
-
-	return errors, nil
-}
-
-func compareDbResponseRow(expected, actual, query interface{}) error {
-	var err error
-
-	if diff := pretty.Compare(expected, actual); diff != "" {
-		err = fmt.Errorf(
-			"items in database do not match (-expected: +actual):\n     test query:\n%s\n    result diff:\n%s",
-			color.CyanString("%v", query),
-			color.CyanString("%v", diff),
-		)
-	}
-	return err
+	return itemJSONs, nil
 }
 
 func compareDbResponseLength(expected, actual []string, query interface{}) error {

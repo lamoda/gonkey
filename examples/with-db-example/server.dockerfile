@@ -1,4 +1,6 @@
-FROM python:3.7.9
+FROM python:3.10.5
 
-RUN pip install -U psycopg2-binary --no-cache-dir
+COPY requirements.txt /app/requirements.txt
+RUN pip install -r /app/requirements.txt
+
 COPY server.py /app/server.py

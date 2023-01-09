@@ -22,9 +22,7 @@ type verifier interface {
 	Verify(r *http.Request) []error
 }
 
-type nopConstraint struct {
-	verifier
-}
+type nopConstraint struct {}
 
 func (c *nopConstraint) Verify(r *http.Request) []error {
 	return nil
@@ -32,9 +30,10 @@ func (c *nopConstraint) Verify(r *http.Request) []error {
 
 type bodyMatchesXMLConstraint struct {
 	expectedBody interface{}
+	compareParams compare.CompareParams
 }
 
-func newBodyMatchesXMLConstraint(expected string) (verifier, error) {
+func newBodyMatchesXMLConstraint(expected string, params compare.CompareParams) (verifier, error) {
 	expectedBody, err := xmlparsing.Parse(expected)
 	if err != nil {
 		return nil, err
@@ -42,6 +41,7 @@ func newBodyMatchesXMLConstraint(expected string) (verifier, error) {
 
 	res := &bodyMatchesXMLConstraint{
 		expectedBody: expectedBody,
+		compareParams: params,
 	}
 	return res, nil
 }
@@ -62,19 +62,15 @@ func (c *bodyMatchesXMLConstraint) Verify(r *http.Request) []error {
 		return []error{err}
 	}
 
-	params := compare.CompareParams{
-		IgnoreArraysOrdering: true,
-	}
-	return compare.Compare(c.expectedBody, actual, params)
+	return compare.Compare(c.expectedBody, actual, c.compareParams)
 }
 
 type bodyMatchesJSONConstraint struct {
-	verifier
-
 	expectedBody interface{}
+	compareParams compare.CompareParams
 }
 
-func newBodyMatchesJSONConstraint(expected string) (verifier, error) {
+func newBodyMatchesJSONConstraint(expected string, params compare.CompareParams) (verifier, error) {
 	var expectedBody interface{}
 	err := json.Unmarshal([]byte(expected), &expectedBody)
 	if err != nil {
@@ -82,6 +78,7 @@ func newBodyMatchesJSONConstraint(expected string) (verifier, error) {
 	}
 	res := &bodyMatchesJSONConstraint{
 		expectedBody: expectedBody,
+		compareParams: params,
 	}
 	return res, nil
 }
@@ -101,18 +98,16 @@ func (c *bodyMatchesJSONConstraint) Verify(r *http.Request) []error {
 	if err != nil {
 		return []error{err}
 	}
-	params := compare.CompareParams{
-		IgnoreArraysOrdering: true,
-	}
-	return compare.Compare(c.expectedBody, actual, params)
+	return compare.Compare(c.expectedBody, actual, c.compareParams)
 }
 
 type bodyJSONFieldMatchesJSONConstraint struct {
 	path     string
 	expected interface{}
+	compareParams compare.CompareParams
 }
 
-func newBodyJSONFieldMatchesJSONConstraint(path, expected string) (verifier, error) {
+func newBodyJSONFieldMatchesJSONConstraint(path, expected string, params compare.CompareParams) (verifier, error) {
 	var v interface{}
 	err := json.Unmarshal([]byte(expected), &v)
 	if err != nil {
@@ -121,6 +116,7 @@ func newBodyJSONFieldMatchesJSONConstraint(path, expected string) (verifier, err
 	res := &bodyJSONFieldMatchesJSONConstraint{
 		path:     path,
 		expected: v,
+		compareParams: params,
 	}
 	return res, nil
 }
@@ -147,15 +143,10 @@ func (c *bodyJSONFieldMatchesJSONConstraint) Verify(r *http.Request) []error {
 	if err != nil {
 		return []error{err}
 	}
-	params := compare.CompareParams{
-		IgnoreArraysOrdering: true,
-	}
-	return compare.Compare(c.expected, actual, params)
+	return compare.Compare(c.expected, actual, c.compareParams)
 }
 
 type methodConstraint struct {
-	verifier
-
 	method string
 }
 
@@ -167,8 +158,6 @@ func (c *methodConstraint) Verify(r *http.Request) []error {
 }
 
 type headerConstraint struct {
-	verifier
-
 	header string
 	value  string
 	regexp *regexp.Regexp
@@ -243,9 +232,59 @@ func (c *queryConstraint) Verify(r *http.Request) (errors []error) {
 	return errors
 }
 
-type pathConstraint struct {
-	verifier
+type queryRegexpConstraint struct {
+	expectedQuery map[string][]string
+}
 
+func newQueryRegexpConstraint(query string) (*queryRegexpConstraint, error) {
+	// user may begin his query with '?', just omit it in this case
+	if strings.HasPrefix(query, "?") {
+		query = query[1:]
+	}
+
+	rawParams := strings.Split(query, "&")
+
+	expectedQuery := map[string][]string{}
+	for _, rawParam := range rawParams {
+		parts := strings.Split(rawParam, "=")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("error parsing query: got %d parts, expected 2", len(parts))
+		}
+
+		_, ok := expectedQuery[parts[0]]
+		if !ok {
+			expectedQuery[parts[0]] = make([]string, 0)
+		}
+		expectedQuery[parts[0]] = append(expectedQuery[parts[0]], parts[1])
+	}
+
+	return &queryRegexpConstraint{expectedQuery}, nil
+}
+
+func (c *queryRegexpConstraint) Verify(r *http.Request) (errors []error) {
+	gotQuery := r.URL.Query()
+	for key, want := range c.expectedQuery {
+		got, ok := gotQuery[key]
+		if !ok {
+			errors = append(errors, fmt.Errorf("'%s' parameter is missing in expQuery", key))
+			continue
+		}
+
+		if ok, err := compare.CompareQuery(want, got); err != nil {
+			errors = append(errors, fmt.Errorf(
+				"'%s' parameters comparison failed. \n %s'", key, err.Error(),
+			))
+		} else if !ok {
+			errors = append(errors, fmt.Errorf(
+				"'%s' parameters are not equal.\n Got: %s \n Want: %s", key, got, want,
+			))
+		}
+	}
+
+	return errors
+}
+
+type pathConstraint struct {
 	path   string
 	regexp *regexp.Regexp
 }
@@ -278,8 +317,6 @@ func (c *pathConstraint) Verify(r *http.Request) []error {
 }
 
 type bodyMatchesTextConstraint struct {
-	verifier
-
 	body   string
 	regexp *regexp.Regexp
 }

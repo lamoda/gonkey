@@ -1,0 +1,81 @@
+databases:
+  1:
+    keys:
+      values:
+        key1:
+          value: value1
+        key2:
+          expiration: 10s
+          value: value2
+    sets:
+      values:
+        set1:
+          expiration: 10s
+          values:
+            - value: a
+            - value: b
+            - value: c
+        set3:
+          expiration: 5s
+          values:
+            - value: x
+            - value: y
+    hashes:
+      values:
+        map1:
+          values:
+            - key: a
+              value: 1
+            - key: b
+              value: 2
+        map2:
+          values:
+            - key: c
+              value: 3
+            - key: d
+              value: 4
+    lists:
+      values:
+        list1:
+          values:
+            - value: 1
+            - value: "2"
+            - value: a
+    zsets:
+      values:
+        zset1:
+          values:
+            - value: 1
+              score: 1.1
+            - value: "2"
+              score: 5.6
+  2:
+    keys:
+      values:
+        key3:
+          value: value3
+        key4:
+          expiration: 5s
+          value: value4
+    sets:
+      values:
+        set2:
+          expiration: 5s
+          values:
+            - value: d
+            - value: e
+            - value: f
+    hashes:
+      values:
+        map3:
+          values:
+            - key: c
+              value: 3
+            - key: d
+              value: 4
+        map4:
+          values:
+            - key: e
+              value: 10
+            - key: f
+              value: 11

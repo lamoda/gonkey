@@ -15,7 +15,7 @@ import (
 
 func TestBuildInsertQuery(t *testing.T) {
 
-	ymlFile, err := ioutil.ReadFile("../testdata/table.yaml")
+	ymlFile, err := ioutil.ReadFile("../testdata/sql.yaml")
 	require.NoError(t, err)
 
 	expected := []string{
@@ -36,7 +36,7 @@ func TestBuildInsertQuery(t *testing.T) {
 		l.loadYml(ymlFile, &ctx),
 	)
 
-	for i, row := range ctx.tables[0].Rows {
+	for i, row := range ctx.tables[0].rows {
 		query, err := l.buildInsertQuery(&ctx, "table", row)
 		require.NoError(t, err)
 
@@ -45,7 +45,7 @@ func TestBuildInsertQuery(t *testing.T) {
 }
 
 func TestLoadTablesShouldResolveRefs(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/table_refs.yaml")
+	yml, err := ioutil.ReadFile("../testdata/sql_refs.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
@@ -111,7 +111,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 }
 
 func TestLoadTablesShouldExtendRows(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/table_extend.yaml")
+	yml, err := ioutil.ReadFile("../testdata/sql_extend.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()

@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-type replyStrategy interface {
+type ReplyStrategy interface {
 	HandleRequest(w http.ResponseWriter, r *http.Request) []error
 }
 
@@ -19,8 +19,6 @@ type contextAwareStrategy interface {
 }
 
 type constantReply struct {
-	replyStrategy
-
 	replyBody  []byte
 	statusCode int
 	headers    map[string]string
@@ -34,7 +32,7 @@ func unhandledRequestError(r *http.Request) []error {
 	return []error{fmt.Errorf("unhandled request to mock:\n%s", requestContent)}
 }
 
-func newFileReplyWithCode(filename string, statusCode int, headers map[string]string) (replyStrategy, error) {
+func NewFileReplyWithCode(filename string, statusCode int, headers map[string]string) (ReplyStrategy, error) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -47,7 +45,7 @@ func newFileReplyWithCode(filename string, statusCode int, headers map[string]st
 	return r, nil
 }
 
-func newConstantReplyWithCode(content []byte, statusCode int, headers map[string]string) replyStrategy {
+func NewConstantReplyWithCode(content []byte, statusCode int, headers map[string]string) ReplyStrategy {
 	return &constantReply{
 		replyBody:  content,
 		statusCode: statusCode,
@@ -64,16 +62,13 @@ func (s *constantReply) HandleRequest(w http.ResponseWriter, r *http.Request) []
 	return nil
 }
 
-type failReply struct {
-}
+type failReply struct{}
 
 func (s *failReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
 	return unhandledRequestError(r)
 }
 
-type nopReply struct {
-	replyStrategy
-}
+type nopReply struct{}
 
 func (s *nopReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
 	w.WriteHeader(http.StatusNoContent)
@@ -81,14 +76,11 @@ func (s *nopReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error
 }
 
 type uriVaryReply struct {
-	replyStrategy
-	contextAwareStrategy
-
 	basePath string
-	variants map[string]*definition
+	variants map[string]*Definition
 }
 
-func newUriVaryReply(basePath string, variants map[string]*definition) replyStrategy {
+func NewUriVaryReply(basePath string, variants map[string]*Definition) ReplyStrategy {
 	return &uriVaryReply{
 		basePath: strings.TrimRight(basePath, "/") + "/",
 		variants: variants,
@@ -120,13 +112,10 @@ func (s *uriVaryReply) EndRunningContext() []error {
 }
 
 type methodVaryReply struct {
-	replyStrategy
-	contextAwareStrategy
-
-	variants map[string]*definition
+	variants map[string]*Definition
 }
 
-func newMethodVaryReply(variants map[string]*definition) replyStrategy {
+func NewMethodVaryReply(variants map[string]*Definition) ReplyStrategy {
 	return &methodVaryReply{
 		variants: variants,
 	}
@@ -155,7 +144,7 @@ func (s *methodVaryReply) EndRunningContext() []error {
 	return errs
 }
 
-func newSequentialReply(strategies []*definition) replyStrategy {
+func NewSequentialReply(strategies []*Definition) ReplyStrategy {
 	return &sequentialReply{
 		sequence: strategies,
 	}
@@ -164,7 +153,7 @@ func newSequentialReply(strategies []*definition) replyStrategy {
 type sequentialReply struct {
 	sync.Mutex
 	count    int
-	sequence []*definition
+	sequence []*Definition
 }
 
 func (s *sequentialReply) ResetRunningContext() {
@@ -198,13 +187,10 @@ func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) 
 
 type basedOnRequestReply struct {
 	sync.Mutex
-	replyStrategy
-	contextAwareStrategy
-
-	variants []*definition
+	variants []*Definition
 }
 
-func newBasedOnRequestReply(variants []*definition) replyStrategy {
+func newBasedOnRequestReply(variants []*Definition) ReplyStrategy {
 	return &basedOnRequestReply{
 		variants: variants,
 	}

@@ -10,15 +10,15 @@ import (
 type ServiceMock struct {
 	server            *http.Server
 	listener          net.Listener
-	mock              *definition
-	defaultDefinition *definition
-	sync.Mutex
+	mock              *Definition
+	defaultDefinition *Definition
+	sync.RWMutex
 	errors []error
 
 	ServiceName string
 }
 
-func NewServiceMock(serviceName string, mock *definition) *ServiceMock {
+func NewServiceMock(serviceName string, mock *Definition) *ServiceMock {
 	return &ServiceMock{
 		mock:              mock,
 		defaultDefinition: mock,
@@ -65,7 +65,7 @@ func (m *ServiceMock) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (m *ServiceMock) SetDefinition(newDefinition *definition) {
+func (m *ServiceMock) SetDefinition(newDefinition *Definition) {
 	m.Lock()
 	defer m.Unlock()
 	m.mock = newDefinition
@@ -85,6 +85,9 @@ func (m *ServiceMock) ResetRunningContext() {
 }
 
 func (m *ServiceMock) EndRunningContext() []error {
+	m.RLock()
+	defer m.RUnlock()
+
 	errs := append(m.errors, m.mock.EndRunningContext()...)
 	for i, e := range errs {
 		errs[i] = &Error{

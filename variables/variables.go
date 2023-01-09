@@ -51,6 +51,14 @@ func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
 	newTest.SetDbQueryString(vs.perform(newTest.DbQueryString()))
 	newTest.SetDbResponseJson(vs.performDbResponses(newTest.DbResponseJson()))
 
+	dbChecks := []models.DatabaseCheck{}
+	for _, def := range newTest.GetDatabaseChecks() {
+		def.SetDbQueryString(vs.perform(def.DbQueryString()))
+		def.SetDbResponseJson(vs.performDbResponses(def.DbResponseJson()))
+		dbChecks = append(dbChecks, def)
+	}
+	newTest.SetDatabaseChecks(dbChecks)
+
 	newTest.SetResponses(vs.performResponses(newTest.GetResponses()))
 	newTest.SetHeaders(vs.performHeaders(newTest.Headers()))
 

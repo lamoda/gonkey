@@ -15,8 +15,6 @@ import (
 )
 
 type ResponseSchemaChecker struct {
-	checker.CheckerInterface
-
 	swagger *spec.Swagger
 }
 

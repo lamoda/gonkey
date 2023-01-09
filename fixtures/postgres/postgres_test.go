@@ -10,7 +10,7 @@ import (
 )
 
 func TestBuildInsertQuery(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/table.yaml")
+	yml, err := ioutil.ReadFile("../testdata/sql.yaml")
 	require.NoError(t, err)
 
 	expected := "INSERT INTO \"public\".\"table\" AS row (\"field1\", \"field2\", \"field3\", \"field4\", \"field5\") VALUES " +
@@ -29,7 +29,7 @@ func TestBuildInsertQuery(t *testing.T) {
 	err = l.loadYml(yml, &ctx)
 	require.NoError(t, err)
 
-	query, err := l.buildInsertQuery(&ctx, newTableName("table"), ctx.tables[0].Rows)
+	query, err := l.buildInsertQuery(&ctx, newTableName("table"), ctx.tables[0].rows)
 
 	if err != nil {
 		t.Error("must not produce error, error:", err.Error())
@@ -43,7 +43,7 @@ func TestBuildInsertQuery(t *testing.T) {
 }
 
 func TestLoadTablesShouldResolveSchema(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/table_schema.yaml")
+	yml, err := ioutil.ReadFile("../testdata/sql_schema.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
@@ -124,7 +124,7 @@ func TestLoadTablesShouldResolveSchema(t *testing.T) {
 }
 
 func TestLoadTablesShouldResolveRefs(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/table_refs.yaml")
+	yml, err := ioutil.ReadFile("../testdata/sql_refs.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
@@ -205,7 +205,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 }
 
 func TestLoadTablesShouldExtendRows(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/table_extend.yaml")
+	yml, err := ioutil.ReadFile("../testdata/sql_extend.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()

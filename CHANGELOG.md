@@ -1,3 +1,169 @@
+# v1.19.1 (Mon Dec 12 2022)
+
+#### 🐛 Bug Fix
+
+- the ability to create custom mock services [#194](https://github.com/lamoda/gonkey/pull/194) (andrey.suchilov@lamoda.ru [@nofuture17](https://github.com/nofuture17))
+
+#### Authors: 2
+
+- andrey.suchilov (andrey.suchilov@lamoda.ru)
+- Suchilov Andrey ([@nofuture17](https://github.com/nofuture17))
+
+---
+
+# v1.19.0 (Thu Oct 27 2022)
+
+#### 🚀 Enhancement
+
+- #187 Wrap test in subtest for go test runner [#188](https://github.com/lamoda/gonkey/pull/188) ([@fetinin](https://github.com/fetinin))
+
+#### Authors: 1
+
+- Denis ([@fetinin](https://github.com/fetinin))
+
+---
+
+# v1.18.3 (Thu Aug 25 2022)
+
+#### 🐛 Bug Fix
+
+- Fix finalizing allure reports. [#179](https://github.com/lamoda/gonkey/pull/179) ([@vitkarpenko](https://github.com/vitkarpenko))
+- With-db-example .PHONY fix. [#172](https://github.com/lamoda/gonkey/pull/172) ([@vitkarpenko](https://github.com/vitkarpenko))
+- feature: redis fixtures support [#176](https://github.com/lamoda/gonkey/pull/176) (aleksandr.nemtarev@lamoda.ru [@anemtarev](https://github.com/anemtarev))
+
+#### 📝 Documentation
+
+- Added JSON-Schema and how to set it up in readme [#171](https://github.com/lamoda/gonkey/pull/171) ([@leorush](https://github.com/leorush))
+
+#### Authors: 4
+
+- [@anemtarev](https://github.com/anemtarev)
+- Alexander Nemtarev (aleksandr.nemtarev@lamoda.ru)
+- Lev ([@leorush](https://github.com/leorush))
+- Vitaly Karpenko ([@vitkarpenko](https://github.com/vitkarpenko))
+
+---
+
+# v1.18.3 (Mon Aug 08 2022)
+
+#### Enhancement
+
+- Redis fixtures support
+- Custom loader support if using gonkey as a library with a FixtureLoader configuration attribute
+
+#### Authors: 1
+
+- Alexander Nemtarev [#178](https://github.com/lamoda/gonkey/pull/176) ([@anemtarev](https://github.com/anemtarev))
+
+# v1.18.2 (Fri Jul 08 2022)
+
+#### 🐛 Bug Fix
+
+- Aerospike fixtures support [#168](https://github.com/lamoda/gonkey/pull/168) ([@vitkarpenko](https://github.com/vitkarpenko))
+
+#### Authors: 1
+
+- Vitaly Karpenko ([@vitkarpenko](https://github.com/vitkarpenko))
+
+---
+
+# v1.18.1 (Wed Jun 22 2022)
+
+#### 🐛 Bug Fix
+
+- Use regexp matching inside database response checks [#166](https://github.com/lamoda/gonkey/pull/166) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
+# v1.18.0 (Tue Jun 21 2022)
+
+#### 🚀 Enhancement
+
+- Add dbChecks format, for run multiply sql queries in one test [#164](https://github.com/lamoda/gonkey/pull/164) ([@Cdayz](https://github.com/Cdayz))
+
+#### Authors: 1
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+
+---
+
+# v1.17.0 (Wed Jun 08 2022)
+
+#### 🚀 Enhancement
+
+- Add `template` mock strategy for use incoming request inside mock responses [#162](https://github.com/lamoda/gonkey/pull/162) ([@Cdayz](https://github.com/Cdayz))
+
+#### 📝 Documentation
+
+- Added table of contents. Also fixed some markdownlint issues in README. [#160](https://github.com/lamoda/gonkey/pull/160) (vitaly.karpenko@lamoda.ru)
+
+#### Authors: 2
+
+- Nikita Tomchik ([@Cdayz](https://github.com/Cdayz))
+- Vitaly Karpenko ([@vitkarpenko](https://github.com/vitkarpenko))
+
+---
+
+# v1.16.1 (Wed Jun 01 2022)
+
+#### 🐛 Bug Fix
+
+- feat: add ? to query [#159](https://github.com/lamoda/gonkey/pull/159) ([@sashamelentyev](https://github.com/sashamelentyev))
+
+#### Authors: 1
+
+- Sasha Melentyev ([@sashamelentyev](https://github.com/sashamelentyev))
+
+---
+
+# v1.16.0 (Thu May 26 2022)
+
+#### 🚀 Enhancement
+
+- New: ignore db ordering in dbResponse feature [#154](https://github.com/lamoda/gonkey/pull/154) (lev.marder@lamoda.ru)
+
+#### Authors: 1
+
+- Lev Marder ([@ikramanop](https://github.com/ikramanop))
+
+---
+
+# v1.15.0 (Thu May 12 2022)
+
+#### 🚀 Enhancement
+
+- New: regexp in query matching [#132](https://github.com/lamoda/gonkey/pull/132) (lev.marder@lamoda.ru)
+
+#### 🏠 Internal
+
+- Bump github.com/stretchr/testify from 1.7.0 to 1.7.1 [#156](https://github.com/lamoda/gonkey/pull/156) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- #133 | fix data race [#155](https://github.com/lamoda/gonkey/pull/155) ([@architectv](https://github.com/architectv))
+
+#### Authors: 3
+
+- [@dependabot[bot]](https://github.com/dependabot[bot])
+- Alexey Vasyukov ([@architectv](https://github.com/architectv))
+- Lev Marder ([@ikramanop](https://github.com/ikramanop))
+
+---
+
+# v1.14.1 (Wed May 11 2022)
+
+#### 🐛 Bug Fix
+
+- new: add comparisonParams to BodyMatches for Json and XML [#117](https://github.com/lamoda/gonkey/pull/117) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### Authors: 2
+
+- [@Alexey19](https://github.com/Alexey19)
+- Alexey Tyuryumov (Alexey.Tyuryumov@acronis.com)
+
+---
+
 # v1.14.0 (Fri Feb 25 2022)
 
 #### 🚀 Enhancement

@@ -1,12 +1,22 @@
 package yaml_file
 
 import (
+	"strings"
+
 	"github.com/lamoda/gonkey/models"
 )
 
-type Test struct {
-	models.TestInterface
+type dbCheck struct {
+	query    string
+	response []string
+}
 
+func (c *dbCheck) DbQueryString() string        { return c.query }
+func (c *dbCheck) DbResponseJson() []string     { return c.response }
+func (c *dbCheck) SetDbQueryString(q string)    { c.query = q }
+func (c *dbCheck) SetDbResponseJson(r []string) { c.response = r }
+
+type Test struct {
 	TestDefinition
 
 	Filename string
@@ -18,6 +28,10 @@ type Test struct {
 	AfterRequestScript string
 	DbQuery            string
 	DbResponse         []string
+
+	CombinedVariables map[string]string
+
+	DbChecks []models.DatabaseCheck
 }
 
 func (t *Test) ToQuery() string {
@@ -78,6 +92,10 @@ func (t *Test) DisallowExtraFields() bool {
 	return t.ComparisonParams.DisallowExtraFields
 }
 
+func (t *Test) IgnoreDbOrdering() bool {
+	return t.ComparisonParams.IgnoreDbOrdering
+}
+
 func (t *Test) Fixtures() []string {
 	return t.FixtureFiles
 }
@@ -128,8 +146,15 @@ func (t *Test) DbResponseJson() []string {
 	return t.DbResponse
 }
 
+func (t *Test) GetDatabaseChecks() []models.DatabaseCheck       { return t.DbChecks }
+func (t *Test) SetDatabaseChecks(checks []models.DatabaseCheck) { t.DbChecks = checks }
+
 func (t *Test) GetVariables() map[string]string {
 	return t.Variables
+}
+
+func (t *Test) GetCombinedVariables() map[string]string {
+	return t.CombinedVariables
 }
 
 func (t *Test) GetForm() *models.Form {
@@ -151,8 +176,15 @@ func (t *Test) Clone() models.TestInterface {
 }
 
 func (t *Test) SetQuery(val string) {
-	t.QueryParams = val
+	var query strings.Builder
+	query.Grow(len(val) + 1)
+	if len(val) > 0 && val[0] != '?' {
+		query.WriteString("?")
+	}
+	query.WriteString(val)
+	t.QueryParams = query.String()
 }
+
 func (t *Test) SetMethod(val string) {
 	t.Method = val
 }

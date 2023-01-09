@@ -30,15 +30,14 @@ type table []row
 type rowsDict map[string]row
 
 type fixture struct {
-	Version   string
 	Inherits  []string
 	Tables    yaml.MapSlice
 	Templates yaml.MapSlice
 }
 
 type loadedTable struct {
-	Name string
-	Rows table
+	name string
+	rows table
 }
 
 type loadContext struct {
@@ -94,7 +93,7 @@ func (l *LoaderMysql) loadFile(name string, ctx *loadContext) error {
 	}
 
 	// skip previously loaded files
-	if inArray(file, &(*ctx).files) {
+	if inArray(file, ctx.files) {
 		return nil
 	}
 
@@ -104,7 +103,7 @@ func (l *LoaderMysql) loadFile(name string, ctx *loadContext) error {
 	if err != nil {
 		return err
 	}
-	(*ctx).files = append((*ctx).files, file)
+	ctx.files = append(ctx.files, file)
 	return l.loadYml(data, ctx)
 }
 
@@ -170,10 +169,10 @@ func (l *LoaderMysql) loadYml(data []byte, ctx *loadContext) error {
 			rows[i] = fields
 		}
 		lt := loadedTable{
-			Name: sourceTable.Key.(string),
-			Rows: rows,
+			name: sourceTable.Key.(string),
+			rows: rows,
 		}
-		(*ctx).tables = append((*ctx).tables, lt)
+		ctx.tables = append(ctx.tables, lt)
 	}
 	return nil
 }
@@ -188,22 +187,22 @@ func (l *LoaderMysql) loadTables(ctx *loadContext) error {
 	// truncate first
 	truncatedTables := make(map[string]bool)
 	for _, lt := range ctx.tables {
-		if _, ok := truncatedTables[lt.Name]; ok {
+		if _, ok := truncatedTables[lt.name]; ok {
 			// already truncated
 			continue
 		}
-		if err := l.truncateTable(tx, lt.Name); err != nil {
+		if err := l.truncateTable(tx, lt.name); err != nil {
 			return err
 		}
-		truncatedTables[lt.Name] = true
+		truncatedTables[lt.name] = true
 	}
 
 	// then load data
 	for _, lt := range ctx.tables {
-		if len(lt.Rows) == 0 {
+		if len(lt.rows) == 0 {
 			continue
 		}
-		if err := l.loadTable(tx, ctx, lt.Name, lt.Rows); err != nil {
+		if err := l.loadTable(tx, ctx, lt.name, lt.rows); err != nil {
 			return err
 		}
 	}
@@ -502,8 +501,8 @@ func (l *LoaderMysql) resolveFieldReference(refs rowsDict, ref string) (interfac
 }
 
 // inArray checks whether the needle is present in haystack slice
-func inArray(needle string, haystack *[]string) bool {
-	for _, e := range *haystack {
+func inArray(needle string, haystack []string) bool {
+	for _, e := range haystack {
 		if needle == e {
 			return true
 		}

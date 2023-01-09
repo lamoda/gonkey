@@ -8,12 +8,9 @@ import (
 	"time"
 
 	"github.com/lamoda/gonkey/models"
-	"github.com/lamoda/gonkey/output"
 )
 
 type AllureReportOutput struct {
-	output.OutputInterface
-
 	reportLocation string
 	allure         Allure
 }
@@ -47,15 +44,18 @@ func (o *AllureReportOutput) Process(t models.TestInterface, result *models.Resu
 		*bytes.NewBufferString("Response"),
 		*bytes.NewBufferString(fmt.Sprintf(`Body: %s`, result.ResponseBody)),
 		"txt")
-	if result.DbQuery != "" {
-		o.allure.AddAttachment(
-			*bytes.NewBufferString("Db Query"),
-			*bytes.NewBufferString(fmt.Sprintf(`SQL string: %s`, result.DbQuery)),
-			"txt")
-		o.allure.AddAttachment(
-			*bytes.NewBufferString("Db Response"),
-			*bytes.NewBufferString(fmt.Sprintf(`Respone: %s`, result.DbResponse)),
-			"txt")
+
+	for i, dbresult := range result.DatabaseResult {
+		if dbresult.Query != "" {
+			o.allure.AddAttachment(
+				*bytes.NewBufferString(fmt.Sprintf("Db Query #%d", i+1)),
+				*bytes.NewBufferString(fmt.Sprintf(`SQL string: %s`, dbresult.Query)),
+				"txt")
+			o.allure.AddAttachment(
+				*bytes.NewBufferString(fmt.Sprintf("Db Response #%d", i+1)),
+				*bytes.NewBufferString(fmt.Sprintf(`Response: %s`, dbresult.Response)),
+				"txt")
+		}
 	}
 
 	status, err := result.AllureStatus()

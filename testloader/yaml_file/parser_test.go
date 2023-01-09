@@ -50,6 +50,8 @@ var testsYAMLData = `
         200:
           foo: 'Hello world'
           bar: 42
+      variables:
+        newVar: some_value
 `
 
 func TestParseTestsWithCases(t *testing.T) {
