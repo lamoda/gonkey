@@ -334,6 +334,7 @@ Also, "?" in query is optional
 You can use variables in the description of the test, the following fields are supported:
 
 - method
+- description
 - path
 - query
 - headers
@@ -349,6 +350,7 @@ Example:
 
 ```yaml
 - method: "{{ $method }}"
+  description: "{{ $description }}"
   path: "/some/path/{{ $pathPart }}"
   query: "{{ $query }}"
   headers:

@@ -19,6 +19,7 @@ type TestInterface interface {
 	GetResponse(code int) (string, bool)
 	GetResponseHeaders(code int) (map[string]string, bool)
 	GetName() string
+	GetDescription() string
 	GetStatus() string
 	SetStatus(string)
 	Fixtures() []string
