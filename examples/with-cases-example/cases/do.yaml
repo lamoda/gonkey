@@ -1,0 +1,25 @@
+- name: Test /do endpoint
+  method: POST
+  path: /do
+
+  variables:
+    name: name
+
+  request: '{"{{ $name }}": "{{ .name }}"}'
+
+  response:
+    200: '{"{{ $num }}":{{ .num }}}'
+
+  cases:
+    - variables:
+        num: num
+      requestArgs:
+        name: a
+      responseArgs:
+        200:
+          num: 1
+    - requestArgs:
+        name: b
+      responseArgs:
+        200:
+          num: 2

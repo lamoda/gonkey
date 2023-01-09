@@ -29,6 +29,8 @@ type Test struct {
 	DbQuery            string
 	DbResponse         []string
 
+	CombinedVariables map[string]string
+
 	DbChecks []models.DatabaseCheck
 }
 
@@ -145,6 +147,10 @@ func (t *Test) SetDatabaseChecks(checks []models.DatabaseCheck) { t.DbChecks = c
 
 func (t *Test) GetVariables() map[string]string {
 	return t.Variables
+}
+
+func (t *Test) GetCombinedVariables() map[string]string {
+	return t.CombinedVariables
 }
 
 func (t *Test) GetForm() *models.Form {

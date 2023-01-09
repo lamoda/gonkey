@@ -120,7 +120,7 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 		}
 	}
 
-	r.config.Variables.Load(v.GetVariables())
+	r.config.Variables.Load(v.GetCombinedVariables())
 	v = r.config.Variables.Apply(v)
 
 	// load fixtures
@@ -206,7 +206,7 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 		return nil, err
 	}
 
-	r.config.Variables.Load(v.GetVariables())
+	r.config.Variables.Load(v.GetCombinedVariables())
 	v = r.config.Variables.Apply(v)
 
 	for _, c := range r.checkers {

@@ -39,6 +39,7 @@ type CaseData struct {
 	DbQueryArgs            map[string]interface{}         `json:"dbQueryArgs" yaml:"dbQueryArgs"`
 	DbResponseArgs         map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
 	DbResponse             []string                       `json:"dbResponse" yaml:"dbResponse"`
+	Variables              map[string]interface{}         `json:"variables" yaml:"variables"`
 }
 
 type DatabaseCheck struct {
@@ -55,22 +56,22 @@ type VariablesToSet map[int]map[string]string
 
 /*
 There can be two types of data in yaml-file:
-1) JSON-paths:
-	VariablesToSet:
-		<code1>:
-			<varName1>: <JSON_Path1>
-			<varName2>: <JSON_Path2>
-2) Plain text:
-	 VariablesToSet:
-		<code1>: <varName1>
-		<code2>: <varName2>
-		...
-   In this case we unmarshall values to format similar to JSON-paths format with empty paths:
-	 VariablesToSet:
-		<code1>:
-			<varName1>: ""
-		<code2>:
-			<varName2>: ""
+ 1. JSON-paths:
+    VariablesToSet:
+    <code1>:
+    <varName1>: <JSON_Path1>
+    <varName2>: <JSON_Path2>
+ 2. Plain text:
+    VariablesToSet:
+    <code1>: <varName1>
+    <code2>: <varName2>
+    ...
+    In this case we unmarshall values to format similar to JSON-paths format with empty paths:
+    VariablesToSet:
+    <code1>:
+    <varName1>: ""
+    <code2>:
+    <varName2>: ""
 */
 func (v *VariablesToSet) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
