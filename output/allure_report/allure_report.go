@@ -33,7 +33,9 @@ func NewOutput(suiteName, reportLocation string) *AllureReportOutput {
 
 func (o *AllureReportOutput) Process(t models.TestInterface, result *models.Result) error {
 	testCase := o.allure.StartCase(t.GetName(), time.Now())
+	testCase.SetDescriptionOrDefaultValue(t.GetDescription(), "No description")
 	testCase.AddLabel("story", result.Path)
+
 	o.allure.AddAttachment(
 		*bytes.NewBufferString("Request"),
 		*bytes.NewBufferString(fmt.Sprintf(`Query: %s \n Body: %s`, result.Query, result.RequestBody)),

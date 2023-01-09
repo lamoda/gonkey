@@ -210,48 +210,54 @@ func (f *LoaderPostgres) loadTables(ctx *loadContext) error {
 	defer func() { _ = tx.Rollback() }()
 
 	// truncate first
-	truncatedTables := make(map[string]bool)
-	for _, lt := range ctx.tables {
-		if _, ok := truncatedTables[lt.name.getFullName()]; ok {
-			// already truncated
-			continue
-		}
-		if err := f.truncateTable(lt.name); err != nil {
-			return err
-		}
-		truncatedTables[lt.name.getFullName()] = true
+	if err := f.truncateTables(tx, ctx.tables...); err != nil {
+		return err
 	}
+
 	// then load data
 	for _, lt := range ctx.tables {
 		if len(lt.rows) == 0 {
 			continue
 		}
-		if err := f.loadTable(ctx, lt.name, lt.rows); err != nil {
-			return fmt.Errorf("failed to load table '%s' because:\n%s", lt.name, err)
+		if err := f.loadTable(ctx, tx, lt.name, lt.rows); err != nil {
+			return fmt.Errorf("failed to load table '%s' because:\n%s", lt.name.getFullName(), err)
 		}
 	}
 	// alter the sequences so they contain max id + 1
-	if err := f.fixSequences(); err != nil {
+	if err := f.fixSequences(tx); err != nil {
 		return err
 	}
 
 	return tx.Commit()
 }
 
-// truncateTable truncates table
-func (f *LoaderPostgres) truncateTable(name tableName) error {
-	query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", name.getFullName())
+// truncateTables truncates table
+func (f *LoaderPostgres) truncateTables(tx *sql.Tx, tables ...loadedTable) error {
+	set := make(map[string]struct{})
+	tablesToTruncate := make([]string, 0, len(tables))
+	for _, t := range tables {
+		tableName := t.name.getFullName()
+		if _, ok := set[tableName]; ok {
+			// already truncated
+			continue
+		}
+
+		tablesToTruncate = append(tablesToTruncate, tableName)
+		set[tableName] = struct{}{}
+	}
+
+	query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", strings.Join(tablesToTruncate, ","))
 	if f.debug {
 		fmt.Println("Issuing SQL:", query)
 	}
-	_, err := f.db.Exec(query)
+	_, err := tx.Exec(query)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f *LoaderPostgres) loadTable(ctx *loadContext, t tableName, rows table) error {
+func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, rows table) error {
 	// $extend keyword allows to import values from a named row
 	for i, row := range rows {
 		if base, ok := row["$extend"]; ok {
@@ -275,7 +281,7 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, t tableName, rows table) er
 		fmt.Println("Issuing SQL:", query)
 	}
 	// issuing query
-	insertedRows, err := f.db.Query(query)
+	insertedRows, err := tx.Query(query)
 	if err != nil {
 		return err
 	}
@@ -326,7 +332,7 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, t tableName, rows table) er
 	return err
 }
 
-func (f *LoaderPostgres) fixSequences() error {
+func (f *LoaderPostgres) fixSequences(tx *sql.Tx) error {
 	query := `
 DO $$
 DECLARE
@@ -353,7 +359,7 @@ END$$
 	if f.debug {
 		fmt.Println("Issuing SQL:", query)
 	}
-	_, err := f.db.Exec(query)
+	_, err := tx.Exec(query)
 	return err
 }
 

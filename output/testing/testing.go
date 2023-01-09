@@ -28,6 +28,8 @@ func (o *TestingOutput) Process(t models.TestInterface, result *models.Result) e
 func renderResult(result *models.Result) (string, error) {
 	text := `
        Name: {{ .Test.GetName }}
+       Description:
+{{- if .Test.GetDescription }}{{ .Test.GetDescription }}{{ else }}{{ " No description" }}{{ end }}
        File: {{ .Test.GetFileName }}
 
 Request:
