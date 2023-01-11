@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.2
-	github.com/aerospike/aerospike-client-go/v5 v5.8.0
+	github.com/aerospike/aerospike-client-go/v5 v5.11.0
 	github.com/fatih/color v1.7.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.2
 	github.com/google/go-cmp v0.5.8
