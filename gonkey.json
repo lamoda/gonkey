@@ -18,6 +18,10 @@
           "type": "string",
           "description": "test name"
         },
+        "description":{
+          "type": "string",
+          "description": "test description"
+        },
         "method": {
           "type": "string",
           "description": "HTTP request type",
