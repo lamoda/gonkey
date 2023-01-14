@@ -331,6 +331,7 @@ responseHeaders:
 В описании теста можно использовать переменные, они поддерживаются в следующих полях:
 
 - method
+- description
 - path
 - query
 - headers
@@ -346,6 +347,7 @@ responseHeaders:
 
 ```yaml
 - method: "{{ $method }}"
+  description: "{{ $description }}"
   path: "/some/path/{{ $pathPart }}"
   query: "{{ $query }}"
   headers:
