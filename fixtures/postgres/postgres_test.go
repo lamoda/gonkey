@@ -30,16 +30,9 @@ func TestBuildInsertQuery(t *testing.T) {
 	require.NoError(t, err)
 
 	query, err := l.buildInsertQuery(&ctx, newTableName("table"), ctx.tables[0].rows)
+	require.NoError(t, err)
 
-	if err != nil {
-		t.Error("must not produce error, error:", err.Error())
-		t.Fail()
-	}
-
-	if query != expected {
-		t.Error("must generate proper SQL, got result:", query)
-		t.Fail()
-	}
+	require.Equal(t, expected, query)
 }
 
 func TestLoadTablesShouldResolveSchema(t *testing.T) {
@@ -47,9 +40,7 @@ func TestLoadTablesShouldResolveSchema(t *testing.T) {
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
+	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
 	ctx := loadContext{
@@ -59,21 +50,12 @@ func TestLoadTablesShouldResolveSchema(t *testing.T) {
 
 	l := New(db, "", true)
 
-	err = l.loadYml([]byte(yml), &ctx)
-	if err != nil {
-		t.Error(err)
-		t.Fail()
-	}
+	err = l.loadYml(yml, &ctx)
+	require.NoError(t, err)
 
 	mock.ExpectBegin()
 
-	mock.ExpectExec("^TRUNCATE TABLE \"schema1\".\"table1\" CASCADE$").
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
-	mock.ExpectExec("^TRUNCATE TABLE \"schema2\".\"table2\" CASCADE$").
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
-	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table3\" CASCADE$").
+	mock.ExpectExec("^TRUNCATE TABLE \"schema1\".\"table1\",\"schema2\".\"table2\",\"public\".\"table3\" CASCADE$").
 		WillReturnResult(sqlmock.NewResult(0, 0))
 
 	q := `^INSERT INTO "schema1"."table1" AS row \("f1", "f2"\) VALUES ` +
@@ -112,15 +94,10 @@ func TestLoadTablesShouldResolveSchema(t *testing.T) {
 	mock.ExpectCommit()
 
 	err = l.loadTables(&ctx)
-	if err != nil {
-		t.Error(err)
-		t.Fail()
-	}
+	require.NoError(t, err)
 
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-		t.Fail()
-	}
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
 }
 
 func TestLoadTablesShouldResolveRefs(t *testing.T) {
@@ -128,9 +105,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
+	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
 	ctx := loadContext{
@@ -140,21 +115,12 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 
 	l := New(db, "", true)
 
-	err = l.loadYml([]byte(yml), &ctx)
-	if err != nil {
-		t.Error(err)
-		t.Fail()
-	}
+	err = l.loadYml(yml, &ctx)
+	require.NoError(t, err)
 
 	mock.ExpectBegin()
 
-	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table1\" CASCADE$").
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
-	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table2\" CASCADE$").
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
-	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table3\" CASCADE$").
+	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table1\",\"public\".\"table2\",\"public\".\"table3\" CASCADE$").
 		WillReturnResult(sqlmock.NewResult(0, 0))
 
 	q := `^INSERT INTO "public"."table1" AS row \("f1", "f2"\) VALUES ` +
@@ -193,15 +159,10 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 	mock.ExpectCommit()
 
 	err = l.loadTables(&ctx)
-	if err != nil {
-		t.Error(err)
-		t.Fail()
-	}
+	require.NoError(t, err)
 
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-		t.Fail()
-	}
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
 }
 
 func TestLoadTablesShouldExtendRows(t *testing.T) {
@@ -209,9 +170,7 @@ func TestLoadTablesShouldExtendRows(t *testing.T) {
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
+	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 
 	ctx := loadContext{
@@ -221,21 +180,12 @@ func TestLoadTablesShouldExtendRows(t *testing.T) {
 
 	l := New(db, "", true)
 
-	err = l.loadYml([]byte(yml), &ctx)
-	if err != nil {
-		t.Error(err)
-		t.Fail()
-	}
+	err = l.loadYml(yml, &ctx)
+	require.NoError(t, err)
 
 	mock.ExpectBegin()
 
-	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table1\" CASCADE$").
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
-	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table2\" CASCADE$").
-		WillReturnResult(sqlmock.NewResult(0, 0))
-
-	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table3\" CASCADE$").
+	mock.ExpectExec("^TRUNCATE TABLE \"public\".\"table1\",\"public\".\"table2\",\"public\".\"table3\" CASCADE$").
 		WillReturnResult(sqlmock.NewResult(0, 0))
 
 	q := `^INSERT INTO "public"."table1" AS row \("f1", "f2"\) VALUES ` +
@@ -276,13 +226,8 @@ func TestLoadTablesShouldExtendRows(t *testing.T) {
 	mock.ExpectCommit()
 
 	err = l.loadTables(&ctx)
-	if err != nil {
-		t.Error(err)
-		t.Fail()
-	}
+	require.NoError(t, err)
 
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-		t.Fail()
-	}
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
 }
