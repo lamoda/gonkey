@@ -218,6 +218,10 @@
             {
               "const": "sequence",
               "title": "With this strategy for each consequent request you will get a reply defined by a consequent nested strategy."
+            },
+            {
+              "const": "dropRequest",
+              "title": "The strategy that by default drops the connection on any request. Used to emulate the network problems."
             }
           ]
         },
