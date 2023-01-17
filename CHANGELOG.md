@@ -1,3 +1,33 @@
+# v1.20.0 (Tue Jan 17 2023)
+
+#### 🚀 Enhancement
+
+- new: introduce dropRequest strategy [#195](https://github.com/lamoda/gonkey/pull/195) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### 🐛 Bug Fix
+
+- issues-147: add description to tests [#151](https://github.com/lamoda/gonkey/pull/151) (mihail.borovikov@lamoda.ru [@fetinin](https://github.com/fetinin) [@Mania-c](https://github.com/Mania-c))
+- feature: cases variables through tests [#180](https://github.com/lamoda/gonkey/pull/180) (lev.marder@lamoda.ru)
+
+#### 🏠 Internal
+
+- Load Postgres fixtures in a single transaction, truncate all tables at once [#198](https://github.com/lamoda/gonkey/pull/198) ([@fetinin](https://github.com/fetinin))
+
+#### 📝 Documentation
+
+- Update doc with "description" field [#197](https://github.com/lamoda/gonkey/pull/197) ([@fetinin](https://github.com/fetinin))
+
+#### Authors: 6
+
+- [@Alexey19](https://github.com/Alexey19)
+- Alexey Tyuryumov (Alexey.Tyuryumov@acronis.com)
+- Denis ([@fetinin](https://github.com/fetinin))
+- Lev Marder ([@ikramanop](https://github.com/ikramanop))
+- Michael ([@Mania-c](https://github.com/Mania-c))
+- Mihail Borovikov (mihail.borovikov@lamoda.ru)
+
+---
+
 # v1.19.1 (Mon Dec 12 2022)
 
 #### 🐛 Bug Fix
