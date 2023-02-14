@@ -90,3 +90,11 @@ func (m *Mocks) EndRunningContext() []error {
 	}
 	return errors
 }
+
+func (m *Mocks) GetNames() []string {
+	names := []string{}
+	for n := range m.mocks {
+		names = append(names, n)
+	}
+	return names
+}

@@ -3,9 +3,11 @@ package runner
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/aerospike/aerospike-client-go/v5"
@@ -46,12 +48,21 @@ type RunWithTestingParams struct {
 	FixtureLoader fixtures.Loader
 }
 
+func registerMocksEnvironment(m *mocks.Mocks) {
+	names := m.GetNames()
+	for _, n := range names {
+		varName := fmt.Sprintf("GONKEY_MOCK_%s", strings.ToUpper(n))
+		os.Setenv(varName, m.Service(n).ServerAddr())
+	}
+}
+
 // RunWithTesting is a helper function the wraps the common Run and provides simple way
 // to configure Gonkey by filling the params structure.
 func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	var mocksLoader *mocks.Loader
 	if params.Mocks != nil {
 		mocksLoader = mocks.NewLoader(params.Mocks)
+		registerMocksEnvironment(params.Mocks)
 	}
 
 	if params.EnvFilePath != "" {
