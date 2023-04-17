@@ -1,3 +1,16 @@
+# v1.20.1 (Mon Apr 17 2023)
+
+#### 🐛 Bug Fix
+
+- fix fatal when test has status broken [#204](https://github.com/lamoda/gonkey/pull/204) (m.pavlov@autodoc.eu [@maxistua](https://github.com/maxistua))
+
+#### Authors: 2
+
+- [@maxistua](https://github.com/maxistua)
+- Maksym Pavlov (m.pavlov@autodoc.eu)
+
+---
+
 # v1.20.0 (Tue Jan 17 2023)
 
 #### 🚀 Enhancement
