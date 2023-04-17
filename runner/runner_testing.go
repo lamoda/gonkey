@@ -146,11 +146,12 @@ func (h testingHandler) HandleTest(test models.TestInterface, executeTest testEx
 		result, err := executeTest(test)
 		if err != nil {
 			returnErr = err
-			t.Fatal(err)
-		}
 
-		if errors.Is(err, errTestSkipped) || errors.Is(err, errTestBroken) {
-			t.Skip()
+			if errors.Is(err, errTestSkipped) || errors.Is(err, errTestBroken) {
+				t.Skip()
+			} else {
+				t.Fatal(err)
+			}
 		}
 
 		if !result.Passed() {
