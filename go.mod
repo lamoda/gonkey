@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/joho/godotenv v1.3.0
+	github.com/joho/godotenv v1.5.1
 	github.com/kylelemons/godebug v1.1.0
 	github.com/lib/pq v1.3.0
 	github.com/mattn/go-colorable v0.1.12 // indirect
