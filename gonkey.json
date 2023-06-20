@@ -123,13 +123,21 @@
           "required": ["path"]
         },
         "dbQuery":{
-          "type": "string",
-          "description": "a string that contains an SQL query"
+          "$ref": "#/$defs/dbQuery"
         },
         "dbResponse":{
+          "$ref": "#/$defs/dbResponse"
+        },
+        "dbChecks":{
           "type": "array",
-          "description": "a list of strings, containing JSON objects that the DB request should return",
-          "items": {"type":"string"}
+          "description": "a list of db checks, containing any amount of needed queries, executed after test case",
+          "items": {
+            "type":"object",
+            "properties":{
+              "dbQuery": {"$ref": "#/$defs/dbQuery"},
+              "dbResponse": {"$ref": "#/$defs/dbResponse"}
+            }
+          }
         },
         "variables":{
           "type":"object",
@@ -161,6 +169,15 @@
     "statusCode": {
       "type": "integer",
       "description": "HTTP-code of the response, the default value is 200"
+    },
+    "dbQuery":{
+      "type": "string",
+      "description": "a string that contains an SQL query"
+    },
+    "dbResponse":{
+      "type": "array",
+      "description": "a list of strings, containing JSON objects that the DB request should return",
+      "items": {"type":"string"}
     },
     "dbQueryArgs":{
       "type":"object",
