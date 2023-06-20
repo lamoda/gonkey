@@ -63,7 +63,7 @@
           "description": "Boolean switches to conrol response checks",
           "properties": {
             "ignoreValues": { "type": "boolean", "description": "Ignore response body JSON values, validate only parameters names" },
-            "DisallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters in response body" },
+            "disallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters in response body" },
             "ignoreArraysOrdering": { "type": "boolean", "description": "Ignore JSON arrays elements ordering in response body" },
             "ignoreDbOrdering ": { "type": "boolean", "description": "Toggles ignore ordering in DB response" }
 
@@ -418,6 +418,15 @@
               "body": {
                 "type": "string",
                 "description": "expected JSON. All keys on all levels defined in this parameter must be present in the request body."
+              },
+              "comparisonParams":{
+                "type":"object",
+                "description": "Boolean switches to conrol json checks",
+                "properties": {
+                  "ignoreValues": { "type": "boolean", "description": "Ignore response body JSON values, validate only parameters names" },
+                  "disallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters" },
+                  "ignoreArraysOrdering": { "type": "boolean", "description": "Ignore JSON arrays elements ordering" }
+                }
               }
             },
             "required": ["body"]
@@ -436,6 +445,15 @@
               "value": {
                 "type": "string",
                 "description": "expected JSON"
+              },
+              "comparisonParams":{
+                "type":"object",
+                "description": "Boolean switches to conrol json checks",
+                "properties": {
+                  "ignoreValues": { "type": "boolean", "description": "Ignore response body JSON values, validate only parameters names" },
+                  "disallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters" },
+                  "ignoreArraysOrdering": { "type": "boolean", "description": "Ignore JSON arrays elements ordering" }
+                }
               }
             },
             "required": ["path","value"]
