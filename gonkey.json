@@ -63,7 +63,7 @@
           "description": "Boolean switches to conrol response checks",
           "properties": {
             "ignoreValues": { "type": "boolean", "description": "Ignore response body JSON values, validate only parameters names" },
-            "DisallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters in response body" },
+            "disallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters in response body" },
             "ignoreArraysOrdering": { "type": "boolean", "description": "Ignore JSON arrays elements ordering in response body" },
             "ignoreDbOrdering ": { "type": "boolean", "description": "Toggles ignore ordering in DB response" }
 
@@ -123,13 +123,21 @@
           "required": ["path"]
         },
         "dbQuery":{
-          "type": "string",
-          "description": "a string that contains an SQL query"
+          "$ref": "#/$defs/dbQuery"
         },
         "dbResponse":{
+          "$ref": "#/$defs/dbResponse"
+        },
+        "dbChecks":{
           "type": "array",
-          "description": "a list of strings, containing JSON objects that the DB request should return",
-          "items": {"type":"string"}
+          "description": "a list of db checks, containing any amount of needed queries, executed after test case",
+          "items": {
+            "type":"object",
+            "properties":{
+              "dbQuery": {"$ref": "#/$defs/dbQuery"},
+              "dbResponse": {"$ref": "#/$defs/dbResponse"}
+            }
+          }
         },
         "variables":{
           "type":"object",
@@ -161,6 +169,15 @@
     "statusCode": {
       "type": "integer",
       "description": "HTTP-code of the response, the default value is 200"
+    },
+    "dbQuery":{
+      "type": "string",
+      "description": "a string that contains an SQL query"
+    },
+    "dbResponse":{
+      "type": "array",
+      "description": "a list of strings, containing JSON objects that the DB request should return",
+      "items": {"type":"string"}
     },
     "dbQueryArgs":{
       "type":"object",
@@ -418,6 +435,15 @@
               "body": {
                 "type": "string",
                 "description": "expected JSON. All keys on all levels defined in this parameter must be present in the request body."
+              },
+              "comparisonParams":{
+                "type":"object",
+                "description": "Boolean switches to conrol json checks",
+                "properties": {
+                  "ignoreValues": { "type": "boolean", "description": "Ignore response body JSON values, validate only parameters names" },
+                  "disallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters" },
+                  "ignoreArraysOrdering": { "type": "boolean", "description": "Ignore JSON arrays elements ordering" }
+                }
               }
             },
             "required": ["body"]
@@ -436,6 +462,15 @@
               "value": {
                 "type": "string",
                 "description": "expected JSON"
+              },
+              "comparisonParams":{
+                "type":"object",
+                "description": "Boolean switches to conrol json checks",
+                "properties": {
+                  "ignoreValues": { "type": "boolean", "description": "Ignore response body JSON values, validate only parameters names" },
+                  "disallowExtraFields": { "type": "boolean", "description": "Disallow extra JSON parameters" },
+                  "ignoreArraysOrdering": { "type": "boolean", "description": "Ignore JSON arrays elements ordering" }
+                }
               }
             },
             "required": ["path","value"]
