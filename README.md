@@ -933,6 +933,8 @@ runner.RunWithTesting(t, &runner.RunWithTestingParams{
 })
 ```
 
+Additionally, the library registers special environment variables `GONKEY_MOCK_<MOCK_NAME>`, which contain the address and port of the corresponding mock server. You can use these environment variables when writing tests.
+
 ### Mocks definition in the test file
 
 Each test communicates a configuration to the mock-server before running. This configuration defines the responses for specific requests in the mock-server. The configuration is defined in a YAML-file with test in the `mocks` section.
