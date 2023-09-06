@@ -1,3 +1,21 @@
+# v1.21.0 (Wed Sep 06 2023)
+
+#### 🚀 Enhancement
+
+- new: register mock address as environment variables [#201](https://github.com/lamoda/gonkey/pull/201) (Alexey.Tyuryumov@acronis.com [@Alexey19](https://github.com/Alexey19))
+
+#### 🏠 Internal
+
+- Updated JSON-Schema with JSON request constraints comparison params [#215](https://github.com/lamoda/gonkey/pull/215) ([@leorush](https://github.com/leorush))
+
+#### Authors: 3
+
+- [@Alexey19](https://github.com/Alexey19)
+- Alexey Tyuryumov (Alexey.Tyuryumov@acronis.com)
+- Lev ([@leorush](https://github.com/leorush))
+
+---
+
 # v1.20.1 (Mon Apr 17 2023)
 
 #### 🐛 Bug Fix
