@@ -4,11 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lamoda/gonkey/output/allure_report"
-	testingOutput "github.com/lamoda/gonkey/output/testing"
-	aerospikeAdapter "github.com/lamoda/gonkey/storage/aerospike"
-	mongoAdapter "github.com/lamoda/gonkey/storage/mongo"
-	"go.mongodb.org/mongo-driver/mongo"
 	"net/http/httptest"
 	"net/url"
 	"os"
@@ -17,6 +12,7 @@ import (
 
 	"github.com/aerospike/aerospike-client-go/v5"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/lamoda/gonkey/checker"
 	"github.com/lamoda/gonkey/checker/response_body"
@@ -26,6 +22,10 @@ import (
 	"github.com/lamoda/gonkey/mocks"
 	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/output"
+	"github.com/lamoda/gonkey/output/allure_report"
+	testingOutput "github.com/lamoda/gonkey/output/testing"
+	aerospikeAdapter "github.com/lamoda/gonkey/storage/aerospike"
+	mongoAdapter "github.com/lamoda/gonkey/storage/mongo"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
 	"github.com/lamoda/gonkey/variables"
 )
