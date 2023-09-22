@@ -1,0 +1,14 @@
+templates:
+  base_tmpl:
+    field1: value1
+  extended_tmpl:
+    $extend: base_tmpl
+    field2: value2
+
+collections:
+  collection1:
+    - $extend: base_tmpl
+      field1: overwritten
+  collection2:
+    - $extend: extended_tmpl
+      field2: overwritten

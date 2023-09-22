@@ -1,0 +1,12 @@
+collections:
+  database1.collection1:
+    - f1: value1
+      f2: value2
+
+  database2.collection2:
+    - f1: value3
+      f2: value4
+
+  collection3:
+    - f1: value5
+      f2: value6
