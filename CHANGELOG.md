@@ -1,6 +1,6 @@
 # v1.21.2 (Tue Oct 17 2023)
 
-#### 🐛 Bug Fix
+#### 🏠 Internal
 
 - Bump github.com/google/uuid from 1.1.1 to 1.3.1 [#223](https://github.com/lamoda/gonkey/pull/223) ([@dependabot[bot]](https://github.com/dependabot[bot]) [@vitkarpenko](https://github.com/vitkarpenko))
 - Bump github.com/tidwall/gjson from 1.13.0 to 1.17.0 [#226](https://github.com/lamoda/gonkey/pull/226) ([@dependabot[bot]](https://github.com/dependabot[bot]))
