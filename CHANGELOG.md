@@ -1,3 +1,15 @@
+# v1.21.3 (Tue Oct 17 2023)
+
+#### ⚠️ Pushed to `master`
+
+- Update CHANGELOG.md ([@vitkarpenko](https://github.com/vitkarpenko))
+
+#### Authors: 1
+
+- Vitaly Karpenko ([@vitkarpenko](https://github.com/vitkarpenko))
+
+---
+
 # v1.21.2 (Tue Oct 17 2023)
 
 #### 🏠 Internal
