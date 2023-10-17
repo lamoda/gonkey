@@ -1,3 +1,16 @@
+# v1.21.1 (Tue Oct 17 2023)
+
+#### 🐛 Bug Fix
+
+- fix fatal when set status skipped or broken [#225](https://github.com/lamoda/gonkey/pull/225) (d.chevinskiy@smartway.today [@lechefer](https://github.com/lechefer))
+
+#### Authors: 2
+
+- Denis Chervinskiy (d.chevinskiy@smartway.today)
+- Denis Chervisnkiy ([@lechefer](https://github.com/lechefer))
+
+---
+
 # v1.21.0 (Wed Sep 06 2023)
 
 #### 🚀 Enhancement
