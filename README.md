@@ -8,7 +8,7 @@ Capabilities:
 
 - works with REST/JSON API
 - tests service API for compliance with OpenAPI-specs
-- seeds the DB with fixtures data (supports PostgreSQL, MySQL, Aerospike, Redis)
+- seeds the DB with fixtures data (supports PostgreSQL, MySQL, Aerospike, Redis, MongoDB)
 - provides mocks for external services
 - can be used as a library and ran together with unit-tests
 - stores the results as an [Allure](http://allure.qatools.ru/) report
@@ -37,6 +37,7 @@ Capabilities:
   - [Expressions](#expressions)
   - [Aerospike](#aerospike)
   - [Redis](#redis)
+  - [MongoDB](#mongodb)
 - [Mocks](#mocks)
   - [Running mocks while using gonkey as a library](#running-mocks-while-using-gonkey-as-a-library)
   - [Mocks definition in the test file](#mocks-definition-in-the-test-file)
@@ -62,8 +63,9 @@ To test a service located on a remote host, use gonkey as a console util.
 - `-spec <...>` path to a file or URL with the swagger-specs for the service
 - `-host <...>` service host:port
 - `-tests <...>` test file or directory
-- `-db-type <...>` - database type. PostgreSQL, Aerospike, Redis are currently supported.
+- `-db-type <...>` - database type. PostgreSQL, Aerospike, Redis, Mongo are currently supported.
 - `-aerospike_host <...>` when using Aerospike - connection URL in a form of `host:port/namespace`
+- `-mongo_dsn <...>` when using MongoDB - connection URL in a form of `mongodb://user:password@host:port`
 - `-redis_url <...>` when using Redis - connection address, for example `redis://user:password@localhost:6789/1?dial_timeout=1&db=1&read_timeout=6s&max_retries=2`
 - `-db_dsn <...>` DSN for the test DB (the DB will be cleared before seeding!), supports only PostgreSQL
 - `-fixtures <...>` fixtures directory
@@ -878,6 +880,49 @@ databases:
           expiration: 5s
           value: value4
 ```
+
+### MongoDB
+
+To connect to MongoDB, you need to:
+- For the CLI-version: use the flags -db-type mongo and mongo_dsn {connectionString};
+- For the Package-version: when configuring the runner, set DbType: fixtures.Mongo and pass the MongoDB client as Mongo: {mongo client}.
+
+The format of fixture files for MongoDB:
+```yaml
+collections:
+  collection1:
+    - field1: "value1"
+      field2: 1
+    - field1: "value2"
+      field2: 2
+      field3: 2.569947773654566
+  collection2:
+    - field4: false
+      field5: null
+      field1: '"'
+    - field1: "'"
+      field5:
+        - 1
+        - '2'
+```
+
+If you are using different databases:
+```yaml
+collections:
+  database1.collection1:
+    - f1: value1
+      f2: value2
+
+  database2.collection2:
+    - f1: value3
+      f2: value4
+
+  collection3:
+    - f1: value5
+      f2: value6
+```
+
+The `eval` operator is not supported.
 
 ## Mocks
 

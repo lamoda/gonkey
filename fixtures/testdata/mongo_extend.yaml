@@ -1,14 +1,20 @@
 templates:
   base_tmpl:
-    field1: value1
-  extended_tmpl:
+    field1: tplVal1
+  ref3:
     $extend: base_tmpl
-    field2: value2
-
+    field2: tplVal2
 collections:
   collection1:
-    - $extend: base_tmpl
-      field1: overwritten
+    - $name: ref1
+      field1: value1
+      field2: value2
+
   collection2:
-    - $extend: extended_tmpl
-      field2: overwritten
+    - $name: ref2
+      $extend: ref1
+      field1: value1 overwritten
+
+  collection3:
+    - $extend: ref2
+    - $extend: ref3

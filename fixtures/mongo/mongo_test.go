@@ -40,7 +40,7 @@ func TestLoaderMongo_loadYml(t *testing.T) {
 							{
 								"field1": "value2",
 								"field2": 2,
-								"field3": 2.569947773654566473,
+								"field3": 2.569947773654566,
 							},
 						},
 					},
@@ -116,12 +116,12 @@ func TestLoaderMongo_loadYml(t *testing.T) {
 			want: loadContext{
 				refsDefinition: documentsDict{
 					"base_tmpl": {
-						"field1": "value1",
+						"field1": "tplVal1",
 					},
-					"extended_tmpl": {
+					"ref3": {
 						"$extend": "base_tmpl",
-						"field1":  "value1",
-						"field2":  "value2",
+						"field1":  "tplVal1",
+						"field2":  "tplVal2",
 					},
 				},
 				refsInserted: documentsDict{},
@@ -130,8 +130,9 @@ func TestLoaderMongo_loadYml(t *testing.T) {
 						name: collectionName{database: "public", name: "collection1"},
 						documents: collection{
 							{
-								"$extend": "base_tmpl",
-								"field1":  "overwritten",
+								"$name":  "ref1",
+								"field1": "value1",
+								"field2": "value2",
 							},
 						},
 					},
@@ -139,8 +140,65 @@ func TestLoaderMongo_loadYml(t *testing.T) {
 						name: collectionName{database: "public", name: "collection2"},
 						documents: collection{
 							{
-								"$extend": "extended_tmpl",
-								"field2":  "overwritten",
+								"$name":   "ref2",
+								"$extend": "ref1",
+								"field1":  "value1 overwritten",
+							},
+						},
+					},
+					{
+						name: collectionName{database: "public", name: "collection3"},
+						documents: collection{
+							{
+								"$extend": "ref2",
+							},
+							{
+								"$extend": "ref3",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "refs",
+			args: args{
+				data: loadTestData(t, "../testdata/mongo_refs.yaml"),
+				ctx: &loadContext{
+					refsDefinition: documentsDict{},
+					refsInserted:   documentsDict{},
+				},
+			},
+			want: loadContext{
+				refsDefinition: documentsDict{},
+				refsInserted:   documentsDict{},
+				collections: []loadedCollection{
+					{
+						name: collectionName{database: "public", name: "collection1"},
+						documents: collection{
+							{
+								"$name": "ref1",
+								"f1":    "value1",
+								"f2":    "value2",
+							},
+						},
+					},
+					{
+						name: collectionName{database: "public", name: "collection2"},
+						documents: collection{
+							{
+								"$name": "ref2",
+								"f1":    "$ref1.f2",
+								"f2":    "$ref1.f1",
+							},
+						},
+					},
+					{
+						name: collectionName{database: "public", name: "collection3"},
+						documents: collection{
+							{
+								"f1": "$ref1.f1",
+								"f2": "$ref2.f1",
 							},
 						},
 					},

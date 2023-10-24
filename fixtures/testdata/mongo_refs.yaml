@@ -1,0 +1,14 @@
+collections:
+  collection1:
+    - $name: ref1
+      f1: value1
+      f2: value2
+
+  collection2:
+    - $name: ref2
+      f1: $ref1.f2
+      f2: $ref1.f1
+
+  collection3:
+    - f1: $ref1.f1
+      f2: $ref2.f1
