@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"flag"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net/url"
 	"os"
@@ -22,6 +25,7 @@ import (
 	"github.com/lamoda/gonkey/output/console_colored"
 	"github.com/lamoda/gonkey/runner"
 	aerospikeAdapter "github.com/lamoda/gonkey/storage/aerospike"
+	mongoAdapter "github.com/lamoda/gonkey/storage/mongo"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
 	"github.com/lamoda/gonkey/variables"
 )
@@ -31,6 +35,7 @@ type config struct {
 	TestsLocation    string
 	DbDsn            string
 	AerospikeHost    string
+	MongoDsn         string
 	RedisURL         string
 	FixturesLocation string
 	EnvFile          string
@@ -43,6 +48,7 @@ type config struct {
 type storages struct {
 	db        *sql.DB
 	aerospike *aerospikeAdapter.Client
+	mongo     *mongoAdapter.Client
 }
 
 func main() {
@@ -91,19 +97,22 @@ func main() {
 func initStorages(cfg config) storages {
 	db := initDB(cfg)
 	aerospikeClient := initAerospike(cfg)
+	mongoClient := initMongo(cfg)
 	return storages{
 		db:        db,
 		aerospike: aerospikeClient,
+		mongo:     mongoClient,
 	}
 }
 
 func initLoaders(storages storages, cfg config) fixtures.Loader {
 	var fixturesLoader fixtures.Loader
 	if cfg.FixturesLocation != "" {
-		if storages.db != nil || storages.aerospike != nil {
+		if storages.db != nil || storages.aerospike != nil || storages.mongo != nil {
 			fixturesLoader = fixtures.NewLoader(&fixtures.Config{
 				DB:        storages.db,
 				Aerospike: storages.aerospike,
+				Mongo:     storages.mongo,
 				Location:  cfg.FixturesLocation,
 				Debug:     cfg.Debug,
 				DbType:    fixtures.FetchDbType(cfg.DbType),
@@ -183,6 +192,19 @@ func initAerospike(cfg config) *aerospikeAdapter.Client {
 	return nil
 }
 
+func initMongo(cfg config) *mongoAdapter.Client {
+	if cfg.MongoDsn != "" {
+		client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cfg.MongoDsn))
+		if err != nil {
+			log.Fatal("Couldn't connect to mongo: ", err)
+		}
+
+		return mongoAdapter.New(client)
+	}
+
+	return nil
+}
+
 func initDB(cfg config) *sql.DB {
 	if cfg.DbDsn != "" {
 		var err error
@@ -203,6 +225,7 @@ func getConfig() config {
 	flag.StringVar(&cfg.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&cfg.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
 	flag.StringVar(&cfg.AerospikeHost, "aerospike_host", "", "Aerospike host for fixtures in form of 'host:port/namespace' (WARNING! Aerospike sets will be truncated)")
+	flag.StringVar(&cfg.MongoDsn, "mongo_dsn", "", "Mongo DSN for the fixtures database (WARNING! Mongo collections will be truncated)")
 	flag.StringVar(&cfg.RedisURL, "redis_url", "", "Redis server URL for fixture loading")
 	flag.StringVar(&cfg.FixturesLocation, "fixtures", "", "Path to fixtures directory")
 	flag.StringVar(&cfg.EnvFile, "env-file", "", "Path to env-file")
@@ -213,7 +236,7 @@ func getConfig() config {
 		&cfg.DbType,
 		"db-type",
 		fixtures.PostgresParam,
-		"Type of database (options: postgres, mysql, aerospike, redis)",
+		"Type of database (options: postgres, mysql, aerospike, redis, mongo)",
 	)
 
 	flag.Parse()

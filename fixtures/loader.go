@@ -2,6 +2,8 @@ package fixtures
 
 import (
 	"database/sql"
+	"github.com/lamoda/gonkey/fixtures/mongo"
+	mongoAdapter "github.com/lamoda/gonkey/storage/mongo"
 	"strings"
 
 	_ "github.com/lib/pq"
@@ -20,6 +22,7 @@ const (
 	Aerospike
 	Redis
 	CustomLoader // using external loader if gonkey used as a library
+	Mongo
 )
 
 const (
@@ -27,11 +30,13 @@ const (
 	MysqlParam     = "mysql"
 	AerospikeParam = "aerospike"
 	RedisParam     = "redis"
+	MongoParam     = "mongo"
 )
 
 type Config struct {
 	DB            *sql.DB
 	Aerospike     *aerospikeClient.Client
+	Mongo         *mongoAdapter.Client
 	DbType        DbType
 	Location      string
 	Debug         bool
@@ -67,6 +72,12 @@ func NewLoader(cfg *Config) Loader {
 			location,
 			cfg.Debug,
 		)
+	case Mongo:
+		loader = mongo.New(
+			cfg.Mongo,
+			location,
+			cfg.Debug,
+		)
 	default:
 		if cfg.FixtureLoader != nil {
 			return cfg.FixtureLoader
@@ -87,6 +98,8 @@ func FetchDbType(dbType string) DbType {
 		return Aerospike
 	case RedisParam:
 		return Redis
+	case MongoParam:
+		return Mongo
 	default:
 		panic("unknown db type param")
 	}

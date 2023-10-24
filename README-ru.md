@@ -6,7 +6,7 @@ Gonkey протестирует ваши сервисы, используя их
 
 - работает с REST/JSON API
 - проверка API сервиса на соответствие OpenAPI-спеке
-- заполнение БД сервиса данными из фикстур (поддерживается PostgreSQL, MySQL, Aerospike, Redis)
+- заполнение БД сервиса данными из фикстур (поддерживается PostgreSQL, MySQL, Aerospike, Redis, MongoDB)
 - моки для имитации внешних сервисов
 - можно подключить к проекту как библиотеку и запускать вместе с юнит-тестами
 - запись результата тестов в виде отчета [Allure](http://allure.qatools.ru/)
@@ -35,6 +35,7 @@ Gonkey протестирует ваши сервисы, используя их
   - [Выражения](#выражения)
   - [Aerospike](#aerospike)
   - [Redis](#redis)
+  - [MongoDB](#mongodb)
 - [Моки](#моки)
   - [Запуск моков при использовании gonkey как библиотеки](#запуск-моков-при-использовании-gonkey-как-библиотеки)
   - [Описание моков в файле с тестом](#описание-моков-в-файле-с-тестом)
@@ -53,17 +54,18 @@ Gonkey протестирует ваши сервисы, используя их
 
 ## Использование консольной утилиты
 
-Для тестирование сервиса, размещенного на удаленном хосте, используйте gonkey как консольную утилиту.
+Для тестирования сервиса, размещенного на удаленном хосте, используйте gonkey как консольную утилиту.
 
 `./gonkey -host <...> -tests <...> [-spec <...>] [-db_dsn <...> -fixtures <...>] [-allure] [-v]`
 
 - `-spec <...>` путь к файлу или URL со swagger-спецификацией сервиса
 - `-host <...>` хост:порт сервиса
 - `-tests <...>` файл или директория с тестами
-- `-db-type <...>` - тип базы данных. В данный момент поддерживается PostgreSQL, Aerospike, Redis.
+- `-db-type <...>` - тип базы данных. В данный момент поддерживается PostgreSQL, Aerospike, Redis, MongoDB.
 - `-db_dsn <...>` dsn для вашей тестовой SQL базы данных (бд будет очищена перед наполнением!), поддерживается только PostgreSQL
 - `-aerospike_host <...>` при использовании Aerospike - URL для подключения к нему в формате `host:port/namespace`
 - `-redis_url <...>` при использовании Redis - адрес для подключения к Redis, например `redis://user:password@localhost:6789/1?dial_timeout=1&db=1&read_timeout=6s&max_retries=2`
+- `-mongo_dsn <...>` при использовании MongoDB - URL для подключения в формате `mongodb://user:password@host:port`
 - `-fixtures <...>` директория с вашими фикстурами
 - `-allure` генерировать allure-отчет
 - `-v` подробный вывод
@@ -875,6 +877,50 @@ databases:
           expiration: 5s
           value: value4
 ```
+
+### MongoDB
+
+Для того, чтобы подключить MongoDB необходимо:
+- Для CLI-версии: использовать флаги `-db-type mongo` и `mongo_dsn { connectionString }`;
+- Для Package-версии: при конфигурации раннера установить `DbType: fixtures.Mongo` и пробросить mongo клиент `Mongo: {mongo client}`.
+
+Формат файлов с фикстурами для Mongo:
+```yaml
+collections:
+  collection1:
+    - field1: "value1"
+      field2: 1
+    - field1: "value2"
+      field2: 2
+      field3: 2.569947773654566
+  collection2:
+    - field4: false
+      field5: null
+      field1: '"'
+    - field1: "'"
+      field5:
+        - 1
+        - '2'
+```
+
+Если используются разные базы данных:
+
+```yaml
+collections:
+  database1.collection1:
+    - f1: value1
+      f2: value2
+
+  database2.collection2:
+    - f1: value3
+      f2: value4
+
+  collection3:
+    - f1: value5
+      f2: value6
+```
+
+Оператор `eval` не поддерживается.
 
 ## Моки
 
