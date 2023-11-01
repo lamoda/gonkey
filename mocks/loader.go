@@ -358,8 +358,8 @@ func (l *Loader) loadConstraintOfKind(kind string, def map[interface{}]interface
 	}
 }
 
-func readCompareParams(def map[interface{}]interface{}) (compare.CompareParams, error) {
-	params := compare.CompareParams{
+func readCompareParams(def map[interface{}]interface{}) (compare.Params, error) {
+	params := compare.Params{
 		IgnoreArraysOrdering: true,
 	}
 
@@ -557,7 +557,7 @@ func (l *Loader) loadBodyMatchesTextConstraint(def map[interface{}]interface{}) 
 }
 
 func validateMapKeys(m map[interface{}]interface{}, allowedKeys ...string) error {
-	for k, _ := range m {
+	for k := range m {
 		k := k.(string)
 		found := false
 		for _, ak := range allowedKeys {

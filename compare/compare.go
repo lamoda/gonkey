@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-type CompareParams struct {
+type Params struct {
 	IgnoreValues         bool `json:"ignoreValues" yaml:"ignoreValues"`
 	IgnoreArraysOrdering bool `json:"ignoreArraysOrdering" yaml:"ignoreArraysOrdering"`
 	DisallowExtraFields  bool `json:"disallowExtraFields" yaml:"disallowExtraFields"`
@@ -23,18 +23,23 @@ const (
 	regex
 )
 
+const (
+	arrayType = "array"
+	mapType   = "map"
+)
+
 var regexExprRx = regexp.MustCompile(`^\$matchRegexp\((.+)\)$`)
 
 // Compare compares values as plain text
 // It can be compared several ways:
-// - Pure values: should be equal
-// - Regex: try to compile 'expected' as regex and match 'actual' with it
+//   - Pure values: should be equal
+//   - Regex: try to compile 'expected' as regex and match 'actual' with it
 //     It activates on following syntax: $matchRegexp(%EXPECTED_VALUE%)
-func Compare(expected, actual interface{}, params CompareParams) []error {
+func Compare(expected, actual interface{}, params Params) []error {
 	return compareBranch("$", expected, actual, &params)
 }
 
-func compareBranch(path string, expected, actual interface{}, params *CompareParams) []error {
+func compareBranch(path string, expected, actual interface{}, params *Params) []error {
 	expectedType := getType(expected)
 	actualType := getType(actual)
 	var errors []error
@@ -42,6 +47,7 @@ func compareBranch(path string, expected, actual interface{}, params *ComparePar
 	// compare types
 	if leafMatchType(expected) != regex && expectedType != actualType {
 		errors = append(errors, makeError(path, "types do not match", expectedType, actualType))
+
 		return errors
 	}
 
@@ -51,12 +57,13 @@ func compareBranch(path string, expected, actual interface{}, params *ComparePar
 	}
 
 	// compare arrays
-	if actualType == "array" {
+	if actualType == arrayType {
 		expectedArray := convertToArray(expected)
 		actualArray := convertToArray(actual)
 
 		if len(expectedArray) != len(actualArray) {
 			errors = append(errors, makeError(path, "array lengths do not match", len(expectedArray), len(actualArray)))
+
 			return errors
 		}
 
@@ -76,12 +83,13 @@ func compareBranch(path string, expected, actual interface{}, params *ComparePar
 	}
 
 	// compare maps
-	if actualType == "map" {
+	if actualType == mapType {
 		expectedRef := reflect.ValueOf(expected)
 		actualRef := reflect.ValueOf(actual)
 
 		if params.DisallowExtraFields && expectedRef.Len() != actualRef.Len() {
 			errors = append(errors, makeError(path, "map lengths do not match", expectedRef.Len(), actualRef.Len()))
+
 			return errors
 		}
 
@@ -92,6 +100,7 @@ func compareBranch(path string, expected, actual interface{}, params *ComparePar
 				if params.failFast {
 					return errors
 				}
+
 				continue
 			}
 
@@ -117,12 +126,14 @@ func getType(value interface{}) string {
 	if value == nil {
 		return "nil"
 	}
+
 	rt := reflect.TypeOf(value)
-	if rt.Kind() == reflect.Slice || rt.Kind() == reflect.Array {
+	switch {
+	case rt.Kind() == reflect.Slice || rt.Kind() == reflect.Array:
 		return "array"
-	} else if rt.Kind() == reflect.Map {
+	case rt.Kind() == reflect.Map:
 		return "map"
-	} else {
+	default:
 		return rt.String()
 	}
 }
@@ -132,7 +143,6 @@ func isScalarType(t string) bool {
 }
 
 func compareLeafs(path string, expected, actual interface{}) []error {
-
 	var errors []error
 
 	switch leafMatchType(expected) {
@@ -150,7 +160,6 @@ func compareLeafs(path string, expected, actual interface{}) []error {
 }
 
 func comparePure(path string, expected, actual interface{}) (errors []error) {
-
 	if expected != actual {
 		errors = append(errors, makeError(path, "values do not match", expected, actual))
 	}
@@ -159,10 +168,10 @@ func comparePure(path string, expected, actual interface{}) (errors []error) {
 }
 
 func compareRegex(path string, expected, actual interface{}) (errors []error) {
-
 	regexExpr, ok := expected.(string)
 	if !ok {
 		errors = append(errors, makeError(path, "type mismatch", "string", reflect.TypeOf(expected)))
+
 		return errors
 	}
 
@@ -171,11 +180,13 @@ func compareRegex(path string, expected, actual interface{}) (errors []error) {
 	rx, err := regexp.Compile(retrieveRegexStr(regexExpr))
 	if err != nil {
 		errors = append(errors, makeError(path, "can not compile regex", nil, "error"))
+
 		return errors
 	}
 
 	if !rx.MatchString(value) {
 		errors = append(errors, makeError(path, "value does not match regex", expected, actual))
+
 		return errors
 	}
 
@@ -183,7 +194,6 @@ func compareRegex(path string, expected, actual interface{}) (errors []error) {
 }
 
 func retrieveRegexStr(expr string) string {
-
 	if matches := regexExprRx.FindStringSubmatch(expr); matches != nil {
 		return matches[1]
 	}
@@ -221,11 +231,12 @@ func convertToArray(array interface{}) []interface{} {
 	for i := 0; i < ref.Len(); i++ {
 		interfaceSlice = append(interfaceSlice, ref.Index(i).Interface())
 	}
+
 	return interfaceSlice
 }
 
 // For every elem in "expected" try to find elem in "actual". Returns arrays without matching.
-func getUnmatchedArrays(expected, actual []interface{}, params *CompareParams) ([]interface{}, []interface{}) {
+func getUnmatchedArrays(expected, actual []interface{}, params *Params) (expectedUnmatched, actualUnmatched []interface{}) {
 	expectedError := make([]interface{}, 0)
 
 	failfastParams := *params
@@ -242,6 +253,7 @@ func getUnmatchedArrays(expected, actual []interface{}, params *CompareParams) (
 					actual[i] = actual[len(actual)-1]
 				}
 				actual = actual[:len(actual)-1]
+
 				break
 			}
 		}

@@ -91,6 +91,7 @@ func main() {
 func initStorages(cfg config) storages {
 	db := initDB(cfg)
 	aerospikeClient := initAerospike(cfg)
+
 	return storages{
 		db:        db,
 		aerospike: aerospikeClient,
@@ -98,41 +99,44 @@ func initStorages(cfg config) storages {
 }
 
 func initLoaders(storages storages, cfg config) fixtures.Loader {
-	var fixturesLoader fixtures.Loader
-	if cfg.FixturesLocation != "" {
-		if storages.db != nil || storages.aerospike != nil {
-			fixturesLoader = fixtures.NewLoader(&fixtures.Config{
-				DB:        storages.db,
-				Aerospike: storages.aerospike,
-				Location:  cfg.FixturesLocation,
-				Debug:     cfg.Debug,
-				DbType:    fixtures.FetchDbType(cfg.DbType),
-			})
-		} else if cfg.DbType == fixtures.RedisParam {
-			redisOptions, err := redis.ParseURL(cfg.RedisURL)
-			if err != nil {
-				log.Panic("redis_url attribute is not a valid URL")
-			}
-			fixturesLoader = redisLoader.New(redisLoader.LoaderOptions{
-				FixtureDir: cfg.FixturesLocation,
-				Redis:      redisOptions,
-			})
-		} else {
-			log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
-		}
+	if cfg.FixturesLocation == "" {
+		return nil
 	}
+
+	var fixturesLoader fixtures.Loader
+	switch {
+	case storages.db != nil || storages.aerospike != nil:
+		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
+			DB:        storages.db,
+			Aerospike: storages.aerospike,
+			Location:  cfg.FixturesLocation,
+			Debug:     cfg.Debug,
+			DbType:    fixtures.FetchDbType(cfg.DbType),
+		})
+	case cfg.DbType == fixtures.RedisParam:
+		redisOptions, err := redis.ParseURL(cfg.RedisURL)
+		if err != nil {
+			log.Panic("redis_url attribute is not a valid URL")
+		}
+		fixturesLoader = redisLoader.New(redisLoader.LoaderOptions{
+			FixtureDir: cfg.FixturesLocation,
+			Redis:      redisOptions,
+		})
+	default:
+		log.Fatal(errors.New("you should specify db_dsn to load fixtures"))
+	}
+
 	return fixturesLoader
 }
 
 func validateConfig(cfg *config) {
 	if cfg.Host == "" {
 		log.Fatal(errors.New("service hostname not provided"))
-	} else {
-		if !strings.HasPrefix(cfg.Host, "http://") && !strings.HasPrefix(cfg.Host, "https://") {
-			cfg.Host = "http://" + cfg.Host
-		}
-		cfg.Host = strings.TrimRight(cfg.Host, "/")
 	}
+	if !strings.HasPrefix(cfg.Host, "http://") && !strings.HasPrefix(cfg.Host, "https://") {
+		cfg.Host = "http://" + cfg.Host
+	}
+	cfg.Host = strings.TrimRight(cfg.Host, "/")
 
 	if cfg.TestsLocation == "" {
 		log.Fatal(errors.New("no tests location provided"))
@@ -163,7 +167,7 @@ func initRunner(
 			Host:           cfg.Host,
 			FixturesLoader: fixturesLoader,
 			Variables:      variables.New(),
-			HttpProxyURL:   proxyURL,
+			HTTPProxyURL:   proxyURL,
 		},
 		yaml_file.NewLoader(cfg.TestsLocation),
 		handler.HandleTest,
@@ -177,6 +181,7 @@ func initAerospike(cfg config) *aerospikeAdapter.Client {
 		if err != nil {
 			log.Fatal("Couldn't connect to aerospike: ", err)
 		}
+
 		return aerospikeAdapter.New(client, namespace)
 	}
 
@@ -190,6 +195,7 @@ func initDB(cfg config) *sql.DB {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		return db
 	}
 
@@ -202,7 +208,12 @@ func getConfig() config {
 	flag.StringVar(&cfg.Host, "host", "", "Target system hostname")
 	flag.StringVar(&cfg.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&cfg.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
-	flag.StringVar(&cfg.AerospikeHost, "aerospike_host", "", "Aerospike host for fixtures in form of 'host:port/namespace' (WARNING! Aerospike sets will be truncated)")
+	flag.StringVar(
+		&cfg.AerospikeHost,
+		"aerospike_host",
+		"",
+		"Aerospike host for fixtures in form of 'host:port/namespace' (WARNING! Aerospike sets will be truncated)",
+	)
 	flag.StringVar(&cfg.RedisURL, "redis_url", "", "Redis server URL for fixture loading")
 	flag.StringVar(&cfg.FixturesLocation, "fixtures", "", "Path to fixtures directory")
 	flag.StringVar(&cfg.EnvFile, "env-file", "", "Path to env-file")
@@ -217,6 +228,7 @@ func getConfig() config {
 	)
 
 	flag.Parse()
+
 	return cfg
 }
 
@@ -240,11 +252,13 @@ func parseAerospikeHost(dsn string) (address string, port int, namespace string)
 
 func proxyURLFromEnv() (*url.URL, error) {
 	if os.Getenv("HTTP_PROXY") != "" {
-		httpUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+		httpURL, err := url.Parse(os.Getenv("HTTP_PROXY"))
 		if err != nil {
 			return nil, err
 		}
-		return httpUrl, nil
+
+		return httpURL, nil
 	}
+
 	return nil, nil
 }

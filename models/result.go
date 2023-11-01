@@ -47,8 +47,8 @@ func (r *Result) AllureStatus() (string, error) {
 	}
 
 	var (
-		status             = "passed"
-		testErrors []error = nil
+		status     = "passed"
+		testErrors []error
 	)
 
 	if len(r.Errors) != 0 {
@@ -61,6 +61,7 @@ func (r *Result) AllureStatus() (string, error) {
 		for _, err := range testErrors {
 			errText = errText + err.Error() + "\n"
 		}
+
 		return status, errors.New(errText)
 	}
 

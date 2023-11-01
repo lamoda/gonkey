@@ -18,7 +18,7 @@ const (
 	gonkeyProtectSubstitute = "!protect!"
 )
 
-var gonkeyProtectTemplate = regexp.MustCompile("{{\\s*\\$")
+var gonkeyProtectTemplate = regexp.MustCompile(`{{\s*\$`)
 
 func parseTestDefinitionFile(absPath string) ([]Test, error) {
 	data, err := ioutil.ReadFile(absPath)
@@ -35,12 +35,13 @@ func parseTestDefinitionFile(absPath string) ([]Test, error) {
 
 	var tests []Test
 
-	for _, definition := range testDefinitions {
-		if testCases, err := makeTestFromDefinition(absPath, definition); err != nil {
+	for i := range testDefinitions {
+		testCases, err := makeTestFromDefinition(absPath, testDefinitions[i])
+		if err != nil {
 			return nil, err
-		} else {
-			tests = append(tests, testCases...)
 		}
+
+		tests = append(tests, testCases...)
 	}
 
 	return tests, nil
@@ -74,6 +75,7 @@ func substituteArgsToMap(tmpl map[string]string, args map[string]interface{}) (m
 			return nil, err
 		}
 	}
+
 	return res, nil
 }
 

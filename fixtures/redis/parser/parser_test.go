@@ -14,7 +14,7 @@ func TestRedisFixtureParser_Load(t *testing.T) {
 
 	type want struct {
 		fixtures []*Fixture
-		ctx      *context
+		ctx      *Context
 	}
 
 	tests := []struct {
@@ -144,7 +144,7 @@ func TestRedisFixtureParser_Load(t *testing.T) {
 						},
 					},
 				},
-				ctx: &context{
+				ctx: &Context{
 					keyRefs:  map[string]Keys{},
 					setRefs:  map[string]SetRecordValue{},
 					hashRefs: map[string]HashRecordValue{},
@@ -228,7 +228,7 @@ func TestRedisFixtureParser_Load(t *testing.T) {
 									},
 								},
 								{
-									Name: "childList",
+									Name:   "childList",
 									Extend: "parentList",
 									Values: []*ListValue{
 										{Value: Int(1)},
@@ -247,7 +247,7 @@ func TestRedisFixtureParser_Load(t *testing.T) {
 									},
 								},
 								{
-									Name: "childZSet",
+									Name:   "childZSet",
 									Extend: "parentZSet",
 									Values: []*ZSetValue{
 										{Value: Int(1), Score: 1.2},
@@ -353,7 +353,7 @@ func TestRedisFixtureParser_Load(t *testing.T) {
 						},
 					},
 				},
-				ctx: &context{
+				ctx: &Context{
 					keyRefs: map[string]Keys{
 						"parentKeys": {
 							Values: map[string]*KeyValue{
@@ -581,7 +581,7 @@ func TestRedisFixtureParser_Load(t *testing.T) {
 						},
 					},
 				},
-				ctx: &context{
+				ctx: &Context{
 					keyRefs: map[string]Keys{
 						"parentKeys": {
 							Values: map[string]*KeyValue{
@@ -714,7 +714,7 @@ func TestRedisFixtureParser_Load(t *testing.T) {
 			if diff := cmp.Diff(test.want.fixtures, fixtures); diff != "" {
 				t.Errorf("ParseFiles - unexpected diff in fixtures: %s", diff)
 			}
-			if diff := cmp.Diff(test.want.ctx, ctx, cmp.AllowUnexported(context{})); diff != "" {
+			if diff := cmp.Diff(test.want.ctx, ctx, cmp.AllowUnexported(Context{})); diff != "" {
 				t.Errorf("ParseFiles - unexpected diff in context: %s", diff)
 			}
 		})

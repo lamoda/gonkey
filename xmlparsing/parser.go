@@ -4,9 +4,9 @@ import (
 	"encoding/xml"
 )
 
-func Parse(rawXml string) (map[string]interface{}, error) {
+func Parse(rawXML string) (map[string]interface{}, error) {
 	var n node
-	if err := xml.Unmarshal([]byte(rawXml), &n); err != nil {
+	if err := xml.Unmarshal([]byte(rawXML), &n); err != nil {
 		return nil, err
 	}
 
@@ -43,6 +43,7 @@ func buildArray(nodes []node) []interface{} {
 	for i, n := range nodes {
 		arr[i] = buildNode(n)
 	}
+
 	return arr
 }
 
@@ -53,6 +54,7 @@ func buildNode(n node) interface{} {
 	if hasAttrs && hasChildren {
 		result := buildMap(n.Children)
 		result["-attrs"] = buildAttributes(n.Attrs)
+
 		return result
 	}
 
@@ -75,6 +77,7 @@ func buildAttributes(attrs []xml.Attr) map[string]string {
 	for _, attr := range attrs {
 		m[joinXMLName(attr.Name)] = attr.Value
 	}
+
 	return m
 }
 
@@ -89,13 +92,14 @@ func regroupNodesByName(nodes []node) map[string][]node {
 
 		grouped[name] = append(grouped[name], n)
 	}
+
 	return grouped
 }
 
-func joinXMLName(XMLName xml.Name) string {
-	name := XMLName.Local
-	if len(XMLName.Space) != 0 {
-		name = XMLName.Space + ":" + name
+func joinXMLName(xmlName xml.Name) string {
+	name := xmlName.Local
+	if xmlName.Space != "" {
+		name = xmlName.Space + ":" + name
 	}
 
 	return name

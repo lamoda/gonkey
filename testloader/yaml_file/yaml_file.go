@@ -26,10 +26,11 @@ func (l *YamlFileLoader) Load() ([]models.TestInterface, error) {
 	}
 
 	ret := make([]models.TestInterface, len(fileTests))
-	for i, test := range fileTests {
-		test := test
+	for i := range fileTests {
+		test := fileTests[i]
 		ret[i] = &test
 	}
+
 	return ret, nil
 }
 
@@ -42,6 +43,7 @@ func (l *YamlFileLoader) parseTestsWithCases(path string) ([]Test, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return l.lookupPath(path, stat)
 }
 
@@ -51,6 +53,7 @@ func (l *YamlFileLoader) lookupPath(path string, fi os.FileInfo) ([]Test, error)
 		if !l.fitsFilter(path) {
 			return []Test{}, nil
 		}
+
 		return parseTestDefinitionFile(path)
 	}
 	files, err := ioutil.ReadDir(path)
@@ -68,6 +71,7 @@ func (l *YamlFileLoader) lookupPath(path string, fi os.FileInfo) ([]Test, error)
 		}
 		tests = append(tests, moreTests...)
 	}
+
 	return tests, nil
 }
 
@@ -75,6 +79,7 @@ func (l *YamlFileLoader) fitsFilter(fileName string) bool {
 	if l.fileFilter == "" {
 		return true
 	}
+
 	return strings.Contains(fileName, l.fileFilter)
 }
 

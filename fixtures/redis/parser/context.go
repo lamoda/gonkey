@@ -1,6 +1,6 @@
 package parser
 
-type context struct {
+type Context struct {
 	keyRefs  map[string]Keys
 	hashRefs map[string]HashRecordValue
 	setRefs  map[string]SetRecordValue
@@ -8,8 +8,8 @@ type context struct {
 	zsetRefs map[string]ZSetRecordValue
 }
 
-func NewContext() *context {
-	return &context{
+func NewContext() *Context {
+	return &Context{
 		keyRefs:  make(map[string]Keys),
 		hashRefs: make(map[string]HashRecordValue),
 		setRefs:  make(map[string]SetRecordValue),

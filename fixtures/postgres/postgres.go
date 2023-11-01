@@ -47,16 +47,18 @@ func newTableName(source string) tableName {
 	switch {
 	case len(parts) == 1:
 		parts = append(parts, parts[0])
+
 		fallthrough
 	case parts[0] == "":
 		parts[0] = "public"
 	}
 	lt := tableName{schema: parts[0], name: parts[1]}
+
 	return lt
 }
 
 func (t *tableName) getFullName() string {
-	return fmt.Sprintf("\"%s\".\"%s\"", t.schema, t.name)
+	return fmt.Sprintf("%q.%q", t.schema, t.name)
 }
 
 type loadContext struct {
@@ -86,6 +88,7 @@ func (f *LoaderPostgres) Load(names []string) error {
 			return fmt.Errorf("unable to load fixture %s: %s", name, err.Error())
 		}
 	}
+
 	return f.loadTables(&ctx)
 }
 
@@ -100,6 +103,7 @@ func (f *LoaderPostgres) loadFile(name string, ctx *loadContext) error {
 	for _, candidate := range candidates {
 		if _, err = os.Stat(candidate); err == nil {
 			file = candidate
+
 			break
 		}
 	}
@@ -118,6 +122,7 @@ func (f *LoaderPostgres) loadFile(name string, ctx *loadContext) error {
 		return err
 	}
 	ctx.files = append(ctx.files, file)
+
 	return f.loadYml(data, ctx)
 }
 
@@ -150,8 +155,7 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		row := make(row, len(fields))
 		for _, field := range fields {
 			key := field.Key.(string)
-			value, _ := field.Value.(interface{})
-			row[key] = value
+			row[key] = field.Value
 		}
 		if base, ok := row["$extend"]; ok {
 			base := base.(string)
@@ -166,8 +170,8 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		}
 		ctx.refsDefinition[name] = row
 		if f.debug {
-			rowJson, _ := json.Marshal(row)
-			fmt.Printf("Populating ref %s as %s from template\n", name, string(rowJson))
+			rowJSON, _ := json.Marshal(row)
+			fmt.Printf("Populating ref %s as %s from template\n", name, string(rowJSON))
 		}
 	}
 
@@ -199,6 +203,7 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		}
 		ctx.tables = append(ctx.tables, lt)
 	}
+
 	return nil
 }
 
@@ -254,23 +259,25 @@ func (f *LoaderPostgres) truncateTables(tx *sql.Tx, tables ...loadedTable) error
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, rows table) error {
 	// $extend keyword allows to import values from a named row
 	for i, row := range rows {
-		if base, ok := row["$extend"]; ok {
-			base := base.(string)
-			baseRow, err := f.resolveReference(ctx.refsDefinition, base)
-			if err != nil {
-				return err
-			}
-			for k, v := range row {
-				baseRow[k] = v
-			}
-			rows[i] = baseRow
+		if _, ok := row["$extend"]; !ok {
+			continue
 		}
+		base := row["$extend"].(string)
+		baseRow, err := f.resolveReference(ctx.refsDefinition, base)
+		if err != nil {
+			return err
+		}
+		for k, v := range row {
+			baseRow[k] = v
+		}
+		rows[i] = baseRow
 	}
 	// build SQL
 	query, err := f.buildInsertQuery(ctx, t, rows)
@@ -299,25 +306,25 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, ro
 				return fmt.Errorf("duplicating ref name %s", name)
 			}
 			// read values
-			var rowJson string
-			if err := insertedRows.Scan(&rowJson); err != nil {
+			var rowJSON string
+			if err := insertedRows.Scan(&rowJSON); err != nil {
 				return err
 			}
 			// decode json
 			values := make(map[string]interface{})
-			if err := json.Unmarshal([]byte(rowJson), &values); err != nil {
+			if err := json.Unmarshal([]byte(rowJSON), &values); err != nil {
 				return err
 			}
 			// add to references
 			ctx.refsDefinition[name] = row
 			if f.debug {
-				rowJson, _ := json.Marshal(row)
-				fmt.Printf("Populating ref %s as %s from row definition\n", name, string(rowJson))
+				rowJSON, _ := json.Marshal(row)
+				fmt.Printf("Populating ref %s as %s from row definition\n", name, string(rowJSON))
 			}
 			ctx.refsInserted[name] = values
 			if f.debug {
-				valuesJson, _ := json.Marshal(values)
-				fmt.Printf("Populating ref %s as %s from inserted values\n", name, string(valuesJson))
+				valuesJSON, _ := json.Marshal(values)
+				fmt.Printf("Populating ref %s as %s from inserted values\n", name, string(valuesJSON))
 			}
 		}
 	}
@@ -329,6 +336,7 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, ro
 	if err := insertedRows.Err(); err != nil {
 		return fmt.Errorf("failed to execute query. DB returned error:\n%s", err)
 	}
+
 	return err
 }
 
@@ -360,6 +368,7 @@ END$$
 		fmt.Println("Issuing SQL:", query)
 	}
 	_, err := tx.Exec(query)
+
 	return err
 }
 
@@ -389,6 +398,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 			value, present := row[name]
 			if !present {
 				dbValuesRow[k] = "default" // default is a PostgreSQL keyword
+
 				continue
 			}
 			// resolve references
@@ -399,6 +409,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 					if err != nil {
 						return "", err
 					}
+
 					continue
 				}
 			}
@@ -416,6 +427,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 	}
 
 	query := "INSERT INTO %s AS row (%s) VALUES %s RETURNING row_to_json(row)"
+
 	return fmt.Sprintf(query, t.getFullName(), strings.Join(fields, ", "), strings.Join(dbValues, ", ")), nil
 }
 
@@ -428,16 +440,17 @@ func (f *LoaderPostgres) resolveExpression(expr string, ctx *loadContext) (strin
 		re := regexp.MustCompile(`^\$eval\((.+)\)$`)
 		if matches := re.FindStringSubmatch(expr); matches != nil {
 			return "(" + matches[1] + ")", nil
-		} else {
-			return "", fmt.Errorf("icorrect $eval() usage: %s", expr)
 		}
-	} else {
-		value, err := f.resolveFieldReference(ctx.refsInserted, expr)
-		if err != nil {
-			return "", nil
-		}
-		return toDbValue(value)
+
+		return "", fmt.Errorf("icorrect $eval() usage: %s", expr)
 	}
+
+	value, err := f.resolveFieldReference(ctx.refsInserted, expr)
+	if err != nil {
+		return "", nil
+	}
+
+	return toDbValue(value)
 }
 
 // resolveReference finds previously stored reference by its name
@@ -450,10 +463,11 @@ func (f *LoaderPostgres) resolveReference(refs rowsDict, refName string) (row, e
 	// by the way removing $-records from base row
 	targetCopy := make(row, len(target))
 	for k, v := range target {
-		if len(k) == 0 || k[0] != '$' {
+		if k == "" || k[0] != '$' {
 			targetCopy[k] = v
 		}
 	}
+
 	return targetCopy, nil
 }
 
@@ -474,6 +488,7 @@ func (f *LoaderPostgres) resolveFieldReference(refs rowsDict, ref string) (inter
 	if !ok {
 		return nil, fmt.Errorf("undefined reference field %s", parts[1])
 	}
+
 	return value, nil
 }
 
@@ -484,6 +499,7 @@ func inArray(needle string, haystack []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -511,6 +527,7 @@ func toDbValue(value interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return quoteLiteral(string(encoded)), nil
 }
 
@@ -521,7 +538,8 @@ func quoteLiteral(s string) string {
 	if strings.Contains(s, `\`) {
 		p = "E"
 	}
-	s = strings.Replace(s, `'`, `''`, -1)
-	s = strings.Replace(s, `\`, `\\`, -1)
+	s = strings.ReplaceAll(s, `'`, `''`)
+	s = strings.ReplaceAll(s, `\`, `\\`)
+
 	return p + `'` + s + `'`
 }

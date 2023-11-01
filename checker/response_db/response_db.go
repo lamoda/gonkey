@@ -80,19 +80,20 @@ func (c *ResponseDbChecker) check(
 	// compare responses length
 	if err := compareDbResponseLength(t.DbResponseJson(), actualDbResponse, t.DbQueryString()); err != nil {
 		errors = append(errors, err)
+
 		return errors, nil
 	}
 	// compare responses as json lists
-	expectedItems, err := toJsonArray(t.DbResponseJson(), "expected", testName)
+	expectedItems, err := toJSONArray(t.DbResponseJson(), "expected", testName)
 	if err != nil {
 		return nil, err
 	}
-	actualItems, err := toJsonArray(actualDbResponse, "actual", testName)
+	actualItems, err := toJSONArray(actualDbResponse, "actual", testName)
 	if err != nil {
 		return nil, err
 	}
 
-	errs := compare.Compare(expectedItems, actualItems, compare.CompareParams{
+	errs := compare.Compare(expectedItems, actualItems, compare.Params{
 		IgnoreArraysOrdering: ignoreOrdering,
 	})
 
@@ -101,11 +102,11 @@ func (c *ResponseDbChecker) check(
 	return errors, nil
 }
 
-func toJsonArray(items []string, qual, testName string) ([]interface{}, error) {
-	var itemJSONs []interface{}
+func toJSONArray(items []string, qual, testName string) ([]interface{}, error) {
+	itemJSONs := make([]interface{}, 0, len(items))
 	for i, row := range items {
-		var itemJson interface{}
-		if err := json.Unmarshal([]byte(row), &itemJson); err != nil {
+		var itemJSON interface{}
+		if err := json.Unmarshal([]byte(row), &itemJSON); err != nil {
 			return nil, fmt.Errorf(
 				"invalid JSON in the %s DB response for test %s:\n row #%d:\n %s\n error:\n%s",
 				qual,
@@ -115,8 +116,9 @@ func toJsonArray(items []string, qual, testName string) ([]interface{}, error) {
 				err.Error(),
 			)
 		}
-		itemJSONs = append(itemJSONs, itemJson)
+		itemJSONs = append(itemJSONs, itemJSON)
 	}
+
 	return itemJSONs, nil
 }
 
@@ -132,11 +134,11 @@ func compareDbResponseLength(expected, actual []string, query interface{}) error
 			color.CyanString("%v", pretty.Compare(expected, actual)),
 		)
 	}
+
 	return err
 }
 
 func newQuery(dbQuery string, db *sql.DB) ([]string, error) {
-
 	var dbResponse []string
 	var jsonString string
 

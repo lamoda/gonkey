@@ -8,13 +8,13 @@ import (
 	"github.com/lamoda/gonkey/models"
 )
 
-type TestingOutput struct{}
+type Output struct{}
 
-func NewOutput() *TestingOutput {
-	return &TestingOutput{}
+func NewOutput() *Output {
+	return &Output{}
 }
 
-func (o *TestingOutput) Process(t models.TestInterface, result *models.Result) error {
+func (o *Output) Process(_ models.TestInterface, result *models.Result) error {
 	if !result.Passed() {
 		text, err := renderResult(result)
 		if err != nil {
@@ -22,6 +22,7 @@ func (o *TestingOutput) Process(t models.TestInterface, result *models.Result) e
 		}
 		fmt.Println(text)
 	}
+
 	return nil
 }
 
@@ -87,5 +88,6 @@ Errors:
 	if err := t.Execute(&buffer, result); err != nil {
 		return "", err
 	}
+
 	return buffer.String(), nil
 }

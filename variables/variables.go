@@ -37,7 +37,6 @@ func (vs *Variables) Set(name, value string) {
 }
 
 func (vs *Variables) Apply(t models.TestInterface) models.TestInterface {
-
 	newTest := t.Clone()
 
 	if vs == nil {
@@ -96,7 +95,6 @@ func usedVariables(str string) (res []string) {
 // perform replaces all variables in str to their values
 // and returns result string
 func (vs *Variables) perform(str string) string {
-
 	varNames := usedVariables(str)
 
 	for _, k := range varNames {
@@ -130,7 +128,6 @@ func (vs *Variables) performInterface(value interface{}) {
 }
 
 func (vs *Variables) get(name string) *Variable {
-
 	v := vs.variables[name]
 	if v == nil {
 		v = NewFromEnvironment(name)
@@ -140,32 +137,32 @@ func (vs *Variables) get(name string) *Variable {
 }
 
 func (vs *Variables) performForm(form *models.Form) *models.Form {
-
 	files := make(map[string]string, len(form.Files))
 
 	for k, v := range form.Files {
 		files[k] = vs.perform(v)
 	}
+
 	return &models.Form{Files: files}
 }
 
 func (vs *Variables) performHeaders(headers map[string]string) map[string]string {
-
 	res := make(map[string]string)
 
 	for k, v := range headers {
 		res[k] = vs.perform(v)
 	}
+
 	return res
 }
 
 func (vs *Variables) performResponses(responses map[int]string) map[int]string {
-
 	res := make(map[int]string)
 
 	for k, v := range responses {
 		res[k] = vs.perform(v)
 	}
+
 	return res
 }
 

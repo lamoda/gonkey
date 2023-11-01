@@ -28,11 +28,12 @@ func (c *ResponseHeaderChecker) Check(t models.TestInterface, result *models.Res
 		actualValues, ok := result.ResponseHeaders[k]
 		if !ok {
 			errs = append(errs, fmt.Errorf("response does not include expected header %s", k))
+
 			continue
 		}
 		found := false
 		for _, actualValue := range actualValues {
-			e := compare.Compare(v, actualValue, compare.CompareParams{})
+			e := compare.Compare(v, actualValue, compare.Params{})
 			if len(e) == 0 {
 				found = true
 			}

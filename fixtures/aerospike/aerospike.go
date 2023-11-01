@@ -21,8 +21,10 @@ type LoaderAerospike struct {
 	debug    bool
 }
 
-type binMap map[string]interface{}
-type set map[string]binMap
+type (
+	binMap map[string]interface{}
+	set    map[string]binMap
+)
 
 type fixture struct {
 	Inherits  []string
@@ -60,6 +62,7 @@ func (l *LoaderAerospike) Load(names []string) error {
 			return fmt.Errorf("unable to load fixture %s: %s", name, err.Error())
 		}
 	}
+
 	return l.loadSets(&ctx)
 }
 
@@ -74,6 +77,7 @@ func (l *LoaderAerospike) loadFile(name string, ctx *loadContext) error {
 	for _, candidate := range candidates {
 		if _, err = os.Stat(candidate); err == nil {
 			file = candidate
+
 			break
 		}
 	}
@@ -92,6 +96,7 @@ func (l *LoaderAerospike) loadFile(name string, ctx *loadContext) error {
 		return err
 	}
 	ctx.files = append(ctx.files, file)
+
 	return l.loadYml(data, ctx)
 }
 
@@ -163,6 +168,7 @@ func (l *LoaderAerospike) loadYml(data []byte, ctx *loadContext) error {
 		}
 		ctx.sets = append(ctx.sets, lt)
 	}
+
 	return nil
 }
 
@@ -234,17 +240,18 @@ func (l *LoaderAerospike) truncateSet(name string) error {
 func (l *LoaderAerospike) loadSet(ctx *loadContext, set loadedSet) error {
 	// $extend keyword allows, to import values from a named row
 	for key, binMap := range set.data {
-		if base, ok := binMap["$extend"]; ok {
-			baseName := base.(string)
-			baseBinMap, err := l.resolveReference(ctx.refsDefinition, baseName)
-			if err != nil {
-				return err
-			}
-			for k, v := range binMap {
-				baseBinMap[k] = v
-			}
-			set.data[key] = baseBinMap
+		if _, ok := binMap["$extend"]; !ok {
+			continue
 		}
+		baseName := binMap["$extend"].(string)
+		baseBinMap, err := l.resolveReference(ctx.refsDefinition, baseName)
+		if err != nil {
+			return err
+		}
+		for k, v := range binMap {
+			baseBinMap[k] = v
+		}
+		set.data[key] = baseBinMap
 	}
 
 	for key, binmap := range set.data {
@@ -267,10 +274,11 @@ func (l *LoaderAerospike) resolveReference(refs set, refName string) (binMap, er
 	// by the way removing $-records from base row
 	targetCopy := make(binMap, len(target))
 	for k, v := range target {
-		if len(k) == 0 || k[0] != '$' {
+		if k == "" || k[0] != '$' {
 			targetCopy[k] = v
 		}
 	}
+
 	return targetCopy, nil
 }
 
@@ -281,5 +289,6 @@ func inArray(needle string, haystack []string) bool {
 			return true
 		}
 	}
+
 	return false
 }

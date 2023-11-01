@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//start new test case
+// start new test case
 func NewTestCase(name string, start time.Time) *TestCase {
 	test := new(TestCase)
 	test.Name = name
@@ -49,7 +49,7 @@ func (t *TestCase) SetDescription(desc string) {
 	t.Desc = desc
 }
 
-func (t *TestCase) SetDescriptionOrDefaultValue(desc string, defVal string) {
+func (t *TestCase) SetDescriptionOrDefaultValue(desc, defVal string) {
 	if desc == "" {
 		t.Desc = defVal
 	} else {

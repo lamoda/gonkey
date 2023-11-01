@@ -10,7 +10,7 @@ Gonkey протестирует ваши сервисы, используя их
 - моки для имитации внешних сервисов
 - можно подключить к проекту как библиотеку и запускать вместе с юнит-тестами
 - запись результата тестов в виде отчета [Allure](http://allure.qatools.ru/)
-- имеется [JSON-schema](#json-schema) для автодополнения и валидации YAML-файлов Gonkey 
+- имеется [JSON-schema](#json-schema) для автодополнения и валидации YAML-файлов Gonkey
 
 ## Содержание
 
@@ -26,6 +26,7 @@ Gonkey протестирует ваши сервисы, используя их
     - [Из результатов предыдущего запроса](#из-результатов-предыдущего-запроса)
     - [Из результата текущего запроса](#из-результата-текущего-запроса)
     - [В переменных окружения или в env-файле](#в-переменных-окружения-или-в-env-файле)
+    - [В cases](#в-cases)
 - [Загрузка файлов](#загрузка-файлов)
 - [Фикстуры](#фикстуры)
   - [Удаление данных из таблиц](#удаление-данных-из-таблиц)
@@ -50,6 +51,9 @@ Gonkey протестирует ваши сервисы, используя их
   - [Описание ответа на запрос в Базу данных](#описание-ответа-на-запрос-в-базу-данных)
   - [Параметризация при запросах в Базу данных](#параметризация-при-запросах-в-базу-данных)
   - [Игнорирование порядка записей в ответе на запрос в базу данных](#игнорирование-порядка-записей-в-ответе-на-запрос-в-базу-данных)
+- [JSON-schema](#json-schema)
+  - [Настройка на IDE Jetbrains](#настройка-на-ide-jetbrains)
+  - [Настройка на IDE VSCode](#настройка-на-ide-vscode)
 
 ## Использование консольной утилиты
 
@@ -691,6 +695,7 @@ tables:
 Для хранилища Aerospike также поддерживается заливка тестовых данных. Для этого важно не забыть при запуске gonkey как CLI-приложение использовать флаг `-db-type aerospike`, а при использовании в качестве библиотеки в конфигурации раннера: `DbType: fixtures.Aerospike`.
 
 Формат файлов с фикстурами для Aerospike отличается, но смысл остаётся прежним:
+
 ```yaml
 sets:
   set1:
@@ -714,6 +719,7 @@ sets:
 ```
 
 Также поддерживаются шаблоны:
+
 ```yaml
 templates:
   base_tmpl:
@@ -1620,6 +1626,7 @@ Example:
 ### Формат описания запросов
 
 Для описания запросов к БД в тесте, можно использовать legacy-формат:
+
 ```yaml
 - name: my test
   ...
@@ -1631,6 +1638,7 @@ Example:
 ```
 
 Но, более предпочтительным будет следующий формат:
+
 ```yaml
 - name: my test
   ...
@@ -1759,10 +1767,10 @@ Example:
 ```
 
 ## JSON-schema
+
 Для упрощения написания тестов на Gonkey, используйте [файл со схемой](https://raw.githubusercontent.com/lamoda/gonkey/master/gonkey.json)
 
 Он добавляет in-line документацию и авто-дополнение в IDE которые это поддерживают.
-
 
 Пример работы в IDE Jetbrains:
 ![Example Jetbrains](https://i.imgur.com/oYuPuR3.gif)
@@ -1770,14 +1778,14 @@ Example:
 Пример работы в IDE VSCode:
 ![Example Jetbrains](https://i.imgur.com/hBIGjP9.gif)
 
-
 ### Настройка на IDE Jetbrains
-Скачайте [файл со схемой](https://raw.githubusercontent.com/lamoda/gonkey/master/gonkey.json). 
+
+Скачайте [файл со схемой](https://raw.githubusercontent.com/lamoda/gonkey/master/gonkey.json).
 В настройках Languages & Frameworks > Schemas and DTDs > JSON Schema Mappings
 
 ![Jetbrains IDE Settings](https://i.imgur.com/xkO22by.png)
 
-Добавьте новую схему 
+Добавьте новую схему
 
 ![Add schema](https://i.imgur.com/XHw14GJ.png)
 
@@ -1789,7 +1797,7 @@ Example:
 
 ![Mapping](https://i.imgur.com/iFjm0Ld.png)
 
-Выберите то что удобно для вас. 
+Выберите то что удобно для вас.
 
 ![Mapping pattern](https://i.imgur.com/WIK6sZW.png)
 
@@ -1803,7 +1811,7 @@ Example:
 
 ### Настройка на IDE VSCode
 
-Для начала вам нужно установить плагин для работы с YAML 
+Для начала вам нужно установить плагин для работы с YAML
 Откройте меню Code(File)->Preferences->Extensions
 
 ![VSCode Preferences](https://i.imgur.com/X7bk5Kh.png)
@@ -1813,15 +1821,16 @@ Example:
 ![Yaml Extension](https://i.imgur.com/57onioF.png)
 
 Откройте меню Code(File)->Preferences->Settings
-Наберите YAML:Schemas и нажмите на ссылку _Edit in settings.json_
+Наберите YAML:Schemas и нажмите на ссылку *Edit in settings.json*
 ![Yaml link](https://i.imgur.com/IEwxWyG.png)
 
-Добавьте маппинг файла и путь к схеме 
+Добавьте маппинг файла и путь к схеме
+
 ```
 "yaml.schemas": {
   "C:\\Users\\Leo\\gonkey.json": ["*.gonkey.yaml"]          
 }
 ```
 
-В примере выше, схема из файла C:\Users\Leo\gonkey.json будет применяться ко всем файлам 
+В примере выше, схема из файла C:\Users\Leo\gonkey.json будет применяться ко всем файлам
 с расширением .gonkey.yaml

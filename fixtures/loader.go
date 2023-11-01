@@ -43,7 +43,6 @@ type Loader interface {
 }
 
 func NewLoader(cfg *Config) Loader {
-
 	var loader Loader
 
 	location := strings.TrimRight(cfg.Location, "/")

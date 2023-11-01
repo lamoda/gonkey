@@ -25,11 +25,13 @@ type Config struct {
 	Mocks          *mocks.Mocks
 	MocksLoader    *mocks.Loader
 	Variables      *variables.Variables
-	HttpProxyURL   *url.URL
+	HTTPProxyURL   *url.URL
 }
 
-type testExecutor func(models.TestInterface) (*models.Result, error)
-type testHandler func(models.TestInterface, testExecutor) error
+type (
+	testExecutor func(models.TestInterface) (*models.Result, error)
+	testHandler  func(models.TestInterface, testExecutor) error
+)
 
 type Runner struct {
 	loader               testloader.LoaderInterface
@@ -46,7 +48,7 @@ func New(config *Config, loader testloader.LoaderInterface, handler testHandler)
 		config:               config,
 		loader:               loader,
 		testExecutionHandler: handler,
-		client:               newClient(config.HttpProxyURL),
+		client:               newClient(config.HTTPProxyURL),
 	}
 }
 
@@ -91,6 +93,7 @@ func (r *Runner) Run() error {
 					return nil, err
 				}
 			}
+
 			return testResult, nil
 		}
 		err := r.testExecutionHandler(test, testExecutor)
@@ -109,7 +112,6 @@ var (
 )
 
 func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
-
 	if v.GetStatus() != "" {
 		if v.GetStatus() == "broken" {
 			return &models.Result{Test: v}, errTestBroken
@@ -221,15 +223,14 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 }
 
 func (r *Runner) setVariablesFromResponse(t models.TestInterface, contentType, body string, statusCode int) error {
-
 	varTemplates := t.GetVariablesToSet()
 	if varTemplates == nil {
 		return nil
 	}
 
-	isJson := strings.Contains(contentType, "json") && body != ""
+	isJSON := strings.Contains(contentType, "json") && body != ""
 
-	vars, err := variables.FromResponse(varTemplates[statusCode], body, isJson)
+	vars, err := variables.FromResponse(varTemplates[statusCode], body, isJSON)
 	if err != nil {
 		return err
 	}
@@ -249,5 +250,6 @@ func checkHasFocused(tests []models.TestInterface) bool {
 			return true
 		}
 	}
+
 	return false
 }

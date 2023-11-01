@@ -28,6 +28,7 @@ Capabilities:
     - [From the response of the previous test](#from-the-response-of-the-previous-test)
     - [From the response of currently running test](#from-the-response-of-currently-running-test)
     - [From environment variables or from env-file](#from-environment-variables-or-from-env-file)
+    - [From cases](#from-cases)
 - [Files uploading](#files-uploading)
 - [Fixtures](#fixtures)
   - [Deleting data from tables](#deleting-data-from-tables)
@@ -52,6 +53,9 @@ Capabilities:
   - [Definition of DB request response](#definition-of-db-request-response)
   - [DB request parameterization](#db-request-parameterization)
   - [Ignoring ordering in DB response](#ignoring-ordering-in-db-response)
+- [JSON-schema](#json-schema)
+  - [Setup in Jetbrains IDE](#setup-in-jetbrains-ide)
+  - [Setup is VSCode IDE](#setup-is-vscode-ide)
 
 ## Using the CLI
 
@@ -133,7 +137,7 @@ func TestFuncCases(t *testing.T) {
 }
 ```
 
-Starts from version 1.18.3, externally written fixture loader may be used for loading test data, if gonkey used as a library. 
+Starts from version 1.18.3, externally written fixture loader may be used for loading test data, if gonkey used as a library.
 To start using the custom loader, you need to import the custom module, that contains implementation of fixtures.Loader interface.
 
 Example with a redis fixtures loader:
@@ -746,11 +750,11 @@ While using gonkey as a CLI application do not forget the flag `-db-type redis`.
 
 List of supported data structures:
 
- - Plain key/value
- - Set
- - Hash
- - List
- - ZSet (sorted set)
+- Plain key/value
+- Set
+- Hash
+- List
+- ZSet (sorted set)
 
 Fixture file example:
 
@@ -1622,6 +1626,7 @@ The response can contain several records. Those records are compared to the expe
 ### Test Format
 
 You can use legacy style for run sql queries, like this:
+
 ```yaml
 - name: my test
   ...
@@ -1633,6 +1638,7 @@ You can use legacy style for run sql queries, like this:
 ```
 
 But, for now, already acceptable style is:
+
 ```yaml
 - name: my test
   ...
@@ -1760,11 +1766,10 @@ Example:
 ```
 
 ## JSON-schema
+
 Use [file with schema](https://raw.githubusercontent.com/lamoda/gonkey/master/gonkey.json) to add syntax highlight to your favourite IDE and write Gonkey tests more easily.
 
 It adds in-line documentation and auto-completion to any IDE that supports it.
-
-
 
 Example in Jetbrains IDE:
 ![Example Jetbrains](https://i.imgur.com/oYuPuR3.gif)
@@ -1772,10 +1777,10 @@ Example in Jetbrains IDE:
 Example in VSCode IDE:
 ![Example Jetbrains](https://i.imgur.com/hBIGjP9.gif)
 
-
 ### Setup in Jetbrains IDE
+
 Download [file with schema](https://raw.githubusercontent.com/lamoda/gonkey/master/gonkey.json).
-Open preferences File->Preferences 
+Open preferences File->Preferences
 In Languages & Frameworks > Schemas and DTDs > JSON Schema Mappings
 
 ![Jetbrains IDE Settings](https://i.imgur.com/xkO22by.png)
@@ -1817,10 +1822,11 @@ Look for YAML and install YAML Language Support by Red Hat
 
 Open Settings by going to Code(File)->Preferences->Settings
 
-Open Schema Settings by typing YAML:Schemas and click on _Edit in settings.json_
+Open Schema Settings by typing YAML:Schemas and click on *Edit in settings.json*
 ![Yaml link](https://i.imgur.com/IEwxWyG.png)
 
 Add file match to apply the JSON on YAML files.
+
 ```
 "yaml.schemas": {
   "C:\\Users\\Leo\\gonkey.json": ["*.gonkey.yaml"]          
