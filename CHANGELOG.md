@@ -1,3 +1,15 @@
+# v1.21.4 (Mon Nov 20 2023)
+
+#### 🐛 Bug Fix
+
+- ci(lint): added some basic linting and fixed warnings. [#233](https://github.com/lamoda/gonkey/pull/233) ([@vitkarpenko](https://github.com/vitkarpenko))
+
+#### Authors: 1
+
+- Vitaly Karpenko ([@vitkarpenko](https://github.com/vitkarpenko))
+
+---
+
 # v1.21.3 (Tue Oct 17 2023)
 
 #### ⚠️ Pushed to `master`
