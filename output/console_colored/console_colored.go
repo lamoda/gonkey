@@ -23,7 +23,7 @@ func NewOutput(verbose bool) *ConsoleColoredOutput {
 	}
 }
 
-func (o *ConsoleColoredOutput) Process(t models.TestInterface, result *models.Result) error {
+func (o *ConsoleColoredOutput) Process(_ models.TestInterface, result *models.Result) error {
 	if !result.Passed() || o.verbose {
 		text, err := renderResult(result)
 		if err != nil {
@@ -37,6 +37,7 @@ func (o *ConsoleColoredOutput) Process(t models.TestInterface, result *models.Re
 			o.coloredPrintf("\n")
 		}
 	}
+
 	return nil
 }
 
@@ -98,6 +99,7 @@ Errors:
 	if err := t.Execute(&buffer, result); err != nil {
 		return "", err
 	}
+
 	return buffer.String(), nil
 }
 

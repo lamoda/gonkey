@@ -5,19 +5,20 @@ import (
 	"regexp"
 )
 
-func CompareQuery(expected, actual []string) (bool, error) {
+func Query(expected, actual []string) (bool, error) {
 	if len(expected) != len(actual) {
 		return false, fmt.Errorf("expected and actual query params have different lengths")
 	}
 
 	remove := func(array []string, i int) []string {
 		array[i] = array[len(array)-1]
+
 		return array[:len(array)-1]
 	}
 
-	var expectedCopy = make([]string, len(expected))
+	expectedCopy := make([]string, len(expected))
 	copy(expectedCopy, expected)
-	var actualCopy = make([]string, len(actual))
+	actualCopy := make([]string, len(actual))
 	copy(actualCopy, actual)
 
 	for len(expectedCopy) != 0 {
@@ -39,6 +40,7 @@ func CompareQuery(expected, actual []string) (bool, error) {
 				if found {
 					expectedCopy = remove(expectedCopy, i)
 					actualCopy = remove(actualCopy, j)
+
 					break
 				}
 			}

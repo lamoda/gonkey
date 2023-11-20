@@ -87,11 +87,11 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 
 	var proxyURL *url.URL
 	if os.Getenv("HTTP_PROXY") != "" {
-		httpUrl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+		httpURL, err := url.Parse(os.Getenv("HTTP_PROXY"))
 		if err != nil {
 			t.Fatal(err)
 		}
-		proxyURL = httpUrl
+		proxyURL = httpURL
 	}
 
 	runner := initRunner(t, params, mocksLoader, fixturesLoader, proxyURL)
@@ -116,7 +116,13 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	}
 }
 
-func initRunner(t *testing.T, params *RunWithTestingParams, mocksLoader *mocks.Loader, fixturesLoader fixtures.Loader, proxyURL *url.URL) *Runner {
+func initRunner(
+	t *testing.T,
+	params *RunWithTestingParams,
+	mocksLoader *mocks.Loader,
+	fixturesLoader fixtures.Loader,
+	proxyURL *url.URL,
+) *Runner {
 	yamlLoader := yaml_file.NewLoader(params.TestsDir)
 	yamlLoader.SetFileFilter(os.Getenv("GONKEY_FILE_FILTER"))
 
@@ -128,11 +134,12 @@ func initRunner(t *testing.T, params *RunWithTestingParams, mocksLoader *mocks.L
 			MocksLoader:    mocksLoader,
 			FixturesLoader: fixturesLoader,
 			Variables:      variables.New(),
-			HttpProxyURL:   proxyURL,
+			HTTPProxyURL:   proxyURL,
 		},
 		yamlLoader,
 		handler.HandleTest,
 	)
+
 	return runner
 }
 
@@ -168,5 +175,6 @@ func (h testingHandler) HandleTest(test models.TestInterface, executeTest testEx
 			t.Fail()
 		}
 	})
+
 	return returnErr
 }

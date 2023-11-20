@@ -22,25 +22,25 @@ type verifier interface {
 	Verify(r *http.Request) []error
 }
 
-type nopConstraint struct {}
+type nopConstraint struct{}
 
 func (c *nopConstraint) Verify(r *http.Request) []error {
 	return nil
 }
 
 type bodyMatchesXMLConstraint struct {
-	expectedBody interface{}
-	compareParams compare.CompareParams
+	expectedBody  interface{}
+	compareParams compare.Params
 }
 
-func newBodyMatchesXMLConstraint(expected string, params compare.CompareParams) (verifier, error) {
+func newBodyMatchesXMLConstraint(expected string, params compare.Params) (verifier, error) {
 	expectedBody, err := xmlparsing.Parse(expected)
 	if err != nil {
 		return nil, err
 	}
 
 	res := &bodyMatchesXMLConstraint{
-		expectedBody: expectedBody,
+		expectedBody:  expectedBody,
 		compareParams: params,
 	}
 	return res, nil
@@ -66,18 +66,18 @@ func (c *bodyMatchesXMLConstraint) Verify(r *http.Request) []error {
 }
 
 type bodyMatchesJSONConstraint struct {
-	expectedBody interface{}
-	compareParams compare.CompareParams
+	expectedBody  interface{}
+	compareParams compare.Params
 }
 
-func newBodyMatchesJSONConstraint(expected string, params compare.CompareParams) (verifier, error) {
+func newBodyMatchesJSONConstraint(expected string, params compare.Params) (verifier, error) {
 	var expectedBody interface{}
 	err := json.Unmarshal([]byte(expected), &expectedBody)
 	if err != nil {
 		return nil, err
 	}
 	res := &bodyMatchesJSONConstraint{
-		expectedBody: expectedBody,
+		expectedBody:  expectedBody,
 		compareParams: params,
 	}
 	return res, nil
@@ -102,20 +102,20 @@ func (c *bodyMatchesJSONConstraint) Verify(r *http.Request) []error {
 }
 
 type bodyJSONFieldMatchesJSONConstraint struct {
-	path     string
-	expected interface{}
-	compareParams compare.CompareParams
+	path          string
+	expected      interface{}
+	compareParams compare.Params
 }
 
-func newBodyJSONFieldMatchesJSONConstraint(path, expected string, params compare.CompareParams) (verifier, error) {
+func newBodyJSONFieldMatchesJSONConstraint(path, expected string, params compare.Params) (verifier, error) {
 	var v interface{}
 	err := json.Unmarshal([]byte(expected), &v)
 	if err != nil {
 		return nil, err
 	}
 	res := &bodyJSONFieldMatchesJSONConstraint{
-		path:     path,
-		expected: v,
+		path:          path,
+		expected:      v,
 		compareParams: params,
 	}
 	return res, nil
@@ -270,7 +270,7 @@ func (c *queryRegexpConstraint) Verify(r *http.Request) (errors []error) {
 			continue
 		}
 
-		if ok, err := compare.CompareQuery(want, got); err != nil {
+		if ok, err := compare.Query(want, got); err != nil {
 			errors = append(errors, fmt.Errorf(
 				"'%s' parameters comparison failed. \n %s'", key, err.Error(),
 			))
@@ -339,7 +339,6 @@ func newBodyMatchesTextConstraint(body, re string) (verifier, error) {
 
 func (c *bodyMatchesTextConstraint) Verify(r *http.Request) []error {
 	ioBody, err := ioutil.ReadAll(r.Body)
-
 	if err != nil {
 		return []error{err}
 	}

@@ -1,21 +1,20 @@
 package parser
 
 type FixtureFileParser interface {
-    Parse(ctx *context, filename string) (*Fixture, error)
-    Copy(parser *fileParser) FixtureFileParser
+	Parse(ctx *Context, filename string) (*Fixture, error)
+	Copy(parser *fileParser) FixtureFileParser
 }
 
 var fixtureParsersRegistry = make(map[string]FixtureFileParser)
 
 func RegisterParser(format string, parser FixtureFileParser) {
-    fixtureParsersRegistry[format] = parser
+	fixtureParsersRegistry[format] = parser
 }
 
 func GetParser(format string) FixtureFileParser {
-    return fixtureParsersRegistry[format]
+	return fixtureParsersRegistry[format]
 }
 
 func init() {
-    RegisterParser("yaml", &redisYamlParser{})
+	RegisterParser("yaml", &redisYamlParser{})
 }
-

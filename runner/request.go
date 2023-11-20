@@ -18,7 +18,7 @@ import (
 
 func newClient(proxyURL *url.URL) *http.Client {
 	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // Client is only used for testing.
 		Proxy:           http.ProxyURL(proxyURL),
 	}
 
@@ -31,7 +31,6 @@ func newClient(proxyURL *url.URL) *http.Client {
 }
 
 func newRequest(host string, test models.TestInterface) (req *http.Request, err error) {
-
 	if test.GetForm() != nil {
 		req, err = newMultipartRequest(host, test)
 		if err != nil {
@@ -52,7 +51,6 @@ func newRequest(host string, test models.TestInterface) (req *http.Request, err 
 }
 
 func newMultipartRequest(host string, test models.TestInterface) (*http.Request, error) {
-
 	if test.ContentType() != "" && test.ContentType() != "multipart/form-data" {
 		return nil, fmt.Errorf(
 			"test has unexpected Content-Type: %s, expected: multipart/form-data",
@@ -89,7 +87,6 @@ func newMultipartRequest(host string, test models.TestInterface) (*http.Request,
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	return req, nil
-
 }
 
 func addFiles(files map[string]string, w *multipart.Writer) error {
@@ -120,6 +117,7 @@ func addFile(path string, w *multipart.Writer, name string) error {
 	if _, err = io.Copy(fw, f); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -142,7 +140,6 @@ func addFields(params url.Values, w *multipart.Writer) error {
 }
 
 func newCommonRequest(host string, test models.TestInterface) (*http.Request, error) {
-
 	body, err := test.ToJSON()
 	if err != nil {
 		return nil, err
@@ -161,7 +158,6 @@ func newCommonRequest(host string, test models.TestInterface) (*http.Request, er
 }
 
 func request(test models.TestInterface, b *bytes.Buffer, host string) (*http.Request, error) {
-
 	req, err := http.NewRequest(
 		strings.ToUpper(test.GetMethod()),
 		host+test.Path()+test.ToQuery(),
@@ -172,12 +168,13 @@ func request(test models.TestInterface, b *bytes.Buffer, host string) (*http.Req
 	}
 
 	for k, v := range test.Headers() {
-		if strings.ToLower(k) == "host" {
+		if strings.EqualFold(k, "host") {
 			req.Host = v
 		} else {
 			req.Header.Add(k, v)
 		}
 	}
+
 	return req, nil
 }
 
@@ -185,7 +182,9 @@ func actualRequestBody(req *http.Request) string {
 	if req.Body != nil {
 		reqBodyStream, _ := req.GetBody()
 		reqBody, _ := ioutil.ReadAll(reqBodyStream)
+
 		return string(reqBody)
 	}
+
 	return ""
 }

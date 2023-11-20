@@ -20,7 +20,7 @@ func makeErrorString(path, msg string, expected, actual interface{}) string {
 }
 
 func TestCompareNils(t *testing.T) {
-	errors := Compare(nil, nil, CompareParams{})
+	errors := Compare(nil, nil, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -31,7 +31,7 @@ func TestCompareNils(t *testing.T) {
 }
 
 func TestCompareNilWithNonNil(t *testing.T) {
-	errors := Compare("", nil, CompareParams{})
+	errors := Compare("", nil, Params{})
 	if errors[0].Error() != makeErrorString("$", "types do not match", "string", "nil") {
 		t.Error(
 			"must return one error",
@@ -42,7 +42,7 @@ func TestCompareNilWithNonNil(t *testing.T) {
 }
 
 func TestCompareEqualStrings(t *testing.T) {
-	errors := Compare("1", "1", CompareParams{})
+	errors := Compare("1", "1", Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -53,7 +53,7 @@ func TestCompareEqualStrings(t *testing.T) {
 }
 
 func TestCompareDifferStrings(t *testing.T) {
-	errors := Compare("1", "2", CompareParams{})
+	errors := Compare("1", "2", Params{})
 	if errors[0].Error() != makeErrorString("$", "values do not match", 1, 2) {
 		t.Error(
 			"must return one error",
@@ -64,7 +64,7 @@ func TestCompareDifferStrings(t *testing.T) {
 }
 
 func TestCompareEqualIntegers(t *testing.T) {
-	errors := Compare(1, 1, CompareParams{})
+	errors := Compare(1, 1, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -75,7 +75,7 @@ func TestCompareEqualIntegers(t *testing.T) {
 }
 
 func TestCompareDifferIntegers(t *testing.T) {
-	errors := Compare(1, 2, CompareParams{})
+	errors := Compare(1, 2, Params{})
 	if errors[0].Error() != makeErrorString("$", "values do not match", 1, 2) {
 		t.Error(
 			"must return one error",
@@ -86,7 +86,7 @@ func TestCompareDifferIntegers(t *testing.T) {
 }
 
 func TestCheckRegexMach(t *testing.T) {
-	errors := Compare("$matchRegexp(x.+z)", "xyyyz", CompareParams{})
+	errors := Compare("$matchRegexp(x.+z)", "xyyyz", Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -97,7 +97,7 @@ func TestCheckRegexMach(t *testing.T) {
 }
 
 func TestCheckRegexNotMach(t *testing.T) {
-	errors := Compare("$matchRegexp(x.+z)", "ayyyb", CompareParams{})
+	errors := Compare("$matchRegexp(x.+z)", "ayyyb", Params{})
 	if errors[0].Error() != makeErrorString("$",
 		"value does not match regex", "$matchRegexp(x.+z)", "ayyyb") {
 		t.Error(
@@ -109,7 +109,7 @@ func TestCheckRegexNotMach(t *testing.T) {
 }
 
 func TestCheckRegexCantCompile(t *testing.T) {
-	errors := Compare("$matchRegexp((?x))", "2", CompareParams{})
+	errors := Compare("$matchRegexp((?x))", "2", Params{})
 	if errors[0].Error() != makeErrorString("$", "can not compile regex", nil, "error") {
 		t.Error(
 			"must return one error",
@@ -122,7 +122,7 @@ func TestCheckRegexCantCompile(t *testing.T) {
 func TestCompareEqualArrays(t *testing.T) {
 	array1 := []string{"1", "2"}
 	array2 := []string{"1", "2"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -135,7 +135,7 @@ func TestCompareEqualArrays(t *testing.T) {
 func TestCompareEqualArraysWithDifferentElementsOrder(t *testing.T) {
 	array1 := []string{"1", "2"}
 	array2 := []string{"2", "1"}
-	errors := Compare(array1, array2, CompareParams{IgnoreArraysOrdering: true})
+	errors := Compare(array1, array2, Params{IgnoreArraysOrdering: true})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -148,7 +148,7 @@ func TestCompareEqualArraysWithDifferentElementsOrder(t *testing.T) {
 func TestCompareArraysDifferLengths(t *testing.T) {
 	array1 := []string{"1", "2", "3"}
 	array2 := []string{"1", "2"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if errors[0].Error() != makeErrorString("$", "array lengths do not match", 3, 2) {
 		t.Error(
 			"must return one error",
@@ -161,7 +161,7 @@ func TestCompareArraysDifferLengths(t *testing.T) {
 func TestCompareDifferArrays(t *testing.T) {
 	array1 := []string{"1", "2"}
 	array2 := []string{"1", "3"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if errors[0].Error() != makeErrorString("$[1]", "values do not match", 2, 3) {
 		t.Error(
 			"must return one error",
@@ -174,14 +174,14 @@ func TestCompareDifferArrays(t *testing.T) {
 func TestCompareArraysFewErrors(t *testing.T) {
 	array1 := []string{"1", "2", "3"}
 	array2 := []string{"1", "3", "4"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	assert.Len(t, errors, 2)
 }
 
 func TestCompareNestedEqualArrays(t *testing.T) {
 	array1 := [][]string{{"1", "2"}, {"3", "4"}}
 	array2 := [][]string{{"1", "2"}, {"3", "4"}}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -194,7 +194,7 @@ func TestCompareNestedEqualArrays(t *testing.T) {
 func TestCompareNestedDifferArrays(t *testing.T) {
 	array1 := [][]string{{"1", "2"}, {"3", "4"}}
 	array2 := [][]string{{"1", "2"}, {"3", "5"}}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if errors[0].Error() != makeErrorString("$[1][1]", "values do not match", 4, 5) {
 		t.Error(
 			"must return one error",
@@ -205,11 +205,10 @@ func TestCompareNestedDifferArrays(t *testing.T) {
 }
 
 func TestCompareArraysWithRegex(t *testing.T) {
-
 	arrayExpected := []string{"2", "$matchRegexp(x.+z)"}
 	arrayActual := []string{"2", "xyyyz"}
 
-	errors := Compare(arrayExpected, arrayActual, CompareParams{})
+	errors := Compare(arrayExpected, arrayActual, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -220,11 +219,10 @@ func TestCompareArraysWithRegex(t *testing.T) {
 }
 
 func TestCompareArraysWithRegexMixedTypes(t *testing.T) {
-
 	arrayExpected := []string{"2", "$matchRegexp([0-9]+)"}
 	arrayActual := []interface{}{"2", 123}
 
-	errors := Compare(arrayExpected, arrayActual, CompareParams{})
+	errors := Compare(arrayExpected, arrayActual, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -235,11 +233,10 @@ func TestCompareArraysWithRegexMixedTypes(t *testing.T) {
 }
 
 func TestCompareArraysWithRegexNotMatch(t *testing.T) {
-
 	arrayExpected := []string{"2", "$matchRegexp(x.+z)"}
 	arrayActual := []string{"2", "ayyyb"}
 
-	errors := Compare(arrayExpected, arrayActual, CompareParams{})
+	errors := Compare(arrayExpected, arrayActual, Params{})
 	expectedErrors := makeErrorString("$[1]",
 		"value does not match regex", "$matchRegexp(x.+z)", "ayyyb")
 	if errors[0].Error() != expectedErrors {
@@ -254,7 +251,7 @@ func TestCompareArraysWithRegexNotMatch(t *testing.T) {
 func TestCompareEqualMaps(t *testing.T) {
 	array1 := map[string]string{"a": "1", "b": "2"}
 	array2 := map[string]string{"a": "1", "b": "2"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -263,11 +260,12 @@ func TestCompareEqualMaps(t *testing.T) {
 		t.Fail()
 	}
 }
+
 func TestCompareMapsWithRegex(t *testing.T) {
 	mapExpected := map[string]string{"a": "1", "b": "$matchRegexp(x.+z)"}
 	mapActual := map[string]string{"a": "1", "b": "xyyyz"}
 
-	errors := Compare(mapExpected, mapActual, CompareParams{})
+	errors := Compare(mapExpected, mapActual, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -281,7 +279,7 @@ func TestCompareMapsWithRegexNotMatch(t *testing.T) {
 	mapExpected := map[string]string{"a": "1", "b": "$matchRegexp(x.+z)"}
 	mapActual := map[string]string{"a": "1", "b": "ayyyb"}
 
-	errors := Compare(mapExpected, mapActual, CompareParams{})
+	errors := Compare(mapExpected, mapActual, Params{})
 	expectedErrors := makeErrorString("$.b", "value does not match regex", "$matchRegexp(x.+z)", "ayyyb")
 
 	if errors[0].Error() != expectedErrors {
@@ -296,7 +294,7 @@ func TestCompareMapsWithRegexNotMatch(t *testing.T) {
 func TestCompareEqualMapsWithExtraFields(t *testing.T) {
 	array1 := map[string]string{"a": "1", "b": "2"}
 	array2 := map[string]string{"a": "1", "b": "2", "c": "3"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -309,7 +307,7 @@ func TestCompareEqualMapsWithExtraFields(t *testing.T) {
 func TestCompareEqualMapsWithExtraFieldsCheckingEnabled(t *testing.T) {
 	array1 := map[string]string{"a": "1", "b": "2"}
 	array2 := map[string]string{"a": "1", "b": "2", "c": "3"}
-	errors := Compare(array1, array2, CompareParams{DisallowExtraFields: true})
+	errors := Compare(array1, array2, Params{DisallowExtraFields: true})
 	if errors[0].Error() != makeErrorString("$", "map lengths do not match", 2, 3) {
 		t.Error(
 			"must return one error",
@@ -322,7 +320,7 @@ func TestCompareEqualMapsWithExtraFieldsCheckingEnabled(t *testing.T) {
 func TestCompareEqualMapsWithDifferentKeysOrder(t *testing.T) {
 	array1 := map[string]string{"a": "1", "b": "2"}
 	array2 := map[string]string{"b": "2", "a": "1"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -335,7 +333,7 @@ func TestCompareEqualMapsWithDifferentKeysOrder(t *testing.T) {
 func TestCompareMapsWithDifferentKeys(t *testing.T) {
 	array1 := map[string]string{"a": "1", "b": "2"}
 	array2 := map[string]string{"a": "1", "c": "2"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	expectedErr := makeErrorString("$", "key is missing", "b", "<missing>")
 	if errors[0].Error() != expectedErr {
 		t.Error(
@@ -349,7 +347,7 @@ func TestCompareMapsWithDifferentKeys(t *testing.T) {
 func TestCompareMapsWithDifferentValues(t *testing.T) {
 	array1 := map[string]string{"a": "1", "b": "2"}
 	array2 := map[string]string{"a": "1", "b": "3"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if errors[0].Error() != makeErrorString("$.b", "values do not match", 2, 3) {
 		t.Error(
 			"must return one error",
@@ -362,14 +360,14 @@ func TestCompareMapsWithDifferentValues(t *testing.T) {
 func TestCompareMapsWithFewErrors(t *testing.T) {
 	array1 := map[string]string{"a": "1", "b": "2", "c": "5"}
 	array2 := map[string]string{"a": "1", "b": "3", "d": "4"}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	assert.Len(t, errors, 2)
 }
 
 func TestCompareEqualNestedMaps(t *testing.T) {
 	array1 := map[string]map[string]string{"a": {"i": "3", "j": "4"}, "b": {"k": "5", "l": "6"}}
 	array2 := map[string]map[string]string{"a": {"i": "3", "j": "4"}, "b": {"k": "5", "l": "6"}}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -382,7 +380,7 @@ func TestCompareEqualNestedMaps(t *testing.T) {
 func TestCompareNestedMapsWithDifferentKeys(t *testing.T) {
 	array1 := map[string]map[string]string{"a": {"i": "3", "j": "4"}, "b": {"k": "5", "l": "6"}}
 	array2 := map[string]map[string]string{"a": {"i": "3", "j": "4"}, "b": {"l": "6"}}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	expectedErr := makeErrorString("$.b", "key is missing", "k", "<missing>")
 	if errors[0].Error() != expectedErr {
 		t.Error(
@@ -396,7 +394,7 @@ func TestCompareNestedMapsWithDifferentKeys(t *testing.T) {
 func TestCompareNestedMapsWithDifferentValues(t *testing.T) {
 	array1 := map[string]map[string]string{"a": {"i": "3", "j": "4"}, "b": {"k": "5", "l": "6"}}
 	array2 := map[string]map[string]string{"a": {"i": "3", "j": "4"}, "b": {"k": "5", "l": "7"}}
-	errors := Compare(array1, array2, CompareParams{})
+	errors := Compare(array1, array2, Params{})
 	if errors[0].Error() != makeErrorString("$.b.l", "values do not match", 6, 7) {
 		t.Error(
 			"must return one error",
@@ -410,7 +408,7 @@ func TestCompareEqualJsonScalars(t *testing.T) {
 	var json1, json2 interface{}
 	json.Unmarshal([]byte("1"), &json1)
 	json.Unmarshal([]byte("1"), &json2)
-	errors := Compare(json1, json2, CompareParams{})
+	errors := Compare(json1, json2, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -424,7 +422,7 @@ func TestCompareDifferJsonScalars(t *testing.T) {
 	var json1, json2 interface{}
 	json.Unmarshal([]byte("1"), &json1)
 	json.Unmarshal([]byte("2"), &json2)
-	errors := Compare(json1, json2, CompareParams{})
+	errors := Compare(json1, json2, Params{})
 	if errors[0].Error() != makeErrorString("$", "values do not match", 1, 2) {
 		t.Error(
 			"must return one error",
@@ -458,7 +456,7 @@ func TestCompareEqualArraysWithIgnoreArraysOrdering(t *testing.T) {
 	var json1, json2 interface{}
 	json.Unmarshal([]byte(expectedArrayJson), &json1)
 	json.Unmarshal([]byte(actualArrayJson), &json2)
-	errors := Compare(json1, json2, CompareParams{
+	errors := Compare(json1, json2, Params{
 		IgnoreArraysOrdering: true,
 	})
 	if len(errors) != 0 {
@@ -474,7 +472,7 @@ func TestCompareEqualComplexJson(t *testing.T) {
 	var json1, json2 interface{}
 	json.Unmarshal([]byte(complexJson1), &json1)
 	json.Unmarshal([]byte(complexJson1), &json2) // compare json with same json
-	errors := Compare(json1, json2, CompareParams{})
+	errors := Compare(json1, json2, Params{})
 	if len(errors) != 0 {
 		t.Error(
 			"must return no errors",
@@ -488,7 +486,7 @@ func TestCompareDifferComplexJson(t *testing.T) {
 	var json1, json2 interface{}
 	json.Unmarshal([]byte(complexJson1), &json1)
 	json.Unmarshal([]byte(complexJson2), &json2)
-	errors := Compare(json1, json2, CompareParams{})
+	errors := Compare(json1, json2, Params{})
 	expectedErr := makeErrorString(
 		"$.paths./api/get-delivery-info.get.parameters[2].$ref",
 		"values do not match",
@@ -5416,6 +5414,7 @@ var complexJson1 = `
     ]
 }
 `
+
 var complexJson2 = `
 {
     "swagger": "2.0",

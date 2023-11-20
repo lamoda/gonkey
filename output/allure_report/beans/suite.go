@@ -38,19 +38,19 @@ func NewSuite(name string, start time.Time) *Suite {
 // SetEnd set end time for suite
 func (s *Suite) SetEnd(endTime time.Time) {
 	if !endTime.IsZero() {
-		//strict UTC
+		// strict UTC
 		s.End = endTime.UTC().UnixNano() / 1000
 	} else {
 		s.End = time.Now().UTC().UnixNano() / 1000
 	}
 }
 
-//suite has test-cases?
+// suite has test-cases?
 func (s Suite) HasTests() bool {
 	return len(s.TestCases.Cases) > 0
 }
 
-//add test in suite
+// add test in suite
 func (s *Suite) AddTest(test *TestCase) {
 	s.TestCases.Cases = append(s.TestCases.Cases, test)
 }

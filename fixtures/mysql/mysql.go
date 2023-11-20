@@ -21,7 +21,7 @@ type LoaderMysql struct {
 	debug    bool
 }
 
-const errNoIdColumn = "Error 1054: Unknown column 'id' in 'where clause'"
+const errNoIDColumn = "Error 1054: Unknown column 'id' in 'where clause'"
 
 type row map[string]interface{}
 
@@ -85,6 +85,7 @@ func (l *LoaderMysql) loadFile(name string, ctx *loadContext) error {
 	for _, candidate := range candidates {
 		if _, err = os.Stat(candidate); err == nil {
 			file = candidate
+
 			break
 		}
 	}
@@ -104,6 +105,7 @@ func (l *LoaderMysql) loadFile(name string, ctx *loadContext) error {
 		return err
 	}
 	ctx.files = append(ctx.files, file)
+
 	return l.loadYml(data, ctx)
 }
 
@@ -131,8 +133,7 @@ func (l *LoaderMysql) loadYml(data []byte, ctx *loadContext) error {
 		row := make(row, len(fields))
 		for _, field := range fields {
 			key := field.Key.(string)
-			value, _ := field.Value.(interface{})
-			row[key] = value
+			row[key] = field.Value
 		}
 
 		if base, ok := row["$extend"]; ok {
@@ -149,8 +150,8 @@ func (l *LoaderMysql) loadYml(data []byte, ctx *loadContext) error {
 
 		ctx.refsDefinition[name] = row
 		if l.debug {
-			rowJson, _ := json.Marshal(row)
-			fmt.Printf("Populating ref %s as %s from template\n", name, string(rowJson))
+			rowJSON, _ := json.Marshal(row)
+			fmt.Printf("Populating ref %s as %s from template\n", name, string(rowJSON))
 		}
 	}
 
@@ -174,6 +175,7 @@ func (l *LoaderMysql) loadYml(data []byte, ctx *loadContext) error {
 		}
 		ctx.tables = append(ctx.tables, lt)
 	}
+
 	return nil
 }
 
@@ -224,20 +226,20 @@ func (l *LoaderMysql) truncateTable(tx *sql.Tx, name string) error {
 }
 
 func (l *LoaderMysql) loadTable(tx *sql.Tx, ctx *loadContext, t string, rows table) error {
-
 	// $extend keyword allows to import values from a named row
 	for i, row := range rows {
-		if base, ok := row["$extend"]; ok {
-			base := base.(string)
-			baseRow, err := l.resolveReference(ctx.refsDefinition, base)
-			if err != nil {
-				return err
-			}
-			for k, v := range row {
-				baseRow[k] = v
-			}
-			rows[i] = baseRow
+		if _, ok := row["$extend"]; !ok {
+			continue
 		}
+		base := row["$extend"].(string)
+		baseRow, err := l.resolveReference(ctx.refsDefinition, base)
+		if err != nil {
+			return err
+		}
+		for k, v := range row {
+			baseRow[k] = v
+		}
+		rows[i] = baseRow
 	}
 
 	// issuing query
@@ -297,21 +299,21 @@ func (l *LoaderMysql) loadRow(tx *sql.Tx, ctx *loadContext, t string, row row) e
 		// add to references
 		ctx.refsDefinition[name] = row
 		if l.debug {
-			rowJson, _ := json.Marshal(insertedRowValue)
+			rowJSON, _ := json.Marshal(insertedRowValue)
 			fmt.Printf(
 				"Populating ref %s as %s from row definition\n",
 				name,
-				string(rowJson),
+				string(rowJSON),
 			)
 		}
 
 		ctx.refsInserted[name] = insertedRowValue
 		if l.debug {
-			valuesJson, _ := json.Marshal(insertedRowValue)
+			valuesJSON, _ := json.Marshal(insertedRowValue)
 			fmt.Printf(
 				"Populating ref %s as %s from inserted values\n",
 				name,
-				string(valuesJson),
+				string(valuesJSON),
 			)
 		}
 	}
@@ -351,19 +353,20 @@ func fetchRow(rows *sql.Rows) (row, error) {
 }
 
 func (l *LoaderMysql) insertedRows(tx *sql.Tx, insertRes sql.Result, t string) (*sql.Rows, error) {
-	lastId, err := insertRes.LastInsertId()
+	lastID, err := insertRes.LastInsertId()
 	if err != nil {
 		return nil, err
 	}
 
+	//nolint:gosec // Obviously shouldn't be used with production DB.
 	query := fmt.Sprintf("SELECT * FROM `%s` WHERE `id` = ?", t)
 
-	rows, err := tx.Query(query, lastId)
+	rows, err := tx.Query(query, lastID)
 	if err != nil {
 		// TODO: now we can take inserted rows only if they have column 'id'
 		//  later we can add possibility to specify name of PK column in fixture definition
 		//  Also, it's weak error check
-		if err.Error() == errNoIdColumn {
+		if err.Error() == errNoIDColumn {
 			return nil, nil
 		}
 
@@ -376,8 +379,7 @@ func (l *LoaderMysql) insertedRows(tx *sql.Tx, insertRes sql.Result, t string) (
 // buildInsertQuery builds SQL query for data insertion
 // based on values read from yaml
 func (l *LoaderMysql) buildInsertQuery(ctx *loadContext, t string, row row) (string, error) {
-
-	var fields []string
+	fields := make([]string, 0, len(row))
 
 	for name := range row {
 		if strings.HasPrefix(name, "$") {
@@ -410,6 +412,7 @@ func (l *LoaderMysql) buildInsertQuery(ctx *loadContext, t string, row row) (str
 	}
 
 	query := "INSERT INTO `%s` (%s) VALUES %s"
+
 	return fmt.Sprintf(
 		query,
 		t,
@@ -419,7 +422,6 @@ func (l *LoaderMysql) buildInsertQuery(ctx *loadContext, t string, row row) (str
 }
 
 func (l *LoaderMysql) rowInsertValue(ctx *loadContext, val interface{}) (string, error) {
-
 	// resolve references
 	if stringValue, ok := val.(string); ok {
 		if strings.HasPrefix(stringValue, "$") {
@@ -427,6 +429,7 @@ func (l *LoaderMysql) rowInsertValue(ctx *loadContext, val interface{}) (string,
 			if err != nil {
 				return "", err
 			}
+
 			return v, nil
 		}
 	}
@@ -435,6 +438,7 @@ func (l *LoaderMysql) rowInsertValue(ctx *loadContext, val interface{}) (string,
 	if err != nil {
 		return "", err
 	}
+
 	return dbValue, nil
 }
 
@@ -447,16 +451,16 @@ func (l *LoaderMysql) resolveExpression(expr string, ctx *loadContext) (string, 
 		re := regexp.MustCompile(`^\$eval\((.+)\)$`)
 		if matches := re.FindStringSubmatch(expr); matches != nil {
 			return "(" + matches[1] + ")", nil
-		} else {
-			return "", fmt.Errorf("icorrect $eval() usage: %s", expr)
 		}
-	} else {
-		value, err := l.resolveFieldReference(ctx.refsInserted, expr)
-		if err != nil {
-			return "", err
-		}
-		return toDbValue(value)
+
+		return "", fmt.Errorf("icorrect $eval() usage: %s", expr)
 	}
+	value, err := l.resolveFieldReference(ctx.refsInserted, expr)
+	if err != nil {
+		return "", err
+	}
+
+	return toDbValue(value)
 }
 
 // resolveReference finds previously stored reference by its name
@@ -469,17 +473,17 @@ func (l *LoaderMysql) resolveReference(refs rowsDict, refName string) (row, erro
 	// by the way removing $-records from base row
 	targetCopy := make(row, len(target))
 	for k, v := range target {
-		if len(k) == 0 || k[0] != '$' {
+		if k == "" || k[0] != '$' {
 			targetCopy[k] = v
 		}
 	}
+
 	return targetCopy, nil
 }
 
 // resolveFieldReference finds previously stored reference by name
 // and return value of its field
 func (l *LoaderMysql) resolveFieldReference(refs rowsDict, ref string) (interface{}, error) {
-
 	parts := strings.SplitN(ref, ".", 2)
 	if len(parts) < 2 || len(parts[0]) < 2 || len(parts[1]) < 1 {
 		return nil, fmt.Errorf("invalid reference %s, correct form is $refName.field", ref)
@@ -497,6 +501,7 @@ func (l *LoaderMysql) resolveFieldReference(refs rowsDict, ref string) (interfac
 	if !ok {
 		return nil, fmt.Errorf("undefined reference field %s", parts[1])
 	}
+
 	return value, nil
 }
 
@@ -507,13 +512,13 @@ func inArray(needle string, haystack []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
 // toDbValue prepares value to be passed in SQL query
 // with respect to its type and converts it to string
 func toDbValue(value interface{}) (string, error) {
-
 	if value == nil {
 		return "NULL", nil
 	}
@@ -535,14 +540,16 @@ func toDbValue(value interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return quoteLiteral(string(encoded)), nil
 }
 
 // quoteLiteral properly escapes string to be safely
 // passed as a value in SQL query
 func quoteLiteral(s string) string {
-	s = strings.Replace(s, `'`, `''`, -1)
-	s = strings.Replace(s, `\`, `\\`, -1)
+	s = strings.ReplaceAll(s, `'`, `''`)
+	s = strings.ReplaceAll(s, `\`, `\\`)
+
 	return "'" + s + "'"
 }
 

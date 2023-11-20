@@ -6,13 +6,12 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func FromResponse(varsToSet map[string]string, body string, isJson bool) (vars *Variables, err error) {
-
+func FromResponse(varsToSet map[string]string, body string, isJSON bool) (vars *Variables, err error) {
 	names, paths := split(varsToSet)
 
 	switch {
-	case isJson:
-		vars, err = fromJson(names, paths, body)
+	case isJSON:
+		vars, err = fromJSON(names, paths, body)
 		if err != nil {
 			return nil, err
 		}
@@ -24,11 +23,9 @@ func FromResponse(varsToSet map[string]string, body string, isJson bool) (vars *
 	}
 
 	return vars, nil
-
 }
 
-func fromJson(names, paths []string, body string) (*Variables, error) {
-
+func fromJSON(names, paths []string, body string) (*Variables, error) {
 	vars := New()
 
 	results := gjson.GetMany(body, paths...)
@@ -46,7 +43,6 @@ func fromJson(names, paths []string, body string) (*Variables, error) {
 }
 
 func fromPlainText(names []string, body string) (*Variables, error) {
-
 	if len(names) != 1 {
 		return nil,
 			fmt.Errorf(
@@ -59,10 +55,9 @@ func fromPlainText(names []string, body string) (*Variables, error) {
 }
 
 // split returns keys and values of given map as separate slices
-func split(m map[string]string) ([]string, []string) {
-
-	values := make([]string, 0, len(m))
-	keys := make([]string, 0, len(m))
+func split(m map[string]string) (keys, values []string) {
+	values = make([]string, 0, len(m))
+	keys = make([]string, 0, len(m))
 
 	for k, v := range m {
 		keys = append(keys, k)

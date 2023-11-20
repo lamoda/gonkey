@@ -32,13 +32,14 @@ func (c *ResponseBodyChecker) Check(t models.TestInterface, result *models.Resul
 			errs = append(errs, checkErrs...)
 		} else {
 			// compare bodies as leaf nodes
-			errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.CompareParams{})...)
+			errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.Params{})...)
 		}
 	}
 	if !foundResponse {
 		err := fmt.Errorf("server responded with status %d", result.ResponseStatusCode)
 		errs = append(errs, err)
 	}
+
 	return errs, nil
 }
 
@@ -60,7 +61,7 @@ func compareJsonBody(t models.TestInterface, expectedBody string, result *models
 		return []error{errors.New("could not parse response")}, nil
 	}
 
-	params := compare.CompareParams{
+	params := compare.Params{
 		IgnoreValues:         !t.NeedsCheckingValues(),
 		IgnoreArraysOrdering: t.IgnoreArraysOrdering(),
 		DisallowExtraFields:  t.DisallowExtraFields(),

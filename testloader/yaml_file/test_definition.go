@@ -23,7 +23,7 @@ type TestDefinition struct {
 	HeadersVal               map[string]string         `json:"headers" yaml:"headers"`
 	CookiesVal               map[string]string         `json:"cookies" yaml:"cookies"`
 	Cases                    []CaseData                `json:"cases" yaml:"cases"`
-	ComparisonParams         compare.CompareParams     `json:"comparisonParams" yaml:"comparisonParams"`
+	ComparisonParams         compare.Params            `json:"comparisonParams" yaml:"comparisonParams"`
 	FixtureFiles             []string                  `json:"fixtures" yaml:"fixtures"`
 	MocksDefinition          map[string]interface{}    `json:"mocks" yaml:"mocks"`
 	PauseValue               int                       `json:"pause" yaml:"pause"`
@@ -76,7 +76,6 @@ There can be two types of data in yaml-file:
     <varName2>: ""
 */
 func (v *VariablesToSet) UnmarshalYAML(unmarshal func(interface{}) error) error {
-
 	res := make(map[int]map[string]string)
 
 	// try to unmarshall as plaint text
@@ -90,6 +89,7 @@ func (v *VariablesToSet) UnmarshalYAML(unmarshal func(interface{}) error) error 
 		}
 
 		*v = res
+
 		return nil
 	}
 
@@ -99,5 +99,6 @@ func (v *VariablesToSet) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	}
 
 	*v = res
+
 	return nil
 }

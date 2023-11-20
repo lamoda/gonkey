@@ -1,0 +1,61 @@
+service:
+  golangci-lint-version: v1.55.1
+
+run:
+  tests: false
+  skip-dirs:
+    - allure
+    - mocks
+  skip-files:
+    - ".*easyjson\\.go$"
+output:
+  print-issued-lines: false
+
+linters-settings:
+  lll:
+    line-length: 140
+  gocritic:
+    disabled-checks:
+      - hugeParam
+    enabled-tags:
+      - performance
+      - style
+      - experimental
+  gosec:
+    excludes:
+      - G204
+      - G306
+  stylecheck:
+    checks: ["all", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
+  revive:
+    rules:
+      # Should be enabled after fixing underscore package names.
+      - name: var-naming
+        disabled: true
+
+linters:
+  enable:
+    - bodyclose
+    - goconst
+    - gocritic
+    - gocyclo
+    - goimports
+    - revive
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - nlreturn
+    - nolintlint
+    - rowserrcheck
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - gas

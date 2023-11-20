@@ -60,11 +60,13 @@ func (t *Test) GetResponses() map[int]string {
 
 func (t *Test) GetResponse(code int) (string, bool) {
 	val, ok := t.Responses[code]
+
 	return val, ok
 }
 
 func (t *Test) GetResponseHeaders(code int) (map[string]string, bool) {
 	val, ok := t.ResponseHeaders[code]
+
 	return val, ok
 }
 
@@ -134,8 +136,7 @@ func (t *Test) Headers() map[string]string {
 
 // TODO: it might make sense to do support of case-insensitive checking
 func (t *Test) ContentType() string {
-	ct, _ := t.HeadersVal["Content-Type"]
-	return ct
+	return t.HeadersVal["Content-Type"]
 }
 
 func (t *Test) DbQueryString() string {
@@ -188,6 +189,7 @@ func (t *Test) SetQuery(val string) {
 func (t *Test) SetMethod(val string) {
 	t.Method = val
 }
+
 func (t *Test) SetPath(val string) {
 	t.RequestURL = val
 }

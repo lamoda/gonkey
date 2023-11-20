@@ -17,14 +17,13 @@ type AllureReportOutput struct {
 
 func NewOutput(suiteName, reportLocation string) *AllureReportOutput {
 	resultsDir, _ := filepath.Abs(reportLocation)
-	if err := os.Mkdir(resultsDir, 0777); err != nil {
-		// likely dir is already exists
-	}
+	_ = os.Mkdir(resultsDir, 0o777)
 	a := Allure{
 		Suites:    nil,
 		TargetDir: resultsDir,
 	}
 	a.StartSuite(suiteName, time.Now())
+
 	return &AllureReportOutput{
 		reportLocation: reportLocation,
 		allure:         a,
@@ -65,5 +64,5 @@ func (o *AllureReportOutput) Process(t models.TestInterface, result *models.Resu
 }
 
 func (o *AllureReportOutput) Finalize() {
-	o.allure.EndSuite(time.Now())
+	_ = o.allure.EndSuite(time.Now())
 }

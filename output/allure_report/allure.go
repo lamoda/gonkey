@@ -37,13 +37,16 @@ func (a *Allure) EndSuite(end time.Time) error {
 			return err
 		}
 	}
-	//remove first/current suite
+	// remove first/current suite
 	a.Suites = a.Suites[1:]
+
 	return nil
 }
 
-var currentState = map[*beans.Suite]*beans.TestCase{}
-var currentStep = map[*beans.Suite]*beans.Step{}
+var (
+	currentState = map[*beans.Suite]*beans.TestCase{}
+	currentStep  = map[*beans.Suite]*beans.Step{}
+)
 
 func (a *Allure) StartCase(testName string, start time.Time) *beans.TestCase {
 	test := beans.NewTestCase(testName, start)
@@ -52,6 +55,7 @@ func (a *Allure) StartCase(testName string, start time.Time) *beans.TestCase {
 	currentState[suite] = test
 	currentStep[suite] = step
 	suite.AddTest(test)
+
 	return test
 }
 
@@ -68,7 +72,7 @@ func (a *Allure) CreateStep(name string, stepFunc func()) {
 	a.StartStep(name, time.Now())
 	// if test error
 	stepFunc()
-	//end
+	// end
 	a.EndStep(status, time.Now())
 }
 
@@ -104,7 +108,7 @@ func (a *Allure) PendingCase(testName string, start time.Time) {
 	a.EndCase("pending", errors.New("test ignored"), start)
 }
 
-//utils
+// utils
 func getBufferInfo(buf bytes.Buffer, typ string) (string, string) {
 	//    exts,err := mime.ExtensionsByType(typ)
 	//    if err != nil {
@@ -115,7 +119,8 @@ func getBufferInfo(buf bytes.Buffer, typ string) (string, string) {
 
 func writeBuffer(pathDir string, buf bytes.Buffer, ext string) (string, error) {
 	fileName := uuid.New().String() + `-attachment.` + ext
-	err := ioutil.WriteFile(filepath.Join(pathDir, fileName), buf.Bytes(), 0644)
+	err := ioutil.WriteFile(filepath.Join(pathDir, fileName), buf.Bytes(), 0o644)
+
 	return fileName, err
 }
 
@@ -124,9 +129,10 @@ func writeSuite(pathDir string, suite *beans.Suite) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath.Join(pathDir, uuid.New().String()+`-testsuite.xml`), b, 0644)
+	err = ioutil.WriteFile(filepath.Join(pathDir, uuid.New().String()+`-testsuite.xml`), b, 0o644)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
