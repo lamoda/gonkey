@@ -190,6 +190,10 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 		Test:                v,
 	}
 
+	for name, value := range resp.Trailer {
+		result.ResponseHeaders["Trailer-"+name] = value
+	}
+
 	// launch script in cmd interface
 	if v.AfterRequestScriptPath() != "" {
 		if err := cmd_runner.CmdRun(v.AfterRequestScriptPath(), v.AfterRequestScriptTimeout()); err != nil {
