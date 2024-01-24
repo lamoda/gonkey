@@ -8,7 +8,7 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.2
 	github.com/google/go-cmp v0.6.0
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.6.0
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/joho/godotenv v1.3.0
