@@ -693,11 +693,9 @@ tables:
 ```
 
 ### Aerospike
+Для хранилища Aerospike также поддерживается заливка тестовых данных. Для этого важно не забыть при запуске gonkey как CLI-приложение использовать флаг `-db-type aerospike`, а при использовании в качестве библиотеки в конфигурации раннера: `DbType: fixtures.Postgres`.
 
-Fixtures for Aerospike are also supported. While using gonkey as CLI application do not forget the flag `-db-type aerospike`; add `DbType: fixtures.Aerospike` to runner's configuration if gonkey is used as library.
-
-Fixtures files format is a bit different, yet the same basic principles applies:
-
+Формат файлов с фикстурами для аэроспайка отличается, но смысл остаётся прежним:
 ```yaml
 sets:
   set1:
@@ -720,8 +718,7 @@ sets:
         - '2'
 ```
 
-Fixtures templates are also supported:
-
+Также поддерживаются шаблоны:
 ```yaml
 templates:
   base_tmpl:
@@ -741,7 +738,8 @@ sets:
       bin2: overwritten
 ```
 
-Records linking and expressions are currently not supported.
+Связывание записей и выражения на данный момент не поддерживаются.
+
 
 ### Redis
 
