@@ -6,10 +6,8 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/lamoda/gonkey/fixtures/aerospike"
 	"github.com/lamoda/gonkey/fixtures/mysql"
 	"github.com/lamoda/gonkey/fixtures/postgres"
-	aerospikeClient "github.com/lamoda/gonkey/storage/aerospike"
 )
 
 type DbType int
@@ -17,21 +15,18 @@ type DbType int
 const (
 	Postgres DbType = iota
 	Mysql
-	Aerospike
 	Redis
 	CustomLoader // using external loader if gonkey used as a library
 )
 
 const (
-	PostgresParam  = "postgres"
-	MysqlParam     = "mysql"
-	AerospikeParam = "aerospike"
-	RedisParam     = "redis"
+	PostgresParam = "postgres"
+	MysqlParam    = "mysql"
+	RedisParam    = "redis"
 )
 
 type Config struct {
 	DB            *sql.DB
-	Aerospike     *aerospikeClient.Client
 	DbType        DbType
 	Location      string
 	Debug         bool
@@ -60,12 +55,6 @@ func NewLoader(cfg *Config) Loader {
 			location,
 			cfg.Debug,
 		)
-	case Aerospike:
-		loader = aerospike.New(
-			cfg.Aerospike,
-			location,
-			cfg.Debug,
-		)
 	default:
 		if cfg.FixtureLoader != nil {
 			return cfg.FixtureLoader
@@ -82,8 +71,6 @@ func FetchDbType(dbType string) DbType {
 		return Postgres
 	case MysqlParam:
 		return Mysql
-	case AerospikeParam:
-		return Aerospike
 	case RedisParam:
 		return Redis
 	default:

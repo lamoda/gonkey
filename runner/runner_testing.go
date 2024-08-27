@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aerospike/aerospike-client-go/v5"
 	"github.com/joho/godotenv"
 
 	"github.com/lamoda/gonkey/checker"
@@ -23,15 +22,9 @@ import (
 	"github.com/lamoda/gonkey/output"
 	"github.com/lamoda/gonkey/output/allure_report"
 	testingOutput "github.com/lamoda/gonkey/output/testing"
-	aerospikeAdapter "github.com/lamoda/gonkey/storage/aerospike"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
 	"github.com/lamoda/gonkey/variables"
 )
-
-type Aerospike struct {
-	*aerospike.Client
-	Namespace string
-}
 
 type RunWithTestingParams struct {
 	Server      *httptest.Server
@@ -39,7 +32,6 @@ type RunWithTestingParams struct {
 	Mocks       *mocks.Mocks
 	FixturesDir string
 	DB          *sql.DB
-	Aerospike   Aerospike
 	// If DB parameter present, used to recognize type of database, if not set, by default uses Postgres
 	DbType        fixtures.DbType
 	EnvFilePath   string
@@ -74,11 +66,10 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 	debug := os.Getenv("GONKEY_DEBUG") != ""
 
 	var fixturesLoader fixtures.Loader
-	if params.DB != nil || params.Aerospike.Client != nil || params.FixtureLoader != nil {
+	if params.DB != nil || params.FixtureLoader != nil {
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
 			Location:      params.FixturesDir,
 			DB:            params.DB,
-			Aerospike:     aerospikeAdapter.New(params.Aerospike.Client, params.Aerospike.Namespace),
 			Debug:         debug,
 			DbType:        params.DbType,
 			FixtureLoader: params.FixtureLoader,

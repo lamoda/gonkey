@@ -7,10 +7,8 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 
-	"github.com/aerospike/aerospike-client-go/v5"
 	"github.com/go-redis/redis/v9"
 	"github.com/joho/godotenv"
 
@@ -21,7 +19,6 @@ import (
 	"github.com/lamoda/gonkey/output/allure_report"
 	"github.com/lamoda/gonkey/output/console_colored"
 	"github.com/lamoda/gonkey/runner"
-	aerospikeAdapter "github.com/lamoda/gonkey/storage/aerospike"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
 	"github.com/lamoda/gonkey/variables"
 )
@@ -30,7 +27,6 @@ type config struct {
 	Host             string
 	TestsLocation    string
 	DbDsn            string
-	AerospikeHost    string
 	RedisURL         string
 	FixturesLocation string
 	EnvFile          string
@@ -41,8 +37,7 @@ type config struct {
 }
 
 type storages struct {
-	db        *sql.DB
-	aerospike *aerospikeAdapter.Client
+	db *sql.DB
 }
 
 func main() {
@@ -90,11 +85,8 @@ func main() {
 
 func initStorages(cfg config) storages {
 	db := initDB(cfg)
-	aerospikeClient := initAerospike(cfg)
-
 	return storages{
-		db:        db,
-		aerospike: aerospikeClient,
+		db: db,
 	}
 }
 
@@ -105,13 +97,12 @@ func initLoaders(storages storages, cfg config) fixtures.Loader {
 
 	var fixturesLoader fixtures.Loader
 	switch {
-	case storages.db != nil || storages.aerospike != nil:
+	case storages.db != nil:
 		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
-			DB:        storages.db,
-			Aerospike: storages.aerospike,
-			Location:  cfg.FixturesLocation,
-			Debug:     cfg.Debug,
-			DbType:    fixtures.FetchDbType(cfg.DbType),
+			DB:       storages.db,
+			Location: cfg.FixturesLocation,
+			Debug:    cfg.Debug,
+			DbType:   fixtures.FetchDbType(cfg.DbType),
 		})
 	case cfg.DbType == fixtures.RedisParam:
 		redisOptions, err := redis.ParseURL(cfg.RedisURL)
@@ -174,20 +165,6 @@ func initRunner(
 	)
 }
 
-func initAerospike(cfg config) *aerospikeAdapter.Client {
-	if cfg.AerospikeHost != "" {
-		address, port, namespace := parseAerospikeHost(cfg.AerospikeHost)
-		client, err := aerospike.NewClient(address, port)
-		if err != nil {
-			log.Fatal("Couldn't connect to aerospike: ", err)
-		}
-
-		return aerospikeAdapter.New(client, namespace)
-	}
-
-	return nil
-}
-
 func initDB(cfg config) *sql.DB {
 	if cfg.DbDsn != "" {
 		var err error
@@ -208,12 +185,6 @@ func getConfig() config {
 	flag.StringVar(&cfg.Host, "host", "", "Target system hostname")
 	flag.StringVar(&cfg.TestsLocation, "tests", "", "Path to tests file or directory")
 	flag.StringVar(&cfg.DbDsn, "db_dsn", "", "DSN for the fixtures database (WARNING! Db tables will be truncated)")
-	flag.StringVar(
-		&cfg.AerospikeHost,
-		"aerospike_host",
-		"",
-		"Aerospike host for fixtures in form of 'host:port/namespace' (WARNING! Aerospike sets will be truncated)",
-	)
 	flag.StringVar(&cfg.RedisURL, "redis_url", "", "Redis server URL for fixture loading")
 	flag.StringVar(&cfg.FixturesLocation, "fixtures", "", "Path to fixtures directory")
 	flag.StringVar(&cfg.EnvFile, "env-file", "", "Path to env-file")
@@ -224,30 +195,12 @@ func getConfig() config {
 		&cfg.DbType,
 		"db-type",
 		fixtures.PostgresParam,
-		"Type of database (options: postgres, mysql, aerospike, redis)",
+		"Type of database (options: postgres, mysql, redis)",
 	)
 
 	flag.Parse()
 
 	return cfg
-}
-
-func parseAerospikeHost(dsn string) (address string, port int, namespace string) {
-	parts := strings.Split(dsn, "/")
-	if len(parts) != 2 {
-		log.Fatalf("couldn't parse aerospike host %v, should be in form of host:port/namespace", dsn)
-	}
-	namespace = parts[1]
-
-	host := parts[0]
-	hostParts := strings.Split(host, ":")
-	address = hostParts[0]
-	port, err := strconv.Atoi(hostParts[1])
-	if err != nil {
-		log.Fatal("couldn't parse port: " + parts[1])
-	}
-
-	return
 }
 
 func proxyURLFromEnv() (*url.URL, error) {

@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.2
-	github.com/aerospike/aerospike-client-go/v5 v5.8.0
 	github.com/fatih/color v1.7.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.2
 	github.com/google/go-cmp v0.6.0
@@ -19,7 +18,6 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/stretchr/testify v1.7.1
 	github.com/tidwall/gjson v1.17.0
-	github.com/yuin/gopher-lua v0.0.0-20220504180219-658193537a64 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/sync v0.4.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
