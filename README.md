@@ -8,7 +8,7 @@ Capabilities:
 
 - works with REST/JSON API
 - tests service API for compliance with OpenAPI-specs
-- seeds the DB with fixtures data (supports PostgreSQL, MySQL, Aerospike, Redis)
+- seeds the DB with fixtures data (supports PostgreSQL, MySQL)
 - provides mocks for external services
 - can be used as a library and ran together with unit-tests
 - stores the results as an [Allure](http://allure.qatools.ru/) report
@@ -36,8 +36,6 @@ Capabilities:
   - [Record inheritance](#record-inheritance)
   - [Record linking](#record-linking)
   - [Expressions](#expressions)
-  - [Aerospike](#aerospike)
-  - [Redis](#redis)
 - [Mocks](#mocks)
   - [Running mocks while using gonkey as a library](#running-mocks-while-using-gonkey-as-a-library)
   - [Mocks definition in the test file](#mocks-definition-in-the-test-file)
@@ -66,9 +64,7 @@ To test a service located on a remote host, use gonkey as a console util.
 - `-spec <...>` path to a file or URL with the swagger-specs for the service
 - `-host <...>` service host:port
 - `-tests <...>` test file or directory
-- `-db-type <...>` - database type. PostgreSQL, Aerospike, Redis are currently supported.
-- `-aerospike_host <...>` when using Aerospike - connection URL in a form of `host:port/namespace`
-- `-redis_url <...>` when using Redis - connection address, for example `redis://user:password@localhost:6789/1?dial_timeout=1&db=1&read_timeout=6s&max_retries=2`
+- `-db-type <...>` - database type. PostgreSQL, MySQL are currently supported.
 - `-db_dsn <...>` DSN for the test DB (the DB will be cleared before seeding!), supports only PostgreSQL
 - `-fixtures <...>` fixtures directory
 - `-allure` generate an Allure-report
@@ -112,9 +108,6 @@ func TestFuncCases(t *testing.T) {
   // init the DB to load the fixtures if needed (details below)
   // db := ...
 
-  // init Aerospike to load the fixtures if needed (details below)
-  // aerospikeClient := ...
-
   // create a server instance of your app
   srv := server.NewServer()
   defer srv.Close()
@@ -125,10 +118,6 @@ func TestFuncCases(t *testing.T) {
     TestsDir: "cases",
     Mocks:    m,
     DB:       db,
-    Aerospike: runner.Aerospike{
-      Client:    aerospikeClient,
-      Namespace: "test",
-    },
     // Type of database, can be fixtures.Postgres, fixtures.Mysql, fixtures.CustomLoader
     // if DB parameter present, by default uses fixtures.Postgres database type
     DbType:      fixtures.Postgres,
@@ -139,51 +128,6 @@ func TestFuncCases(t *testing.T) {
 
 Starts from version 1.18.3, externally written fixture loader may be used for loading test data, if gonkey used as a library.
 To start using the custom loader, you need to import the custom module, that contains implementation of fixtures.Loader interface.
-
-Example with a redis fixtures loader:
-
-```go
-package test
-
-import (
-  "net/http"
-  "net/http/httptest"
-  "testing"
-
-  "github.com/lamoda/gonkey/fixtures"
-  redisLoader "github.com/lamoda/gonkey/fixtures/redis"
-  // redisLoader "custom_module/gonkey-redis" // custom implementation of a fixtures.Loader interface
-  redisClient "github.com/go-redis/redis/v9"
-  "github.com/lamoda/gonkey/runner"
-)
-
-func TestFuncCases(t *testing.T) {
-  serveMux := http.NewServeMux()
-  
-  serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-    _, _ = w.Write([]byte("ok"))
-  })
-  
-  srv := httptest.NewServer(serveMux)
-
-  clientOptions, err := redisClient.ParseURL("redis://user:password@localhost:6789/1?dial_timeout=1&db=1&read_timeout=6s&max_retries=2")
-  if err != nil {
-    panic(err)
-  }
-  
-  redisFixtureLoader := redisLoader.New(redisLoader.LoaderOptions{
-    FixtureDir: "./fixtures",
-    Redis:      clientOptions,
-  })
-
-  runner.RunWithTesting(t, &runner.RunWithTestingParams{
-    Server:        srv,
-    TestsDir:      "./cases",
-    DbType:        fixtures.CustomLoader,
-    FixtureLoader: redisFixtureLoader,
-  })
-}
-```
 
 The tests can be now ran with `go test`, for example: `go test ./...`.
 
@@ -691,196 +635,6 @@ tables:
   comments:
     - created_at: $eval(NOW())
 ```
-
-### Aerospike
-Для хранилища Aerospike также поддерживается заливка тестовых данных. Для этого важно не забыть при запуске gonkey как CLI-приложение использовать флаг `-db-type aerospike`, а при использовании в качестве библиотеки в конфигурации раннера: `DbType: fixtures.Postgres`.
-
-Формат файлов с фикстурами для аэроспайка отличается, но смысл остаётся прежним:
-```yaml
-sets:
-  set1:
-    key1:
-      bin1: "value1"
-      bin2: 1
-    key2:
-      bin1: "value2"
-      bin2: 2
-      bin3: 2.569947773654566473
-  set2:
-    key1:
-      bin4: false
-      bin5: null
-      bin1: '"'
-    key2:
-      bin1: "'"
-      bin5:
-        - 1
-        - '2'
-```
-
-Также поддерживаются шаблоны:
-```yaml
-templates:
-  base_tmpl:
-    bin1: value1
-  extended_tmpl:
-    $extend: base_tmpl
-    bin2: value2
-
-sets:
-  set1:
-    key1:
-      $extend: base_tmpl
-      bin1: overwritten
-  set2:
-    key1:
-      $extend: extended_tmpl
-      bin2: overwritten
-```
-
-Связывание записей и выражения на данный момент не поддерживаются.
-
-
-### Redis
-
-Supports loading test data with fixtures for redis key/value storage.
-While using gonkey as a CLI application do not forget the flag `-db-type redis`.
-
-List of supported data structures:
-
-- Plain key/value
-- Set
-- Hash
-- List
-- ZSet (sorted set)
-
-Fixture file example:
-
-```yaml
-inherits:
-  - template1
-  - template2
-  - other_fixture
-templates:
-  keys:
-    - $name: parentKeyTemplate
-      values:
-        baseKey:
-          expiration: 1s
-          value: 1
-    - $name: childKeyTemplate
-      $extend: parentKeyTemplate
-      values:
-        otherKey:
-          value: 2
-  sets:
-    - $name: parentSetTemplate
-      expiration: 10s
-      values:
-        - value: a
-    - $name: childSetTemplate
-      $extend: parentSetTemplate
-      values:
-        - value: b
-  hashes:
-    - $name: parentHashTemplate
-      values:
-        - key: a
-          value: 1
-        - key: b
-          value: 2
-    - $name: childHashTemplate
-      $extend: parentHashTemplate
-      values:
-        - key: c
-          value: 3
-        - key: d
-          value: 4
-  lists:
-    - $name: parentListTemplate
-      values:
-        - value: 1
-        - value: 2
-    - $name: childListTemplate
-      values:
-        - value: 3
-        - value: 4
-  zsets:
-    - $name: parentZSetTemplate
-      values:
-        - value: 1
-          score: 2.1
-        - value: 2
-          score: 4.3
-    - $name: childZSetTemplate
-      value:
-        - value: 3
-          score: 6.5
-        - value: 4
-          score: 8.7
-databases:
-  1:
-    keys:
-      $extend: childKeyTemplate
-      values:
-        key1:
-          value: value1
-        key2:
-          expiration: 10s
-          value: value2
-    sets:
-      values:
-        set1:
-          $extend: childSetTemplate
-          expiration: 10s
-          values:
-            - value: a
-            - value: b
-        set3:
-          expiration: 5s
-          values:
-            - value: x
-            - value: y
-    hashes:
-      values:
-        map1:
-          $extend: childHashTemplate
-          values:
-            - key: a
-              value: 1
-            - key: b
-              value: 2
-        map2:
-          values:
-            - key: c
-              value: 3
-            - key: d
-              value: 4
-    lists:
-      values:
-        list1:
-          $extend: childListTemplate
-          values:
-            - value: 1
-            - value: 100
-            - value: 200
-    zsets:
-      values:
-        zset1:
-          $extend: childZSetTemplate
-          values:
-            - value: 5
-              score: 10.1
-  2:
-    keys:
-      values:
-        key3:
-          value: value3
-        key4:
-          expiration: 5s
-          value: value4
-```
-
 ## Mocks
 
 In order to imitate responses from external services, use mocks.

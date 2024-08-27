@@ -15,14 +15,12 @@ type DbType int
 const (
 	Postgres DbType = iota
 	Mysql
-	Redis
 	CustomLoader // using external loader if gonkey used as a library
 )
 
 const (
 	PostgresParam = "postgres"
 	MysqlParam    = "mysql"
-	RedisParam    = "redis"
 )
 
 type Config struct {
@@ -71,8 +69,6 @@ func FetchDbType(dbType string) DbType {
 		return Postgres
 	case MysqlParam:
 		return Mysql
-	case RedisParam:
-		return Redis
 	default:
 		panic("unknown db type param")
 	}

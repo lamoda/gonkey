@@ -1,7 +1,0 @@
-- name: Get a number from aerospike
-  method: GET
-  path: /aerospike/
-  fixtures:
-    - aerospike.yaml
-  response:
-    200: '{"data": {"bin1": "value1", "bin2": "overwritten"}}'

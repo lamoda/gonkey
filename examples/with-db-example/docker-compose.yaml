@@ -17,13 +17,6 @@ services:
     healthcheck:
       test: "pg_isready -U postgres"
 
-  aerospike:
-    image: aerospike/aerospike-server:5.6.0.5
-    ports:
-      - "3000:3000"
-    environment:
-      - NAMESPACE=test
-
   svc:
     build:
       context: .
@@ -38,8 +31,6 @@ services:
       - APP_POSTGRES_PASS=testing_password
       - APP_POSTGRES_DB=testing_db
     depends_on:
-      aerospike:
-        condition: service_started
       postgres:
         condition: service_healthy
 

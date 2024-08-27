@@ -11,6 +11,3 @@ teardown:
 .PHONY: test-postgres
 test-postgres: setup
 	./gonkey -db_dsn "postgresql://testing_user:testing_password@localhost:5432/testing_db?sslmode=disable" -debug -host http://localhost:5000 -tests ./cases/postgres
-
-test-aerospike: setup
-	./gonkey -debug  -fixtures ./fixtures/ -db-type aerospike -aerospike_host "localhost:3000/test" -host http://localhost:5000 -tests ./cases/aerospike

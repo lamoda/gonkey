@@ -5,7 +5,6 @@ import random
 import socketserver
 from http import HTTPStatus
 
-import aerospike
 import psycopg2
 
 
@@ -15,8 +14,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             response = self.get_info()
         elif self.path.startswith('/randint/'):
             response = self.get_rand_num()
-        elif self.path.startswith('/aerospike/'):
-            response = self.get_from_aerospike()
         else:
             response = {'non-existing': True}
 
@@ -31,9 +28,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def get_rand_num(self) -> dict:
         return {'num': {'generated': str(random.randint(0, 100))}}
-
-    def get_from_aerospike(self) -> dict:
-        return {'data': aerospike.get()}
 
     def do_GET(self):
         # заголовки ответа
@@ -77,22 +71,8 @@ class PostgresStorage:
         return query_data
 
 
-class AerospikeStorage:
-    def __init__(self):
-        config = {'hosts': [('aerospike', 3000)]}
-        self.client = aerospike.client(config).connect()
-
-    def get(self):
-        # Records are addressable via a tuple of (namespace, set, key)
-        key = ('test', 'set2', 'key1')
-        key, metadata, record = self.client.get(key)
-        return record
-
-
 postgres = PostgresStorage()
 postgres.apply_migrations()
-
-aerospike = AerospikeStorage()
 
 if __name__ == '__main__':
     service = socketserver.TCPServer(('', 5000), Handler)
