@@ -2,7 +2,6 @@ package mocks
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -63,7 +62,7 @@ func (m *Mocks) ShutdownContext(ctx context.Context) error {
 		}
 	}
 	if len(errs) != 0 {
-		return errors.New(strings.Join(errs, "; "))
+		return fmt.Errorf("%s", strings.Join(errs, "; "))
 	}
 	return nil
 }
@@ -73,7 +72,7 @@ func (m *Mocks) SetMock(mock *ServiceMock) {
 }
 
 func (m *Mocks) Service(serviceName string) *ServiceMock {
-	mock, _ := m.mocks[serviceName]
+	mock := m.mocks[serviceName]
 	return mock
 }
 

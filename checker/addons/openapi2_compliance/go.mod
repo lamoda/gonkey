@@ -8,5 +8,7 @@ require (
 	github.com/go-openapi/spec v0.20.3
 	github.com/go-openapi/strfmt v0.20.0
 	github.com/go-openapi/validate v0.20.2
-	github.com/lamoda/gonkey v1.3.1
+	github.com/lamoda/gonkey v1.21.4
 )
+
+replace github.com/lamoda/gonkey => ../../..

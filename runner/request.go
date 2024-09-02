@@ -91,12 +91,10 @@ func newMultipartRequest(host string, test models.TestInterface) (*http.Request,
 
 func addFiles(files map[string]string, w *multipart.Writer) error {
 	for name, path := range files {
-
 		err := addFile(path, w, name)
 		if err != nil {
 			return err
 		}
-
 	}
 
 	return nil

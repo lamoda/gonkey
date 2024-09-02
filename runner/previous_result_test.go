@@ -13,7 +13,6 @@ const (
 )
 
 func Test_PreviousResult(t *testing.T) {
-
 	srv := testServer()
 	defer srv.Close()
 
@@ -25,7 +24,6 @@ func Test_PreviousResult(t *testing.T) {
 
 func testServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		resp := []byte(body)
 
 		type nestedInfo struct {
@@ -53,6 +51,5 @@ func testServer() *httptest.Server {
 		}
 
 		_, _ = w.Write(resp)
-
 	}))
 }

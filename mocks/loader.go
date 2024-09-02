@@ -393,7 +393,6 @@ func readCompareParams(def map[interface{}]interface{}) (compare.Params, error) 
 		if pbval, ok := mapping[skey]; ok {
 			*pbval = bval
 		}
-
 	}
 	return params, nil
 }

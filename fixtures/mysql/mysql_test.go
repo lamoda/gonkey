@@ -14,7 +14,6 @@ import (
 )
 
 func TestBuildInsertQuery(t *testing.T) {
-
 	ymlFile, err := ioutil.ReadFile("../testdata/sql.yaml")
 	require.NoError(t, err)
 
@@ -194,7 +193,6 @@ func expectInsert(
 	valuesToInsert string,
 	valuesResult []string,
 ) {
-
 	t.Helper()
 
 	idCounter++

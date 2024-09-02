@@ -207,6 +207,6 @@ func Test_queryRegexpConstraint_Verify(t *testing.T) {
 }
 
 func newTestRequest(query string) *http.Request {
-	r, _ := http.NewRequest("GET", "http://localhost/?"+query, nil)
+	r, _ := http.NewRequest("GET", "http://localhost/?"+query, http.NoBody)
 	return r
 }

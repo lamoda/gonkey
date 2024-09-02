@@ -100,7 +100,6 @@ func (r *Runner) Run() error {
 		if err != nil {
 			return fmt.Errorf("test %s error: %s", test.GetName(), err)
 		}
-
 	}
 
 	return nil

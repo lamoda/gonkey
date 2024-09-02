@@ -3,7 +3,6 @@ package mocks
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -54,7 +53,7 @@ func (c *bodyMatchesXMLConstraint) Verify(r *http.Request) []error {
 	// write body for future reusing
 	r.Body = ioutil.NopCloser(bytes.NewReader(body))
 	if len(body) == 0 {
-		return []error{errors.New("request is empty")}
+		return []error{fmt.Errorf("request is empty")}
 	}
 
 	actual, err := xmlparsing.Parse(string(body))
@@ -91,7 +90,7 @@ func (c *bodyMatchesJSONConstraint) Verify(r *http.Request) []error {
 	// write body for future reusing
 	r.Body = ioutil.NopCloser(bytes.NewReader(body))
 	if len(body) == 0 {
-		return []error{errors.New("request is empty")}
+		return []error{fmt.Errorf("request is empty")}
 	}
 	var actual interface{}
 	err = json.Unmarshal(body, &actual)
@@ -134,7 +133,7 @@ func (c *bodyJSONFieldMatchesJSONConstraint) Verify(r *http.Request) []error {
 	if !value.Exists() {
 		return []error{fmt.Errorf("json field %s does not exist", c.path)}
 	}
-	if len(value.String()) == 0 {
+	if value.String() == "" {
 		return []error{fmt.Errorf("json field %s is empty", c.path)}
 	}
 
@@ -200,9 +199,7 @@ type queryConstraint struct {
 
 func newQueryConstraint(query string) (*queryConstraint, error) {
 	// user may begin his query with '?', just omit it in this case
-	if strings.HasPrefix(query, "?") {
-		query = query[1:]
-	}
+	query = strings.TrimPrefix(query, "?")
 	pq, err := url.ParseQuery(query)
 	if err != nil {
 		return nil, err
@@ -238,9 +235,7 @@ type queryRegexpConstraint struct {
 
 func newQueryRegexpConstraint(query string) (*queryRegexpConstraint, error) {
 	// user may begin his query with '?', just omit it in this case
-	if strings.HasPrefix(query, "?") {
-		query = query[1:]
-	}
+	query = strings.TrimPrefix(query, "?")
 
 	rawParams := strings.Split(query, "&")
 

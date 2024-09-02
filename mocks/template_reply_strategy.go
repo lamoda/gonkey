@@ -58,7 +58,9 @@ func newTemplateReply(content string, statusCode int, headers map[string]string)
 
 func (s *templateReply) executeResponseTemplate(r *http.Request) (string, error) {
 	ctx := map[string]*templateRequest{
-		"request": &templateRequest{r: r},
+		"request": {
+			r: r,
+		},
 	}
 
 	reply := bytes.NewBuffer(nil)

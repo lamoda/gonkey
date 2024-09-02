@@ -380,7 +380,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 	fieldPresence := make(map[string]bool)
 	for _, row := range rows {
 		for name := range row {
-			if len(name) > 0 && name[0] == '$' {
+			if name != "" && name[0] == '$' {
 				continue
 			}
 			if _, ok := fieldPresence[name]; !ok {
@@ -403,7 +403,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 			}
 			// resolve references
 			if stringValue, ok := value.(string); ok {
-				if len(stringValue) > 0 && stringValue[0] == '$' {
+				if stringValue != "" && stringValue[0] == '$' {
 					var err error
 					dbValuesRow[k], err = f.resolveExpression(stringValue, ctx)
 					if err != nil {

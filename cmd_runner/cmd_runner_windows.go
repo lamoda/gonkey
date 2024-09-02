@@ -11,7 +11,7 @@ import (
 )
 
 func CmdRun(scriptPath string, timeout int) error {
-	//by default timeout should be 3s
+	// by default timeout should be 3s
 	if timeout <= 0 {
 		timeout = 3
 	}

@@ -81,7 +81,6 @@ func (v *VariablesToSet) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	// try to unmarshall as plaint text
 	var plain map[int]string
 	if err := unmarshal(&plain); err == nil {
-
 		for code, varName := range plain {
 			res[code] = map[string]string{
 				varName: "",

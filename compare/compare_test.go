@@ -406,8 +406,8 @@ func TestCompareNestedMapsWithDifferentValues(t *testing.T) {
 
 func TestCompareEqualJsonScalars(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte("1"), &json1)
-	json.Unmarshal([]byte("1"), &json2)
+	_ = json.Unmarshal([]byte("1"), &json1)
+	_ = json.Unmarshal([]byte("1"), &json2)
 	errors := Compare(json1, json2, Params{})
 	if len(errors) != 0 {
 		t.Error(
@@ -420,8 +420,8 @@ func TestCompareEqualJsonScalars(t *testing.T) {
 
 func TestCompareDifferJsonScalars(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte("1"), &json1)
-	json.Unmarshal([]byte("2"), &json2)
+	_ = json.Unmarshal([]byte("1"), &json1)
+	_ = json.Unmarshal([]byte("2"), &json2)
 	errors := Compare(json1, json2, Params{})
 	if errors[0].Error() != makeErrorString("$", "values do not match", 1, 2) {
 		t.Error(
@@ -454,8 +454,8 @@ var actualArrayJson = `
 
 func TestCompareEqualArraysWithIgnoreArraysOrdering(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte(expectedArrayJson), &json1)
-	json.Unmarshal([]byte(actualArrayJson), &json2)
+	_ = json.Unmarshal([]byte(expectedArrayJson), &json1)
+	_ = json.Unmarshal([]byte(actualArrayJson), &json2)
 	errors := Compare(json1, json2, Params{
 		IgnoreArraysOrdering: true,
 	})
@@ -470,8 +470,8 @@ func TestCompareEqualArraysWithIgnoreArraysOrdering(t *testing.T) {
 
 func TestCompareEqualComplexJson(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte(complexJson1), &json1)
-	json.Unmarshal([]byte(complexJson1), &json2) // compare json with same json
+	_ = json.Unmarshal([]byte(complexJson1), &json1)
+	_ = json.Unmarshal([]byte(complexJson1), &json2) // compare json with same json
 	errors := Compare(json1, json2, Params{})
 	if len(errors) != 0 {
 		t.Error(
@@ -484,8 +484,8 @@ func TestCompareEqualComplexJson(t *testing.T) {
 
 func TestCompareDifferComplexJson(t *testing.T) {
 	var json1, json2 interface{}
-	json.Unmarshal([]byte(complexJson1), &json1)
-	json.Unmarshal([]byte(complexJson2), &json2)
+	_ = json.Unmarshal([]byte(complexJson1), &json1)
+	_ = json.Unmarshal([]byte(complexJson2), &json2)
 	errors := Compare(json1, json2, Params{})
 	expectedErr := makeErrorString(
 		"$.paths./api/get-delivery-info.get.parameters[2].$ref",

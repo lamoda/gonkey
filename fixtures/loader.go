@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"strings"
 
-	_ "github.com/lib/pq"
-
 	"github.com/lamoda/gonkey/fixtures/mysql"
 	"github.com/lamoda/gonkey/fixtures/postgres"
 )

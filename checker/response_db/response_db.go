@@ -78,10 +78,9 @@ func (c *ResponseDbChecker) check(
 	)
 
 	// compare responses length
-	if err := compareDbResponseLength(t.DbResponseJson(), actualDbResponse, t.DbQueryString()); err != nil {
-		errors = append(errors, err)
-
-		return errors, nil
+	err = compareDbResponseLength(t.DbResponseJson(), actualDbResponse, t.DbQueryString())
+	if err != nil {
+		return append(errors, err), nil
 	}
 	// compare responses as json lists
 	expectedItems, err := toJSONArray(t.DbResponseJson(), "expected", testName)

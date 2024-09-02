@@ -1,61 +1,112 @@
-service:
-  golangci-lint-version: v1.55.1
-
-run:
-  tests: false
-  skip-dirs:
-    - allure
-    - mocks
-  skip-files:
-    - ".*easyjson\\.go$"
-output:
-  print-issued-lines: false
-
 linters-settings:
+  govet:
+    check-shadowing: true
+  golint:
+    min-confidence: 0.8
+  gocyclo:
+    min-complexity: 15
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 3
+  misspell:
+    locale: EN
   lll:
-    line-length: 140
+    line-length: 150
+  goimports:
+    local-prefixes: example.com/aaa/bbb/
   gocritic:
-    disabled-checks:
-      - hugeParam
     enabled-tags:
+      - diagnostic
       - performance
       - style
       - experimental
-  gosec:
-    excludes:
-      - G204
-      - G306
-  stylecheck:
-    checks: ["all", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
+    disabled-checks:
+      - paramTypeCombine
+      - unnamedResult
+  funlen:
+    lines: 120
+    statements: 70
   revive:
+    ignore-generated-header: true
+    severity: warning
+    confidence: 0.8
+    error-code: 0
+    warning-code: 0
     rules:
-      # Should be enabled after fixing underscore package names.
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: duplicated-imports
+      - name: early-return
+      - name: empty-block
+      - name: error-naming
+      - name: error-return
+      - name: error-strings
+      - name: errorf
+      - name: exported
+      - name: identical-branches
+      - name: if-return
+      - name: import-shadowing
+      - name: increment-decrement
+      - name: indent-error-flow
+      - name: package-comments
+      - name: range
+      - name: range-val-address
+      - name: range-val-in-closure
+      - name: receiver-naming
+      - name: redefines-builtin-id
+      - name: superfluous-else
+      - name: time-naming
+      - name: unexported-return
+      - name: unnecessary-stmt
+      - name: unreachable-code
+      #- name: unhandled-error
+      - name: var-declaration
       - name: var-naming
-        disabled: true
 
 linters:
+  disable-all: true
   enable:
     - bodyclose
-    - goconst
-    - gocritic
-    - gocyclo
+    - dogsled
+    #- errcheck
+    - exportloopref
+    #- funlen
+    - gochecknoinits
+    #- goconst
+    #- gocritic
+    - gofmt
     - goimports
-    - revive
-    - goprintffuncname
-    - gosec
+    #- gosec
     - gosimple
-    - govet
-    - ineffassign
+    #- govet
+    #- ineffassign
     - lll
     - misspell
     - nakedret
-    - nlreturn
-    - nolintlint
-    - rowserrcheck
-    - staticcheck
-    - stylecheck
+    #- revive
+    #- staticcheck
+    #- stylecheck
     - typecheck
     - unconvert
-    - unparam
+    #- unparam
     - unused
-    - gas
+    - whitespace
+
+run:
+  skip-dirs:
+    - vendor
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+        - funlen
+        - lll

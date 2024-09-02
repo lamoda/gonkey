@@ -33,11 +33,9 @@ func TestParse_EniromentVariables(t *testing.T) {
 	resp, ok := testApplied.GetResponse(200)
 	assert.True(t, ok)
 	assert.Equal(t, "resp_val", resp)
-
 }
 
 func TestParseTestsWithVariables(t *testing.T) {
-
 	tests, err := parseTestDefinitionFile("testdata/variables.yaml")
 	require.NoError(t, err)
 
@@ -56,7 +54,6 @@ func TestParseTestsWithVariables(t *testing.T) {
 }
 
 func TestParseTestsWithCombinedVariables(t *testing.T) {
-
 	tests, err := parseTestDefinitionFile("testdata/combined-variables.yaml")
 	require.NoError(t, err)
 
@@ -75,7 +72,6 @@ func TestParseTestsWithCombinedVariables(t *testing.T) {
 }
 
 func checkOriginal(t *testing.T, test models.TestInterface, combined bool) {
-
 	t.Helper()
 
 	req, err := test.ToJSON()
@@ -103,7 +99,6 @@ func checkOriginal(t *testing.T, test models.TestInterface, combined bool) {
 }
 
 func checkApplied(t *testing.T, test models.TestInterface, combined bool) {
-
 	t.Helper()
 
 	req, err := test.ToJSON()

@@ -32,7 +32,6 @@ type response struct {
 
 func testServerUpload(t *testing.T) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		resp := response{
 			Status: "OK",
 		}
@@ -47,12 +46,10 @@ func testServerUpload(t *testing.T) *httptest.Server {
 
 		_, err = w.Write(respData)
 		require.NoError(t, err)
-
 	}))
 }
 
 func formFile(t *testing.T, r *http.Request, field string) (string, string) {
-
 	file, header, err := r.FormFile(field)
 	require.NoError(t, err)
 
