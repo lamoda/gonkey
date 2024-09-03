@@ -171,15 +171,15 @@ func NewSequentialReply(strategies []*Definition) ReplyStrategy {
 }
 
 type sequentialReply struct {
-	sync.Mutex
+	mutex    sync.Mutex
 	count    int
 	sequence []*Definition
 }
 
 func (s *sequentialReply) ResetRunningContext() {
-	s.Lock()
+	s.mutex.Lock()
 	s.count = 0
-	s.Unlock()
+	s.mutex.Unlock()
 	for _, def := range s.sequence {
 		def.ResetRunningContext()
 	}
@@ -194,8 +194,8 @@ func (s *sequentialReply) EndRunningContext() []error {
 }
 
 func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
-	s.Lock()
-	defer s.Unlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	// out of bounds, url requested more times than sequence length
 	if s.count >= len(s.sequence) {
 		return unhandledRequestError(r)
@@ -206,7 +206,7 @@ func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) 
 }
 
 type basedOnRequestReply struct {
-	sync.Mutex
+	mutex    sync.Mutex
 	variants []*Definition
 }
 
@@ -217,8 +217,8 @@ func newBasedOnRequestReply(variants []*Definition) ReplyStrategy {
 }
 
 func (s *basedOnRequestReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
-	s.Lock()
-	defer s.Unlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
 	var errors []error
 	for _, def := range s.variants {

@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http/httptest"
@@ -20,24 +19,24 @@ import (
 	"github.com/lamoda/gonkey/mocks"
 	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/output"
-	"github.com/lamoda/gonkey/output/allure_report"
 	testingOutput "github.com/lamoda/gonkey/output/testing"
+	"github.com/lamoda/gonkey/storage"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
 	"github.com/lamoda/gonkey/variables"
 )
 
-type RunWithTestingParams struct {
-	Server      *httptest.Server
+var DefaultOutput = testingOutput.NewOutput()
+
+type RunWithTestingOpts struct {
 	TestsDir    string
-	Mocks       *mocks.Mocks
 	FixturesDir string
-	DB          *sql.DB
-	// If DB parameter present, used to recognize type of database, if not set, by default uses Postgres
-	DbType        fixtures.DbType
-	EnvFilePath   string
-	OutputFunc    output.OutputInterface
-	Checkers      []checker.CheckerInterface
-	FixtureLoader fixtures.Loader
+	EnvFilePath string
+
+	Mocks          *mocks.Mocks
+	Storages       []storage.StorageInterface
+	MainOutputFunc output.OutputInterface
+	Outputs        []output.OutputInterface
+	Checkers       []checker.CheckerInterface
 }
 
 func registerMocksEnvironment(m *mocks.Mocks) {
@@ -50,31 +49,20 @@ func registerMocksEnvironment(m *mocks.Mocks) {
 
 // RunWithTesting is a helper function the wraps the common Run and provides simple way
 // to configure Gonkey by filling the params structure.
-func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
+func RunWithTesting(t *testing.T, server *httptest.Server, opts *RunWithTestingOpts) {
 	var mocksLoader *mocks.Loader
-	if params.Mocks != nil {
-		mocksLoader = mocks.NewLoader(params.Mocks)
-		registerMocksEnvironment(params.Mocks)
+	if opts.Mocks != nil {
+		mocksLoader = mocks.NewLoader(opts.Mocks)
+		registerMocksEnvironment(opts.Mocks)
 	}
 
-	if params.EnvFilePath != "" {
-		if err := godotenv.Load(params.EnvFilePath); err != nil {
+	if opts.EnvFilePath != "" {
+		if err := godotenv.Load(opts.EnvFilePath); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	debug := os.Getenv("GONKEY_DEBUG") != ""
-
-	var fixturesLoader fixtures.Loader
-	if params.DB != nil || params.FixtureLoader != nil {
-		fixturesLoader = fixtures.NewLoader(&fixtures.Config{
-			Location:      params.FixturesDir,
-			DB:            params.DB,
-			Debug:         debug,
-			DbType:        params.DbType,
-			FixtureLoader: params.FixtureLoader,
-		})
-	}
+	fixturesLoader := fixtures.NewLoader(opts.FixturesDir, opts.Storages)
 
 	var proxyURL *url.URL
 	if os.Getenv("HTTP_PROXY") != "" {
@@ -85,21 +73,10 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 		proxyURL = httpURL
 	}
 
-	runner := initRunner(t, params, mocksLoader, fixturesLoader, proxyURL)
+	runner := initRunner(t, server, opts, mocksLoader, fixturesLoader, proxyURL)
 
-	if params.OutputFunc != nil {
-		runner.AddOutput(params.OutputFunc)
-	} else {
-		runner.AddOutput(testingOutput.NewOutput())
-	}
-
-	if os.Getenv("GONKEY_ALLURE_DIR") != "" {
-		allureOutput := allure_report.NewOutput("Gonkey", os.Getenv("GONKEY_ALLURE_DIR"))
-		defer allureOutput.Finalize()
-		runner.AddOutput(allureOutput)
-	}
-
-	addCheckers(runner, params)
+	addOutputs(runner, opts)
+	addCheckers(runner, opts)
 
 	err := runner.Run()
 	if err != nil {
@@ -109,19 +86,20 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 
 func initRunner(
 	t *testing.T,
-	params *RunWithTestingParams,
+	server *httptest.Server,
+	opts *RunWithTestingOpts,
 	mocksLoader *mocks.Loader,
 	fixturesLoader fixtures.Loader,
 	proxyURL *url.URL,
 ) *Runner {
-	yamlLoader := yaml_file.NewLoader(params.TestsDir)
+	yamlLoader := yaml_file.NewLoader(opts.TestsDir)
 	yamlLoader.SetFileFilter(os.Getenv("GONKEY_FILE_FILTER"))
 
 	handler := testingHandler{t}
 	runner := New(
 		&Config{
-			Host:           params.Server.URL,
-			Mocks:          params.Mocks,
+			Host:           server.URL,
+			Mocks:          opts.Mocks,
 			MocksLoader:    mocksLoader,
 			FixturesLoader: fixturesLoader,
 			Variables:      variables.New(),
@@ -134,15 +112,25 @@ func initRunner(
 	return runner
 }
 
-func addCheckers(runner *Runner, params *RunWithTestingParams) {
-	runner.AddCheckers(response_body.NewChecker())
-	runner.AddCheckers(response_header.NewChecker())
-
-	if params.DB != nil {
-		runner.AddCheckers(response_db.NewChecker(params.DB))
+func addOutputs(runner *Runner, opts *RunWithTestingOpts) {
+	if opts.MainOutputFunc != nil {
+		runner.AddOutput(opts.MainOutputFunc)
+	} else {
+		runner.AddOutput(DefaultOutput)
 	}
 
-	runner.AddCheckers(params.Checkers...)
+	for _, o := range opts.Outputs {
+		runner.AddOutput(o)
+	}
+}
+
+func addCheckers(runner *Runner, opts *RunWithTestingOpts) {
+	runner.AddCheckers(response_body.NewChecker())
+	runner.AddCheckers(response_header.NewChecker())
+	if len(opts.Storages) != 0 {
+		runner.AddCheckers(response_db.NewChecker(opts.Storages))
+	}
+	runner.AddCheckers(opts.Checkers...)
 }
 
 type testingHandler struct {

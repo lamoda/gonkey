@@ -1,4 +1,4 @@
-package postgres
+package postgresql
 
 import (
 	"database/sql"
@@ -14,12 +14,6 @@ import (
 
 	"gopkg.in/yaml.v2"
 )
-
-type LoaderPostgres struct {
-	db       *sql.DB
-	location string
-	debug    bool
-}
 
 type row map[string]interface{}
 
@@ -47,7 +41,6 @@ func newTableName(source string) tableName {
 	switch {
 	case len(parts) == 1:
 		parts = append(parts, parts[0])
-
 		fallthrough
 	case parts[0] == "":
 		parts[0] = "public"
@@ -68,35 +61,56 @@ type loadContext struct {
 	refsInserted   rowsDict
 }
 
-func New(db *sql.DB, location string, debug bool) *LoaderPostgres {
-	return &LoaderPostgres{
-		db:       db,
-		location: location,
-		debug:    debug,
-	}
-}
-
-func (f *LoaderPostgres) Load(names []string) error {
+func LoadFixtures(db *sql.DB, location string, names []string) error {
 	ctx := loadContext{
 		refsDefinition: make(rowsDict),
 		refsInserted:   make(rowsDict),
 	}
 	// gather data from files
 	for _, name := range names {
-		err := f.loadFile(name, &ctx)
+		err := loadFile(location, name, &ctx)
 		if err != nil {
 			return fmt.Errorf("unable to load fixture %s: %s", name, err.Error())
 		}
 	}
 
-	return f.loadTables(&ctx)
+	return loadTables(&ctx, db)
 }
 
-func (f *LoaderPostgres) loadFile(name string, ctx *loadContext) error {
+func ExecuteQuery(db *sql.DB, query string) ([]json.RawMessage, error) {
+	dbResponse := []json.RawMessage{}
+
+	if idx := strings.IndexByte(query, ';'); idx >= 0 {
+		query = query[:idx]
+	}
+
+	rows, err := db.Query(fmt.Sprintf("SELECT row_to_json(rows) FROM (%s) rows;", query))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var jsonString string
+		err = rows.Scan(&jsonString)
+		if err != nil {
+			return nil, err
+		}
+		dbResponse = append(dbResponse, json.RawMessage(jsonString))
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return dbResponse, nil
+}
+
+func loadFile(location, name string, ctx *loadContext) error {
 	candidates := []string{
-		f.location + "/" + name,
-		f.location + "/" + name + ".yml",
-		f.location + "/" + name + ".yaml",
+		location + "/" + name,
+		location + "/" + name + ".yml",
+		location + "/" + name + ".yaml",
 	}
 	var err error
 	var file string
@@ -114,19 +128,16 @@ func (f *LoaderPostgres) loadFile(name string, ctx *loadContext) error {
 	if inArray(file, ctx.files) {
 		return nil
 	}
-	if f.debug {
-		fmt.Println("Loading", file)
-	}
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
 	}
 	ctx.files = append(ctx.files, file)
 
-	return f.loadYml(data, ctx)
+	return loadYml(location, data, ctx)
 }
 
-func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
+func loadYml(location string, data []byte, ctx *loadContext) error {
 	// read yml into struct
 	var loadedFixture fixture
 	if err := yaml.Unmarshal(data, &loadedFixture); err != nil {
@@ -135,7 +146,7 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 
 	// load inherits
 	for _, inheritFile := range loadedFixture.Inherits {
-		if err := f.loadFile(inheritFile, ctx); err != nil {
+		if err := loadFile(location, inheritFile, ctx); err != nil {
 			return err
 		}
 	}
@@ -159,7 +170,7 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		}
 		if base, ok := row["$extend"]; ok {
 			base := base.(string)
-			baseRow, err := f.resolveReference(ctx.refsDefinition, base)
+			baseRow, err := resolveReference(ctx.refsDefinition, base)
 			if err != nil {
 				return err
 			}
@@ -169,10 +180,6 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 			row = baseRow
 		}
 		ctx.refsDefinition[name] = row
-		if f.debug {
-			rowJSON, _ := json.Marshal(row)
-			fmt.Printf("Populating ref %s as %s from template\n", name, string(rowJSON))
-		}
 	}
 
 	// loadedFixture.tables
@@ -207,15 +214,15 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 	return nil
 }
 
-func (f *LoaderPostgres) loadTables(ctx *loadContext) error {
-	tx, err := f.db.Begin()
+func loadTables(ctx *loadContext, db *sql.DB) error {
+	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
 
 	// truncate first
-	if err := f.truncateTables(tx, ctx.tables...); err != nil {
+	if err := truncateTables(tx, ctx.tables...); err != nil {
 		return err
 	}
 
@@ -224,12 +231,12 @@ func (f *LoaderPostgres) loadTables(ctx *loadContext) error {
 		if len(lt.rows) == 0 {
 			continue
 		}
-		if err := f.loadTable(ctx, tx, lt.name, lt.rows); err != nil {
+		if err := loadTable(ctx, tx, lt.name, lt.rows); err != nil {
 			return fmt.Errorf("failed to load table '%s' because:\n%s", lt.name.getFullName(), err)
 		}
 	}
 	// alter the sequences so they contain max id + 1
-	if err := f.fixSequences(tx); err != nil {
+	if err := fixSequences(tx); err != nil {
 		return err
 	}
 
@@ -237,7 +244,7 @@ func (f *LoaderPostgres) loadTables(ctx *loadContext) error {
 }
 
 // truncateTables truncates table
-func (f *LoaderPostgres) truncateTables(tx *sql.Tx, tables ...loadedTable) error {
+func truncateTables(tx *sql.Tx, tables ...loadedTable) error {
 	set := make(map[string]struct{})
 	tablesToTruncate := make([]string, 0, len(tables))
 	for _, t := range tables {
@@ -252,9 +259,6 @@ func (f *LoaderPostgres) truncateTables(tx *sql.Tx, tables ...loadedTable) error
 	}
 
 	query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", strings.Join(tablesToTruncate, ","))
-	if f.debug {
-		fmt.Println("Issuing SQL:", query)
-	}
 	_, err := tx.Exec(query)
 	if err != nil {
 		return err
@@ -263,14 +267,14 @@ func (f *LoaderPostgres) truncateTables(tx *sql.Tx, tables ...loadedTable) error
 	return nil
 }
 
-func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, rows table) error {
+func loadTable(ctx *loadContext, tx *sql.Tx, t tableName, rows table) error {
 	// $extend keyword allows to import values from a named row
 	for i, row := range rows {
 		if _, ok := row["$extend"]; !ok {
 			continue
 		}
 		base := row["$extend"].(string)
-		baseRow, err := f.resolveReference(ctx.refsDefinition, base)
+		baseRow, err := resolveReference(ctx.refsDefinition, base)
 		if err != nil {
 			return err
 		}
@@ -280,12 +284,9 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, ro
 		rows[i] = baseRow
 	}
 	// build SQL
-	query, err := f.buildInsertQuery(ctx, t, rows)
+	query, err := buildInsertQuery(ctx, t, rows)
 	if err != nil {
 		return err
-	}
-	if f.debug {
-		fmt.Println("Issuing SQL:", query)
 	}
 	// issuing query
 	insertedRows, err := tx.Query(query)
@@ -317,15 +318,7 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, ro
 			}
 			// add to references
 			ctx.refsDefinition[name] = row
-			if f.debug {
-				rowJSON, _ := json.Marshal(row)
-				fmt.Printf("Populating ref %s as %s from row definition\n", name, string(rowJSON))
-			}
 			ctx.refsInserted[name] = values
-			if f.debug {
-				valuesJSON, _ := json.Marshal(values)
-				fmt.Printf("Populating ref %s as %s from inserted values\n", name, string(valuesJSON))
-			}
 		}
 	}
 
@@ -340,7 +333,7 @@ func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, ro
 	return err
 }
 
-func (f *LoaderPostgres) fixSequences(tx *sql.Tx) error {
+func fixSequences(tx *sql.Tx) error {
 	query := `
 DO $$
 DECLARE
@@ -364,9 +357,6 @@ BEGIN
     END LOOP;
 END$$
 `
-	if f.debug {
-		fmt.Println("Issuing SQL:", query)
-	}
 	_, err := tx.Exec(query)
 
 	return err
@@ -374,7 +364,7 @@ END$$
 
 // buildInsertQuery builds SQL query for data insertion
 // based on values read from yaml
-func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows table) (string, error) {
+func buildInsertQuery(ctx *loadContext, t tableName, rows table) (string, error) {
 	// first pass, collecting all the fields
 	var fields []string
 	fieldPresence := make(map[string]bool)
@@ -405,7 +395,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 			if stringValue, ok := value.(string); ok {
 				if stringValue != "" && stringValue[0] == '$' {
 					var err error
-					dbValuesRow[k], err = f.resolveExpression(stringValue, ctx)
+					dbValuesRow[k], err = resolveExpression(stringValue, ctx)
 					if err != nil {
 						return "", err
 					}
@@ -435,7 +425,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 // supporting expressions:
 // - $eval()               - executes an SQL expression, e.g. $eval(CURRENT_DATE)
 // - $recordName.fieldName - using value of previously inserted named record
-func (f *LoaderPostgres) resolveExpression(expr string, ctx *loadContext) (string, error) {
+func resolveExpression(expr string, ctx *loadContext) (string, error) {
 	if expr[:5] == "$eval" {
 		re := regexp.MustCompile(`^\$eval\((.+)\)$`)
 		if matches := re.FindStringSubmatch(expr); matches != nil {
@@ -445,7 +435,7 @@ func (f *LoaderPostgres) resolveExpression(expr string, ctx *loadContext) (strin
 		return "", fmt.Errorf("icorrect $eval() usage: %s", expr)
 	}
 
-	value, err := f.resolveFieldReference(ctx.refsInserted, expr)
+	value, err := resolveFieldReference(ctx.refsInserted, expr)
 	if err != nil {
 		return "", nil
 	}
@@ -454,7 +444,7 @@ func (f *LoaderPostgres) resolveExpression(expr string, ctx *loadContext) (strin
 }
 
 // resolveReference finds previously stored reference by its name
-func (f *LoaderPostgres) resolveReference(refs rowsDict, refName string) (row, error) {
+func resolveReference(refs rowsDict, refName string) (row, error) {
 	target, ok := refs[refName]
 	if !ok {
 		return nil, fmt.Errorf("undefined reference %s", refName)
@@ -473,7 +463,7 @@ func (f *LoaderPostgres) resolveReference(refs rowsDict, refName string) (row, e
 
 // resolveFieldReference finds previously stored reference by name
 // and return value of its field
-func (f *LoaderPostgres) resolveFieldReference(refs rowsDict, ref string) (interface{}, error) {
+func resolveFieldReference(refs rowsDict, ref string) (interface{}, error) {
 	parts := strings.SplitN(ref, ".", 2)
 	if len(parts) < 2 || len(parts[0]) < 2 || len(parts[1]) < 1 {
 		return nil, fmt.Errorf("invalid reference %s, correct form is $refName.field", ref)

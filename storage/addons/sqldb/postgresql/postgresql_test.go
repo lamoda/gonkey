@@ -1,7 +1,6 @@
-package postgres
+package postgresql
 
 import (
-	"database/sql"
 	"io/ioutil"
 	"testing"
 
@@ -25,11 +24,10 @@ func TestBuildInsertQuery(t *testing.T) {
 		refsInserted:   make(map[string]row),
 	}
 
-	l := New(&sql.DB{}, "", false)
-	err = l.loadYml(yml, &ctx)
+	err = loadYml("", yml, &ctx)
 	require.NoError(t, err)
 
-	query, err := l.buildInsertQuery(&ctx, newTableName("table"), ctx.tables[0].rows)
+	query, err := buildInsertQuery(&ctx, newTableName("table"), ctx.tables[0].rows)
 	require.NoError(t, err)
 
 	require.Equal(t, expected, query)
@@ -48,9 +46,7 @@ func TestLoadTablesShouldResolveSchema(t *testing.T) {
 		refsInserted:   make(map[string]row),
 	}
 
-	l := New(db, "", true)
-
-	err = l.loadYml(yml, &ctx)
+	err = loadYml("", yml, &ctx)
 	require.NoError(t, err)
 
 	mock.ExpectBegin()
@@ -93,7 +89,8 @@ func TestLoadTablesShouldResolveSchema(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	err = l.loadTables(&ctx)
+	err = loadTables(&ctx, db)
+
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -113,9 +110,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 		refsInserted:   make(map[string]row),
 	}
 
-	l := New(db, "", true)
-
-	err = l.loadYml(yml, &ctx)
+	err = loadYml("", yml, &ctx)
 	require.NoError(t, err)
 
 	mock.ExpectBegin()
@@ -158,7 +153,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	err = l.loadTables(&ctx)
+	err = loadTables(&ctx, db)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -178,9 +173,7 @@ func TestLoadTablesShouldExtendRows(t *testing.T) {
 		refsInserted:   make(map[string]row),
 	}
 
-	l := New(db, "", true)
-
-	err = l.loadYml(yml, &ctx)
+	err = loadYml("", yml, &ctx)
 	require.NoError(t, err)
 
 	mock.ExpectBegin()
@@ -225,7 +218,7 @@ func TestLoadTablesShouldExtendRows(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	err = l.loadTables(&ctx)
+	err = loadTables(&ctx, db)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()

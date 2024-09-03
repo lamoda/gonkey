@@ -1,26 +1,25 @@
 package response_db
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/lamoda/gonkey/checker"
 	"github.com/lamoda/gonkey/compare"
 	"github.com/lamoda/gonkey/models"
+	"github.com/lamoda/gonkey/storage"
 
 	"github.com/fatih/color"
 	"github.com/kylelemons/godebug/pretty"
 )
 
 type ResponseDbChecker struct {
-	db *sql.DB
+	storages []storage.StorageInterface
 }
 
-func NewChecker(dbConnect *sql.DB) checker.CheckerInterface {
+func NewChecker(storages []storage.StorageInterface) checker.CheckerInterface {
 	return &ResponseDbChecker{
-		db: dbConnect,
+		storages: storages,
 	}
 }
 
@@ -67,7 +66,7 @@ func (c *ResponseDbChecker) check(
 	}
 
 	// get DB response
-	actualDbResponse, err := newQuery(t.DbQueryString(), c.db)
+	actualDbResponse, err := newQuery(t.DbQueryString(), c.storages)
 	if err != nil {
 		return nil, err
 	}
@@ -137,30 +136,20 @@ func compareDbResponseLength(expected, actual []string, query interface{}) error
 	return err
 }
 
-func newQuery(dbQuery string, db *sql.DB) ([]string, error) {
-	var dbResponse []string
-	var jsonString string
-
-	if idx := strings.IndexByte(dbQuery, ';'); idx >= 0 {
-		dbQuery = dbQuery[:idx]
-	}
-
-	rows, err := db.Query(fmt.Sprintf("SELECT row_to_json(rows) FROM (%s) rows;", dbQuery))
+func newQuery(dbQuery string, storages []storage.StorageInterface) ([]string, error) {
+	messages, err := storages[0].ExecuteQuery(dbQuery)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		err = rows.Scan(&jsonString)
+	dbResponse := []string{}
+	for _, item := range messages {
+		data, err := item.MarshalJSON()
 		if err != nil {
 			return nil, err
 		}
-		dbResponse = append(dbResponse, jsonString)
-	}
-	err = rows.Err()
-	if err != nil {
-		return nil, err
+
+		dbResponse = append(dbResponse, string(data))
 	}
 
 	return dbResponse, nil

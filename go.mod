@@ -8,7 +8,6 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/joho/godotenv v1.3.0
 	github.com/kylelemons/godebug v1.1.0
-	github.com/lib/pq v1.3.0
 	github.com/stretchr/testify v1.7.1
 	github.com/tidwall/gjson v1.17.0
 	golang.org/x/sync v0.4.0

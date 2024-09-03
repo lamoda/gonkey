@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"io/ioutil"
@@ -29,14 +28,12 @@ func TestBuildInsertQuery(t *testing.T) {
 		refsInserted:   make(map[string]row),
 	}
 
-	l := New(&sql.DB{}, "", false)
-
 	require.NoError(t,
-		l.loadYml(ymlFile, &ctx),
+		loadYml("", ymlFile, &ctx),
 	)
 
 	for i, row := range ctx.tables[0].rows {
-		query, err := l.buildInsertQuery(&ctx, "table", row)
+		query, err := buildInsertQuery(&ctx, "table", row)
 		require.NoError(t, err)
 
 		assert.Equal(t, expected[i], query)
@@ -58,9 +55,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 		refsInserted:   make(map[string]row),
 	}
 
-	l := New(db, "", true)
-
-	if err = l.loadYml(yml, &ctx); err != nil {
+	if err = loadYml("", yml, &ctx); err != nil {
 		t.Error(err)
 		t.Fail()
 	}
@@ -97,7 +92,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	err = l.loadTables(&ctx)
+	err = loadTables(&ctx, db)
 	if err != nil {
 		t.Error(err)
 		t.Fail()
@@ -124,9 +119,7 @@ func TestLoadTablesShouldExtendRows(t *testing.T) {
 		refsInserted:   make(map[string]row),
 	}
 
-	l := New(db, "", true)
-
-	if err = l.loadYml(yml, &ctx); err != nil {
+	if err = loadYml("", yml, &ctx); err != nil {
 		t.Error(err)
 		t.Fail()
 	}
@@ -171,7 +164,7 @@ func TestLoadTablesShouldExtendRows(t *testing.T) {
 
 	mock.ExpectCommit()
 
-	err = l.loadTables(&ctx)
+	err = loadTables(&ctx, db)
 	if err != nil {
 		t.Error(err)
 		t.Fail()

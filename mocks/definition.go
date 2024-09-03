@@ -13,9 +13,9 @@ type Definition struct {
 	path               string
 	requestConstraints []verifier
 	replyStrategy      ReplyStrategy
-	sync.Mutex
-	calls           int
-	callsConstraint int
+	mutex              sync.Mutex
+	calls              int
+	callsConstraint    int
 }
 
 func NewDefinition(path string, constraints []verifier, strategy ReplyStrategy, callsConstraint int) *Definition {
@@ -28,9 +28,9 @@ func NewDefinition(path string, constraints []verifier, strategy ReplyStrategy, 
 }
 
 func (d *Definition) Execute(w http.ResponseWriter, r *http.Request) []error {
-	d.Lock()
+	d.mutex.Lock()
 	d.calls++
-	d.Unlock()
+	d.mutex.Unlock()
 	var errors []error
 	if len(d.requestConstraints) > 0 {
 		requestDump, err := httputil.DumpRequest(r, true)
@@ -59,14 +59,14 @@ func (d *Definition) ResetRunningContext() {
 	if s, ok := d.replyStrategy.(contextAwareStrategy); ok {
 		s.ResetRunningContext()
 	}
-	d.Lock()
+	d.mutex.Lock()
 	d.calls = 0
-	d.Unlock()
+	d.mutex.Unlock()
 }
 
 func (d *Definition) EndRunningContext() []error {
-	d.Lock()
-	defer d.Unlock()
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 	var errs []error
 	if s, ok := d.replyStrategy.(contextAwareStrategy); ok {
 		errs = s.EndRunningContext()
@@ -100,9 +100,9 @@ func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) []
 	return errors
 }
 func (d *Definition) ExecuteWithoutVerifying(w http.ResponseWriter, r *http.Request) []error {
-	d.Lock()
+	d.mutex.Lock()
 	d.calls++
-	d.Unlock()
+	d.mutex.Unlock()
 	if d.replyStrategy != nil {
 		return d.replyStrategy.HandleRequest(w, r)
 	}

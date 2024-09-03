@@ -20,8 +20,7 @@ func TestProxy(t *testing.T) {
 	initServer()
 	srv := httptest.NewServer(nil)
 
-	runner.RunWithTesting(t, &runner.RunWithTestingParams{
-		Server:   srv,
+	runner.RunWithTesting(t, srv, &runner.RunWithTestingOpts{
 		TestsDir: "cases",
 		Mocks:    m,
 	})

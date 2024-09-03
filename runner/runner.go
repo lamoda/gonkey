@@ -124,7 +124,6 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 	r.config.Variables.Load(v.GetCombinedVariables())
 	v = r.config.Variables.Apply(v)
 
-	// load fixtures
 	if r.config.FixturesLoader != nil && v.Fixtures() != nil {
 		if err := r.config.FixturesLoader.Load(v.Fixtures()); err != nil {
 			return nil, fmt.Errorf("unable to load fixtures [%s], error:\n%s", strings.Join(v.Fixtures(), ", "), err)

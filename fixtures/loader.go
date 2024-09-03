@@ -1,73 +1,33 @@
 package fixtures
 
 import (
-	"database/sql"
-	"strings"
+	"fmt"
 
-	"github.com/lamoda/gonkey/fixtures/mysql"
-	"github.com/lamoda/gonkey/fixtures/postgres"
+	"github.com/lamoda/gonkey/storage"
 )
-
-type DbType int
-
-const (
-	Postgres DbType = iota
-	Mysql
-	CustomLoader // using external loader if gonkey used as a library
-)
-
-const (
-	PostgresParam = "postgres"
-	MysqlParam    = "mysql"
-)
-
-type Config struct {
-	DB            *sql.DB
-	DbType        DbType
-	Location      string
-	Debug         bool
-	FixtureLoader Loader
-}
 
 type Loader interface {
 	Load(names []string) error
 }
 
-func NewLoader(cfg *Config) Loader {
-	var loader Loader
-
-	location := strings.TrimRight(cfg.Location, "/")
-
-	switch cfg.DbType {
-	case Postgres:
-		loader = postgres.New(
-			cfg.DB,
-			location,
-			cfg.Debug,
-		)
-	case Mysql:
-		loader = mysql.New(
-			cfg.DB,
-			location,
-			cfg.Debug,
-		)
-	default:
-		if cfg.FixtureLoader != nil {
-			return cfg.FixtureLoader
-		}
-		panic("unknown db type")
+func NewLoader(location string, storages []storage.StorageInterface) Loader {
+	return &loaderImpl{
+		location: location,
+		storages: storages,
 	}
-
-	return loader
 }
 
-func FetchDbType(dbType string) DbType {
-	switch dbType {
-	case PostgresParam:
-		return Postgres
-	case MysqlParam:
-		return Mysql
-	default:
-		panic("unknown db type param")
+type loaderImpl struct {
+	location string
+	storages []storage.StorageInterface
+}
+
+func (l *loaderImpl) Load(names []string) error {
+	for _, s := range l.storages {
+		err := s.LoadFixtures(l.location, names)
+		if err != nil {
+			return fmt.Errorf("load fixtures: %w", err)
+		}
 	}
+	return nil
 }
