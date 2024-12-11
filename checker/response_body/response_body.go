@@ -9,6 +9,7 @@ import (
 	"github.com/lamoda/gonkey/checker"
 	"github.com/lamoda/gonkey/compare"
 	"github.com/lamoda/gonkey/models"
+	"github.com/lamoda/gonkey/xmlparsing"
 )
 
 type ResponseBodyChecker struct{}
@@ -31,8 +32,16 @@ func (c *ResponseBodyChecker) Check(t models.TestInterface, result *models.Resul
 			}
 			errs = append(errs, checkErrs...)
 		} else {
-			// compare bodies as leaf nodes
-			errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.Params{})...)
+			if strings.Contains(result.ResponseContentType, "xml") && expectedBody != "" {
+				checkErrs, err := compareXmlBody(t, expectedBody, result)
+				if err != nil {
+					return nil, err
+				}
+				errs = append(errs, checkErrs...)
+			} else {
+				// compare bodies as leaf nodes
+				errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.Params{})...)
+			}
 		}
 	}
 	if !foundResponse {
@@ -61,6 +70,32 @@ func compareJsonBody(t models.TestInterface, expectedBody string, result *models
 		return []error{errors.New("could not parse response")}, nil
 	}
 
+	params := compare.Params{
+		IgnoreValues:         !t.NeedsCheckingValues(),
+		IgnoreArraysOrdering: t.IgnoreArraysOrdering(),
+		DisallowExtraFields:  t.DisallowExtraFields(),
+	}
+
+	return compare.Compare(expected, actual, params), nil
+}
+
+func compareXmlBody(t models.TestInterface, expectedBody string, result *models.Result) ([]error, error) {
+	// decode expected body
+	expected, err := xmlparsing.Parse(expectedBody)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"invalid XML in response for test %s (status %d): %s",
+			t.GetName(),
+			result.ResponseStatusCode,
+			err.Error(),
+		)
+	}
+
+	// decode actual body
+	actual, err := xmlparsing.Parse(result.ResponseBody)
+	if err != nil {
+		return []error{errors.New("could not parse response")}, nil
+	}
 	params := compare.Params{
 		IgnoreValues:         !t.NeedsCheckingValues(),
 		IgnoreArraysOrdering: t.IgnoreArraysOrdering(),
