@@ -25,20 +25,20 @@ func (c *ResponseBodyChecker) Check(t models.TestInterface, result *models.Resul
 	if expectedBody, ok := t.GetResponse(result.ResponseStatusCode); ok {
 		foundResponse = true
 		// is the response JSON document?
-		if strings.Contains(result.ResponseContentType, "json") && expectedBody != "" {
+		switch {
+		case strings.Contains(result.ResponseContentType, "json") && expectedBody != "":
 			checkErrs, err := compareJsonBody(t, expectedBody, result)
 			if err != nil {
 				return nil, err
 			}
 			errs = append(errs, checkErrs...)
-		} else if strings.Contains(result.ResponseContentType, "xml") && expectedBody != "" {
+		case strings.Contains(result.ResponseContentType, "xml") && expectedBody != "":
 			checkErrs, err := compareXmlBody(t, expectedBody, result)
 			if err != nil {
 				return nil, err
 			}
 			errs = append(errs, checkErrs...)
-		} else {
-			// compare bodies as leaf nodes
+		default:
 			errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.Params{})...)
 		}
 
