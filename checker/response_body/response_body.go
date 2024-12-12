@@ -31,18 +31,17 @@ func (c *ResponseBodyChecker) Check(t models.TestInterface, result *models.Resul
 				return nil, err
 			}
 			errs = append(errs, checkErrs...)
-		} else {
-			if strings.Contains(result.ResponseContentType, "xml") && expectedBody != "" {
-				checkErrs, err := compareXmlBody(t, expectedBody, result)
-				if err != nil {
-					return nil, err
-				}
-				errs = append(errs, checkErrs...)
-			} else {
-				// compare bodies as leaf nodes
-				errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.Params{})...)
+		} else if strings.Contains(result.ResponseContentType, "xml") && expectedBody != "" {
+			checkErrs, err := compareXmlBody(t, expectedBody, result)
+			if err != nil {
+				return nil, err
 			}
+			errs = append(errs, checkErrs...)
+		} else {
+			// compare bodies as leaf nodes
+			errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.Params{})...)
 		}
+
 	}
 	if !foundResponse {
 		err := fmt.Errorf("server responded with status %d", result.ResponseStatusCode)
