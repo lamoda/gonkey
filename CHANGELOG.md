@@ -1,3 +1,18 @@
+# v1.21.5 (Fri Dec 27 2024)
+
+#### 🐛 Bug Fix
+
+- Bump auto version to v11.3.0 [#252](https://github.com/lamoda/gonkey/pull/252) ([@gaydin](https://github.com/gaydin))
+- Update go, linter versions and update dependencies [#251](https://github.com/lamoda/gonkey/pull/251) ([@gaydin](https://github.com/gaydin))
+- Added xml response body matching (re-used xml parser from constraints) [#249](https://github.com/lamoda/gonkey/pull/249) ([@leorush](https://github.com/leorush))
+
+#### Authors: 2
+
+- Lev ([@leorush](https://github.com/leorush))
+- Stanislav ([@gaydin](https://github.com/gaydin))
+
+---
+
 # v1.21.4 (Mon Nov 20 2023)
 
 #### 🐛 Bug Fix
