@@ -16,7 +16,7 @@ jobs:
 
       - name: Install auto
         run: |
-          curl -vkL https://github.com/intuit/auto/releases/download/v10.16.8/auto-linux.gz -o ~/auto.gz
+          curl -vkL https://github.com/intuit/auto/releases/download/v11.3.0/auto-linux.gz -o ~/auto.gz
           gunzip ~/auto.gz
           chmod a+x ~/auto
 
