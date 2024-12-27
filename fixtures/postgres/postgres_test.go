@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestBuildInsertQuery(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/sql.yaml")
+	yml, err := os.ReadFile("../testdata/sql.yaml")
 	require.NoError(t, err)
 
 	expected := "INSERT INTO \"public\".\"table\" AS row (\"field1\", \"field2\", \"field3\", \"field4\", \"field5\") VALUES " +
@@ -36,7 +36,7 @@ func TestBuildInsertQuery(t *testing.T) {
 }
 
 func TestLoadTablesShouldResolveSchema(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/sql_schema.yaml")
+	yml, err := os.ReadFile("../testdata/sql_schema.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
@@ -101,7 +101,7 @@ func TestLoadTablesShouldResolveSchema(t *testing.T) {
 }
 
 func TestLoadTablesShouldResolveRefs(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/sql_refs.yaml")
+	yml, err := os.ReadFile("../testdata/sql_refs.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
@@ -166,7 +166,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 }
 
 func TestLoadTablesShouldExtendRows(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/sql_extend.yaml")
+	yml, err := os.ReadFile("../testdata/sql_extend.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()

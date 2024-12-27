@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -15,7 +15,7 @@ import (
 
 func TestBuildInsertQuery(t *testing.T) {
 
-	ymlFile, err := ioutil.ReadFile("../testdata/sql.yaml")
+	ymlFile, err := os.ReadFile("../testdata/sql.yaml")
 	require.NoError(t, err)
 
 	expected := []string{
@@ -45,7 +45,7 @@ func TestBuildInsertQuery(t *testing.T) {
 }
 
 func TestLoadTablesShouldResolveRefs(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/sql_refs.yaml")
+	yml, err := os.ReadFile("../testdata/sql_refs.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()
@@ -111,7 +111,7 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 }
 
 func TestLoadTablesShouldExtendRows(t *testing.T) {
-	yml, err := ioutil.ReadFile("../testdata/sql_extend.yaml")
+	yml, err := os.ReadFile("../testdata/sql_extend.yaml")
 	require.NoError(t, err)
 
 	db, mock, err := sqlmock.New()

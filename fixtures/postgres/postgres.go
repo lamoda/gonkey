@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"sort"
@@ -117,7 +116,7 @@ func (f *LoaderPostgres) loadFile(name string, ctx *loadContext) error {
 	if f.debug {
 		fmt.Println("Loading", file)
 	}
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -403,7 +402,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 			}
 			// resolve references
 			if stringValue, ok := value.(string); ok {
-				if len(stringValue) > 0 && stringValue[0] == '$' {
+				if stringValue != "" && stringValue[0] == '$' {
 					var err error
 					dbValuesRow[k], err = f.resolveExpression(stringValue, ctx)
 					if err != nil {

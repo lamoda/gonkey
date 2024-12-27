@@ -3,7 +3,7 @@ package yaml_file
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"regexp"
 	"strings"
 	"text/template"
@@ -21,7 +21,7 @@ const (
 var gonkeyProtectTemplate = regexp.MustCompile(`{{\s*\$`)
 
 func parseTestDefinitionFile(absPath string) ([]Test, error) {
-	data, err := ioutil.ReadFile(absPath)
+	data, err := os.ReadFile(absPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %s:\n%s", absPath, err)
 	}
