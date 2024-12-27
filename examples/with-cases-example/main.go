@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
@@ -34,7 +34,7 @@ func Do(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonRequest, _ := ioutil.ReadAll(r.Body)
+	jsonRequest, _ := io.ReadAll(r.Body)
 	request := buildRequest(jsonRequest)
 
 	if request.Name == "a" {

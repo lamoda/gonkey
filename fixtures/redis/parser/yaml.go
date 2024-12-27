@@ -3,7 +3,7 @@ package parser
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -466,7 +466,7 @@ func (p *redisYamlParser) buildZSets(ctx *Context, data *ZSets) error {
 }
 
 func (p *redisYamlParser) Parse(ctx *Context, filename string) (*Fixture, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

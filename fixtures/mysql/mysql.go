@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"sort"
@@ -100,7 +99,7 @@ func (l *LoaderMysql) loadFile(name string, ctx *loadContext) error {
 
 	l.printDebug("Loading", file)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}

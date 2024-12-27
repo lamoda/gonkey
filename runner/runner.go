@@ -3,7 +3,7 @@ package runner
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -170,7 +170,7 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
 	_ = resp.Body.Close()
 

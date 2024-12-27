@@ -179,7 +179,7 @@ func (t *Test) Clone() models.TestInterface {
 func (t *Test) SetQuery(val string) {
 	var query strings.Builder
 	query.Grow(len(val) + 1)
-	if len(val) > 0 && val[0] != '?' {
+	if val != "" && val[0] != '?' {
 		query.WriteString("?")
 	}
 	query.WriteString(val)

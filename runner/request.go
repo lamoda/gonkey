@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -181,7 +180,7 @@ func request(test models.TestInterface, b *bytes.Buffer, host string) (*http.Req
 func actualRequestBody(req *http.Request) string {
 	if req.Body != nil {
 		reqBodyStream, _ := req.GetBody()
-		reqBody, _ := ioutil.ReadAll(reqBodyStream)
+		reqBody, _ := io.ReadAll(reqBodyStream)
 
 		return string(reqBody)
 	}

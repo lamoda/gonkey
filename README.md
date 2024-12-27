@@ -153,7 +153,7 @@ import (
   "github.com/lamoda/gonkey/fixtures"
   redisLoader "github.com/lamoda/gonkey/fixtures/redis"
   // redisLoader "custom_module/gonkey-redis" // custom implementation of a fixtures.Loader interface
-  redisClient "github.com/go-redis/redis/v9"
+  redisClient "github.com/redis/go-redis/v9"
   "github.com/lamoda/gonkey/runner"
 )
 

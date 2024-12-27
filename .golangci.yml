@@ -1,13 +1,13 @@
-service:
-  golangci-lint-version: v1.55.1
-
 run:
   tests: false
-  skip-dirs:
+
+issues:
+  exclude-files:
+    - ".*easyjson\\.go$"
+  exclude-dirs:
     - allure
     - mocks
-  skip-files:
-    - ".*easyjson\\.go$"
+
 output:
   print-issued-lines: false
 
@@ -32,6 +32,14 @@ linters-settings:
       # Should be enabled after fixing underscore package names.
       - name: var-naming
         disabled: true
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/lamoda/gonkey)
+    skip-generated: true
+    custom-order: false
+    no-lex-order: false
 
 linters:
   enable:
@@ -58,4 +66,5 @@ linters:
     - unconvert
     - unparam
     - unused
-    - gas
+    - gosec
+    - gci
