@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
+	"github.com/kylelemons/godebug/pretty"
+
 	"github.com/lamoda/gonkey/checker"
 	"github.com/lamoda/gonkey/compare"
 	"github.com/lamoda/gonkey/models"
-
-	"github.com/fatih/color"
-	"github.com/kylelemons/godebug/pretty"
 )
 
 type ResponseDbChecker struct {

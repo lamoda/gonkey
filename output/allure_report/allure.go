@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/lamoda/gonkey/output/allure_report/beans"
 )
 
@@ -119,7 +120,7 @@ func getBufferInfo(buf bytes.Buffer, typ string) (string, string) {
 
 func writeBuffer(pathDir string, buf bytes.Buffer, ext string) (string, error) {
 	fileName := uuid.New().String() + `-attachment.` + ext
-	err := ioutil.WriteFile(filepath.Join(pathDir, fileName), buf.Bytes(), 0o644)
+	err := os.WriteFile(filepath.Join(pathDir, fileName), buf.Bytes(), 0o644)
 
 	return fileName, err
 }
@@ -129,7 +130,7 @@ func writeSuite(pathDir string, suite *beans.Suite) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath.Join(pathDir, uuid.New().String()+`-testsuite.xml`), b, 0o644)
+	err = os.WriteFile(filepath.Join(pathDir, uuid.New().String()+`-testsuite.xml`), b, 0o644)
 	if err != nil {
 		return err
 	}

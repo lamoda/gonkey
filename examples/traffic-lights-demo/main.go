@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"sync"
@@ -54,7 +54,7 @@ func initServer() {
 		lights.mutex.Lock()
 		defer lights.mutex.Unlock()
 
-		request, err := ioutil.ReadAll(r.Body)
+		request, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Fatal(err)
 		}

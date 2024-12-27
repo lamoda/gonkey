@@ -8,9 +8,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/lamoda/gonkey/models"
-
 	"gopkg.in/yaml.v2"
+
+	"github.com/lamoda/gonkey/models"
 )
 
 const (

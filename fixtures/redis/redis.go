@@ -3,8 +3,9 @@ package redis
 import (
 	"context"
 
-	"github.com/lamoda/gonkey/fixtures/redis/parser"
 	"github.com/redis/go-redis/v9"
+
+	"github.com/lamoda/gonkey/fixtures/redis/parser"
 )
 
 type Loader struct {

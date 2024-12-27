@@ -2,7 +2,7 @@ package runner
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -58,7 +58,7 @@ func formFile(t *testing.T, r *http.Request, field string) (string, string) {
 
 	defer func() { _ = file.Close() }()
 
-	contents, err := ioutil.ReadAll(file)
+	contents, err := io.ReadAll(file)
 	require.NoError(t, err)
 
 	return header.Filename, string(contents)

@@ -5,10 +5,10 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/testloader/yaml_file"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestCheckShouldMatchSubset(t *testing.T) {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	urlpkg "net/url"
@@ -45,7 +44,7 @@ func Do(w http.ResponseWriter, r *http.Request) {
 		if res.StatusCode != http.StatusOK {
 			return 0, fmt.Errorf("backend response status code %d", res.StatusCode)
 		}
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		_ = res.Body.Close()
 		if err != nil {
 			return 0, fmt.Errorf("cannot read response body %w", err)

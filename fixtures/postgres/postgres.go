@@ -379,7 +379,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 	fieldPresence := make(map[string]bool)
 	for _, row := range rows {
 		for name := range row {
-			if len(name) > 0 && name[0] == '$' {
+			if name != "" && name[0] == '$' {
 				continue
 			}
 			if _, ok := fieldPresence[name]; !ok {
