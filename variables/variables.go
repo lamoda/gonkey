@@ -143,7 +143,13 @@ func (vs *Variables) performForm(form *models.Form) *models.Form {
 		files[k] = vs.perform(v)
 	}
 
-	return &models.Form{Files: files}
+	fields := make(map[string]string, len(form.Fields))
+
+	for k, v := range form.Fields {
+		fields[k] = vs.perform(v)
+	}
+
+	return &models.Form{Files: files, Fields: fields}
 }
 
 func (vs *Variables) performHeaders(headers map[string]string) map[string]string {

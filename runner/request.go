@@ -5,11 +5,13 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/lamoda/gonkey/models"
@@ -50,22 +52,35 @@ func newRequest(host string, test models.TestInterface) (req *http.Request, err 
 }
 
 func newMultipartRequest(host string, test models.TestInterface) (*http.Request, error) {
-	if test.ContentType() != "" && test.ContentType() != "multipart/form-data" {
-		return nil, fmt.Errorf(
-			"test has unexpected Content-Type: %s, expected: multipart/form-data",
-			test.ContentType(),
-		)
+	var boundary string
+
+	if test.ContentType() != "" {
+		contentType, params, err := mime.ParseMediaType(test.ContentType())
+		if err != nil {
+			return nil, err
+		}
+		if contentType != "multipart/form-data" {
+			return nil, fmt.Errorf(
+				"test has unexpected Content-Type: %s, expected: multipart/form-data",
+				test.ContentType(),
+			)
+		}
+
+		if b, ok := params["boundary"]; ok {
+			boundary = b
+		}
 	}
 
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
 
-	params, err := url.ParseQuery(test.GetRequest())
-	if err != nil {
-		return nil, err
+	if boundary != "" {
+		if err := w.SetBoundary(boundary); err != nil {
+			return nil, fmt.Errorf("SetBoundary : %w", err)
+		}
 	}
 
-	err = addFields(params, w)
+	err := addFields(test.GetForm().Fields, w)
 	if err != nil {
 		return nil, err
 	}
@@ -90,12 +105,29 @@ func newMultipartRequest(host string, test models.TestInterface) (*http.Request,
 
 func addFiles(files map[string]string, w *multipart.Writer) error {
 	for name, path := range files {
-
 		err := addFile(path, w, name)
 		if err != nil {
 			return err
 		}
 
+	}
+
+	return nil
+}
+func addFields(fields map[string]string, w *multipart.Writer) error {
+	// TODO: sort fields better
+	fieldNames := make([]string, 0, len(fields))
+	for n, _ := range fields {
+		fieldNames = append(fieldNames, n)
+	}
+	slices.Sort(fieldNames)
+
+	for _, name := range fieldNames {
+		n := name
+		v := fields[n]
+		if err := w.WriteField(n, v); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -115,24 +147,6 @@ func addFile(path string, w *multipart.Writer, name string) error {
 
 	if _, err = io.Copy(fw, f); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func addFields(params url.Values, w *multipart.Writer) error {
-	for k, vv := range params {
-		for _, v := range vv {
-			fw, err := w.CreateFormField(k)
-			if err != nil {
-				return err
-			}
-
-			_, err = fw.Write([]byte(v))
-			if err != nil {
-				return err
-			}
-		}
 	}
 
 	return nil
