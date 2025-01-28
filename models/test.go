@@ -64,9 +64,9 @@ type TestInterface interface {
 	Clone() TestInterface
 }
 
-// TODO: add support for form fields
 type Form struct {
-	Files map[string]string `json:"files" yaml:"files"`
+	Files  map[string]string `json:"files" yaml:"files"`
+	Fields map[string]string `json:"fields" yaml:"fields"`
 }
 
 type Summary struct {

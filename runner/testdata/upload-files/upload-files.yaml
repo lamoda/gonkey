@@ -32,4 +32,24 @@
         "file_2_content": "file2_content"
       }
 
+- name: "upload-files: with form fields"
+  method: POST
+  form:
+    fields:
+      fieldTest: "test_field value"
+    files:
+      file1: "testdata/upload-files/file1.txt"
+      file2: "testdata/upload-files/file2.log"
+  response:
+    200: |
+      {
+        "status": "OK",
+        "file_1_name": "file1.txt",
+        "file_1_content": "file1_some_text",
+        "file_2_name": "file2.log",
+        "file_2_content": "file2_content",
+        "fields_test_name": "fieldTest",
+        "fields_test_content": "test_field value" 
+      }
+
 # TODO: test with incorrect Content-Type
