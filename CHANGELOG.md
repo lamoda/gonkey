@@ -1,3 +1,22 @@
+# v1.21.6 (Tue Jan 28 2025)
+
+#### 🐛 Bug Fix
+
+- Add multipart form request [#254](https://github.com/lamoda/gonkey/pull/254) ([@RoTerentev](https://github.com/RoTerentev))
+
+#### 🔩 Dependency Updates
+
+- Bump actions/checkout from 1 to 4 [#237](https://github.com/lamoda/gonkey/pull/237) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump actions/setup-go from 1 to 5 [#238](https://github.com/lamoda/gonkey/pull/238) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump golangci/golangci-lint-action from 3 to 6 [#253](https://github.com/lamoda/gonkey/pull/253) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+
+#### Authors: 2
+
+- [@dependabot[bot]](https://github.com/dependabot[bot])
+- RomanTerentev ([@RoTerentev](https://github.com/RoTerentev))
+
+---
+
 # v1.21.5 (Fri Dec 27 2024)
 
 #### 🐛 Bug Fix
