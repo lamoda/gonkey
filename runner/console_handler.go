@@ -29,7 +29,7 @@ func (h *ConsoleHandler) HandleTest(test models.TestInterface, executeTest testE
 	}
 
 	h.totalTests++
-	if !testResult.Passed() {
+	if testResult != nil && !testResult.Passed() {
 		h.failedTests++
 	}
 
