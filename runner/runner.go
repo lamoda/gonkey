@@ -83,6 +83,12 @@ func (r *Runner) Run() error {
 		}
 
 		testExecutor := func(testInterface models.TestInterface) (*models.Result, error) {
+			switch testInterface.GetStatus() {
+			case "broken":
+				return nil, errTestBroken
+			case "skipped":
+				return nil, errTestSkipped
+			}
 			testResult, err := r.executeTest(test)
 			if err != nil {
 				return nil, err
@@ -112,16 +118,6 @@ var (
 )
 
 func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
-	if v.GetStatus() != "" {
-		if v.GetStatus() == "broken" {
-			return nil, errTestBroken
-		}
-
-		if v.GetStatus() == "skipped" {
-			return nil, errTestSkipped
-		}
-	}
-
 	r.config.Variables.Load(v.GetCombinedVariables())
 	v = r.config.Variables.Apply(v)
 
