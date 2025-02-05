@@ -114,11 +114,11 @@ var (
 func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 	if v.GetStatus() != "" {
 		if v.GetStatus() == "broken" {
-			return &models.Result{Test: v}, errTestBroken
+			return nil, errTestBroken
 		}
 
 		if v.GetStatus() == "skipped" {
-			return &models.Result{Test: v}, errTestSkipped
+			return nil, errTestSkipped
 		}
 	}
 
