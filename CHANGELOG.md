@@ -1,3 +1,16 @@
+# v1.21.7 (Wed Feb 05 2025)
+
+#### 🐛 Bug Fix
+
+- fix: processing a test running from console with status [#255](https://github.com/lamoda/gonkey/pull/255) (mihail.borovikov@lamoda.ru [@Mania-c](https://github.com/Mania-c))
+
+#### Authors: 2
+
+- Mihail Borovikov (mihail.borovikov@lamoda.ru)
+- Mikhail ([@Mania-c](https://github.com/Mania-c))
+
+---
+
 # v1.21.6 (Tue Jan 28 2025)
 
 #### 🐛 Bug Fix
