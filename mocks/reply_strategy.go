@@ -2,9 +2,9 @@ package mocks
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"strings"
 	"sync"
 )
@@ -33,7 +33,7 @@ func unhandledRequestError(r *http.Request) []error {
 }
 
 func NewFileReplyWithCode(filename string, statusCode int, headers map[string]string) (ReplyStrategy, error) {
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

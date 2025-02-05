@@ -1,0 +1,33 @@
+- name: "form-data: simple form"
+  method: POST
+  path: /dontcare
+  headers:
+    Content-Type: multipart/form-data; boundary=somebound
+  form:
+    fields:
+      field_test: test value
+      field2: test value 2
+      info: 100
+  response:
+    200: |
+      {
+        "content_type_header":"multipart/form-data; boundary=somebound",
+        "request_body_content":"--somebound\r\nContent-Disposition: form-data; name=\"field2\"\r\n\r\ntest value 2\r\n--somebound\r\nContent-Disposition: form-data; name=\"field_test\"\r\n\r\ntest value\r\n--somebound\r\nContent-Disposition: form-data; name=\"info\"\r\n\r\n100\r\n--somebound--\r\n"
+      }
+
+- name: "form-data: simple form, several fields"
+  method: POST
+  path: /dontcare
+  headers:
+    Content-Type: multipart/form-data; boundary=somebound
+  form:
+    fields:
+      field_test: test value
+      "fieldobj[2][one]": fieldobj 2 prop one
+      "fieldobj[2][two]": fieldobj 2 prop two
+  response:
+    200: |
+      {
+        "content_type_header":"multipart/form-data; boundary=somebound",
+        "request_body_content":"--somebound\r\nContent-Disposition: form-data; name=\"field_test\"\r\n\r\ntest value\r\n--somebound\r\nContent-Disposition: form-data; name=\"fieldobj[2][one]\"\r\n\r\nfieldobj 2 prop one\r\n--somebound\r\nContent-Disposition: form-data; name=\"fieldobj[2][two]\"\r\n\r\nfieldobj 2 prop two\r\n--somebound--\r\n"
+      }

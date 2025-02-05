@@ -1,3 +1,50 @@
+# v1.21.7 (Wed Feb 05 2025)
+
+#### 🐛 Bug Fix
+
+- fix: processing a test running from console with status [#255](https://github.com/lamoda/gonkey/pull/255) (mihail.borovikov@lamoda.ru [@Mania-c](https://github.com/Mania-c))
+
+#### Authors: 2
+
+- Mihail Borovikov (mihail.borovikov@lamoda.ru)
+- Mikhail ([@Mania-c](https://github.com/Mania-c))
+
+---
+
+# v1.21.6 (Tue Jan 28 2025)
+
+#### 🐛 Bug Fix
+
+- Add multipart form request [#254](https://github.com/lamoda/gonkey/pull/254) ([@RoTerentev](https://github.com/RoTerentev))
+
+#### 🔩 Dependency Updates
+
+- Bump actions/checkout from 1 to 4 [#237](https://github.com/lamoda/gonkey/pull/237) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump actions/setup-go from 1 to 5 [#238](https://github.com/lamoda/gonkey/pull/238) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- Bump golangci/golangci-lint-action from 3 to 6 [#253](https://github.com/lamoda/gonkey/pull/253) ([@dependabot[bot]](https://github.com/dependabot[bot]))
+
+#### Authors: 2
+
+- [@dependabot[bot]](https://github.com/dependabot[bot])
+- RomanTerentev ([@RoTerentev](https://github.com/RoTerentev))
+
+---
+
+# v1.21.5 (Fri Dec 27 2024)
+
+#### 🐛 Bug Fix
+
+- Bump auto version to v11.3.0 [#252](https://github.com/lamoda/gonkey/pull/252) ([@gaydin](https://github.com/gaydin))
+- Update go, linter versions and update dependencies [#251](https://github.com/lamoda/gonkey/pull/251) ([@gaydin](https://github.com/gaydin))
+- Added xml response body matching (re-used xml parser from constraints) [#249](https://github.com/lamoda/gonkey/pull/249) ([@leorush](https://github.com/leorush))
+
+#### Authors: 2
+
+- Lev ([@leorush](https://github.com/leorush))
+- Stanislav ([@gaydin](https://github.com/gaydin))
+
+---
+
 # v1.21.4 (Mon Nov 20 2023)
 
 #### 🐛 Bug Fix

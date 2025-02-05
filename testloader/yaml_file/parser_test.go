@@ -2,7 +2,6 @@ package yaml_file
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -55,7 +54,7 @@ var testsYAMLData = `
 `
 
 func TestParseTestsWithCases(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("../..", "tmpfile_")
+	tmpfile, err := os.CreateTemp("../..", "tmpfile_")
 	if err != nil {
 		t.Fatal(err)
 	}

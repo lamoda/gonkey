@@ -1,7 +1,7 @@
 package aerospike
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -114,7 +114,7 @@ func TestLoaderAerospike_loadYml(t *testing.T) {
 }
 
 func loadTestData(t *testing.T, path string) []byte {
-	aerospikeYaml, err := ioutil.ReadFile(path)
+	aerospikeYaml, err := os.ReadFile(path)
 	if err != nil {
 		t.Error("No aerospike.yaml")
 	}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -91,7 +90,7 @@ func (l *LoaderAerospike) loadFile(name string, ctx *loadContext) error {
 	if l.debug {
 		fmt.Println("Loading", file)
 	}
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}

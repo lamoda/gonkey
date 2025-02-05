@@ -1,0 +1,12 @@
+- name: Test XML body matching
+  method: POST
+  path: /do
+  response:
+    200: >-
+      <?xml version="1.0" encoding="UTF-8"?>
+      <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:ns1="http://app.example.com">
+      <SOAP-ENV:Body>
+      <ns1:notifyResponse/>
+      </SOAP-ENV:Body>
+      </SOAP-ENV:Envelope>

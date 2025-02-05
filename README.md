@@ -16,46 +16,69 @@ Capabilities:
 
 ## Table of contents
 
-- [Using the CLI](#using-the-cli)
-- [Using gonkey as a library](#using-gonkey-as-a-library)
-- [Test scenario example](#test-scenario-example)
-- [Test status](#test-status)
-- [HTTP-request](#http-request)
-- [HTTP-response](#http-response)
-- [Variables](#variables)
-  - [Assignment](#assignment)
-    - [In the description of the test](#in-the-description-of-the-test)
-    - [From the response of the previous test](#from-the-response-of-the-previous-test)
-    - [From the response of currently running test](#from-the-response-of-currently-running-test)
-    - [From environment variables or from env-file](#from-environment-variables-or-from-env-file)
-    - [From cases](#from-cases)
-- [Files uploading](#files-uploading)
-- [Fixtures](#fixtures)
-  - [Deleting data from tables](#deleting-data-from-tables)
-  - [Record templates](#record-templates)
-  - [Record inheritance](#record-inheritance)
-  - [Record linking](#record-linking)
-  - [Expressions](#expressions)
-  - [Aerospike](#aerospike)
-  - [Redis](#redis)
-- [Mocks](#mocks)
-  - [Running mocks while using gonkey as a library](#running-mocks-while-using-gonkey-as-a-library)
-  - [Mocks definition in the test file](#mocks-definition-in-the-test-file)
-    - [Request constraints (requestConstraints)](#request-constraints-requestconstraints)
-    - [Response strategies (strategy)](#response-strategies-strategy)
-    - [Calls count](#calls-count)
-- [Shell scripts usage](#shell-scripts-usage)
-  - [Script definition](#script-definition)
-  - [Running a script with parameterization](#running-a-script-with-parameterization)
-- [A DB query](#a-db-query)
-  - [Test Format](#test-format)
-  - [Query definition](#query-definition)
-  - [Definition of DB request response](#definition-of-db-request-response)
-  - [DB request parameterization](#db-request-parameterization)
-  - [Ignoring ordering in DB response](#ignoring-ordering-in-db-response)
-- [JSON-schema](#json-schema)
-  - [Setup in Jetbrains IDE](#setup-in-jetbrains-ide)
-  - [Setup is VSCode IDE](#setup-is-vscode-ide)
+- [Gonkey: testing automation tool](#gonkey-testing-automation-tool)
+  - [Table of contents](#table-of-contents)
+  - [Using the CLI](#using-the-cli)
+  - [Using gonkey as a library](#using-gonkey-as-a-library)
+  - [Test scenario example](#test-scenario-example)
+  - [Test status](#test-status)
+  - [HTTP-request](#http-request)
+  - [HTTP-response](#http-response)
+  - [Variables](#variables)
+    - [Assignment](#assignment)
+      - [In the description of the test](#in-the-description-of-the-test)
+      - [From the response of the previous test](#from-the-response-of-the-previous-test)
+      - [From the response of currently running test](#from-the-response-of-currently-running-test)
+      - [From environment variables or from env-file](#from-environment-variables-or-from-env-file)
+      - [From cases](#from-cases)
+  - [multipart/form-data requests](#multipartform-data-requests)
+    - [Form](#form)
+    - [File upload](#file-upload)
+  - [Fixtures](#fixtures)
+    - [Deleting data from tables](#deleting-data-from-tables)
+    - [Record templates](#record-templates)
+    - [Record inheritance](#record-inheritance)
+    - [Record linking](#record-linking)
+    - [Expressions](#expressions)
+    - [Aerospike](#aerospike)
+    - [Redis](#redis)
+  - [Mocks](#mocks)
+    - [Running mocks while using gonkey as a library](#running-mocks-while-using-gonkey-as-a-library)
+    - [Mocks definition in the test file](#mocks-definition-in-the-test-file)
+      - [Request constraints (requestConstraints)](#request-constraints-requestconstraints)
+        - [nop](#nop)
+        - [bodyMatchesJSON](#bodymatchesjson)
+        - [bodyJSONFieldMatchesJSON](#bodyjsonfieldmatchesjson)
+        - [pathMatches](#pathmatches)
+        - [queryMatches](#querymatches)
+        - [queryMatchesRegexp](#querymatchesregexp)
+        - [methodIs](#methodis)
+        - [headerIs](#headeris)
+        - [bodyMatchesText](#bodymatchestext)
+        - [bodyMatchesXML](#bodymatchesxml)
+      - [Response strategies (strategy)](#response-strategies-strategy)
+        - [nop](#nop-1)
+        - [file](#file)
+        - [constant](#constant)
+        - [template](#template)
+        - [uriVary](#urivary)
+        - [methodVary](#methodvary)
+        - [sequence](#sequence)
+        - [basedOnRequest](#basedonrequest)
+        - [dropRequest](#droprequest)
+      - [Calls count](#calls-count)
+  - [Shell scripts usage](#shell-scripts-usage)
+    - [Script definition](#script-definition)
+    - [Running a script with parameterization](#running-a-script-with-parameterization)
+  - [A DB query](#a-db-query)
+    - [Test Format](#test-format)
+    - [Query definition](#query-definition)
+    - [Definition of DB request response](#definition-of-db-request-response)
+    - [DB request parameterization](#db-request-parameterization)
+    - [Ignoring ordering in DB response](#ignoring-ordering-in-db-response)
+  - [JSON-schema](#json-schema)
+    - [Setup in Jetbrains IDE](#setup-in-jetbrains-ide)
+    - [Setup is VSCode IDE](#setup-is-vscode-ide)
 
 ## Using the CLI
 
@@ -153,7 +176,7 @@ import (
   "github.com/lamoda/gonkey/fixtures"
   redisLoader "github.com/lamoda/gonkey/fixtures/redis"
   // redisLoader "custom_module/gonkey-redis" // custom implementation of a fixtures.Loader interface
-  redisClient "github.com/go-redis/redis/v9"
+  redisClient "github.com/redis/go-redis/v9"
   "github.com/lamoda/gonkey/runner"
 )
 
@@ -349,6 +372,7 @@ You can use variables in the description of the test, the following fields are s
 - mocks body
 - mocks headers
 - mocks requestConstraints
+- form
 
 Example:
 
@@ -487,11 +511,42 @@ Example:
 
 Variables like these will be available through another cases if not redefined.
 
-## Files uploading
+## multipart/form-data requests
+You must specify the type of request:
+- POST
 
-You can upload files in test request. For this you must specify the type of request - POST and header:
-
+Header (optional):
 > Content-Type: multipart/form-data
+
+with _boundary_ (optional):
+> Content-Type: multipart/form-data; boundary=--some-boundary
+
+
+### Form
+Example:
+
+```yaml
+ - name: "upload-form"
+   method: POST
+   form:
+     fields:
+       field_name1: "field_name1 value"
+       name2: "name2 value"
+       "custom_struct_field[0]": "custom_struct_field 0"
+       "custom_struct_field[1]": "custom_struct_field 1"
+       "custom_struct_field[inner_obj][field]": "inner_obj field value"
+   headers:
+     Content-Type: multipart/form-data # case-sensitive, can be omitted
+   response:
+     200: |
+       {
+         "status": "OK"
+       }
+```
+
+### File upload
+You can upload files in test request.
+Example:
 
 Example:
 
@@ -502,6 +557,25 @@ Example:
        files:
          file1: "testdata/upload-files/file1.txt"
          file2: "testdata/upload-files/file2.log"
+   headers:
+     Content-Type: multipart/form-data
+   response:
+     200: |
+       {
+         "status": "OK"
+       }
+```
+
+with form:
+```yaml
+ - name: "upload-multipart-form-data"
+   method: POST
+   form:
+     fields:
+       field_name1: "field_name1 value"
+     files:
+       file1: "testdata/upload-files/file1.txt"
+       file2: "testdata/upload-files/file2.log"
    headers:
      Content-Type: multipart/form-data # case-sensitive, can be omitted
    response:

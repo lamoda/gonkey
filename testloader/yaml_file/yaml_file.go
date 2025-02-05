@@ -1,7 +1,6 @@
 package yaml_file
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -56,15 +55,21 @@ func (l *YamlFileLoader) lookupPath(path string, fi os.FileInfo) ([]Test, error)
 
 		return parseTestDefinitionFile(path)
 	}
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
 	var tests []Test
-	for _, fi := range files {
-		if !fi.IsDir() && !isYmlFile(fi.Name()) {
+	for _, de := range files {
+		if !de.IsDir() && !isYmlFile(de.Name()) {
 			continue
 		}
+
+		fi, err = de.Info()
+		if err != nil {
+			return nil, err
+		}
+
 		moreTests, err := l.lookupPath(path+"/"+fi.Name(), fi)
 		if err != nil {
 			return nil, err

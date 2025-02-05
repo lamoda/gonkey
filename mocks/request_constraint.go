@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -13,9 +13,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/lamoda/gonkey/compare"
 	"github.com/lamoda/gonkey/xmlparsing"
-	"github.com/tidwall/gjson"
 )
 
 type verifier interface {
@@ -47,12 +48,12 @@ func newBodyMatchesXMLConstraint(expected string, params compare.Params) (verifi
 }
 
 func (c *bodyMatchesXMLConstraint) Verify(r *http.Request) []error {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return []error{err}
 	}
 	// write body for future reusing
-	r.Body = ioutil.NopCloser(bytes.NewReader(body))
+	r.Body = io.NopCloser(bytes.NewReader(body))
 	if len(body) == 0 {
 		return []error{errors.New("request is empty")}
 	}
@@ -84,12 +85,12 @@ func newBodyMatchesJSONConstraint(expected string, params compare.Params) (verif
 }
 
 func (c *bodyMatchesJSONConstraint) Verify(r *http.Request) []error {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return []error{err}
 	}
 	// write body for future reusing
-	r.Body = ioutil.NopCloser(bytes.NewReader(body))
+	r.Body = io.NopCloser(bytes.NewReader(body))
 	if len(body) == 0 {
 		return []error{errors.New("request is empty")}
 	}
@@ -122,13 +123,13 @@ func newBodyJSONFieldMatchesJSONConstraint(path, expected string, params compare
 }
 
 func (c *bodyJSONFieldMatchesJSONConstraint) Verify(r *http.Request) []error {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return []error{err}
 	}
 
 	// write body for future reusing
-	r.Body = ioutil.NopCloser(bytes.NewReader(body))
+	r.Body = io.NopCloser(bytes.NewReader(body))
 
 	value := gjson.Get(string(body), c.path)
 	if !value.Exists() {
@@ -338,13 +339,13 @@ func newBodyMatchesTextConstraint(body, re string) (verifier, error) {
 }
 
 func (c *bodyMatchesTextConstraint) Verify(r *http.Request) []error {
-	ioBody, err := ioutil.ReadAll(r.Body)
+	ioBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		return []error{err}
 	}
 
 	// write body for future reusing
-	r.Body = ioutil.NopCloser(bytes.NewReader(ioBody))
+	r.Body = io.NopCloser(bytes.NewReader(ioBody))
 
 	body := string(ioBody)
 

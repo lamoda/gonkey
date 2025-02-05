@@ -163,6 +163,23 @@
               "dbResponseArgs": {"$ref": "#/$defs/requestArgs"}
             }
           }
+        },
+        "form":{
+          "$ref": "#/$defs/form"
+        }
+      }
+    },
+    "form": {
+      "type": "object",
+      "description": "multipart/form-data form content",
+      "properties":{
+        "fields": {
+          "type": "object",
+          "description": "fields of multipart/form-data form"
+        },
+        "files":{
+          "type": "object",
+          "description": "files of multipart/form-data form"
         }
       }
     },

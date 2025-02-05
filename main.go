@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/aerospike/aerospike-client-go/v5"
-	"github.com/go-redis/redis/v9"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/lamoda/gonkey/checker/response_body"
 	"github.com/lamoda/gonkey/checker/response_db"

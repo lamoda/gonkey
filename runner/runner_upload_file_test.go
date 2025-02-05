@@ -2,7 +2,7 @@ package runner
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -23,11 +23,13 @@ func TestUploadFiles(t *testing.T) {
 }
 
 type response struct {
-	Status       string `json:"status"`
-	File1Name    string `json:"file_1_name"`
-	File1Content string `json:"file_1_content"`
-	File2Name    string `json:"file_2_name"`
-	File2Content string `json:"file_2_content"`
+	Status            string `json:"status"`
+	File1Name         string `json:"file_1_name"`
+	File1Content      string `json:"file_1_content"`
+	File2Name         string `json:"file_2_name"`
+	File2Content      string `json:"file_2_content"`
+	FieldsTestName    string `json:"fields_test_name"`
+	FieldsTestContent string `json:"fields_test_content"`
 }
 
 func testServerUpload(t *testing.T) *httptest.Server {
@@ -39,6 +41,8 @@ func testServerUpload(t *testing.T) *httptest.Server {
 
 		resp.File1Name, resp.File1Content = formFile(t, r, "file1")
 		resp.File2Name, resp.File2Content = formFile(t, r, "file2")
+
+		resp.FieldsTestName, resp.FieldsTestContent = "fieldTest", r.FormValue("fieldTest")
 
 		respData, err := json.Marshal(resp)
 		require.NoError(t, err)
@@ -58,7 +62,7 @@ func formFile(t *testing.T, r *http.Request, field string) (string, string) {
 
 	defer func() { _ = file.Close() }()
 
-	contents, err := ioutil.ReadAll(file)
+	contents, err := io.ReadAll(file)
 	require.NoError(t, err)
 
 	return header.Filename, string(contents)
