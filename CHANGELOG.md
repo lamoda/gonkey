@@ -1,3 +1,16 @@
+# v1.21.8 (Wed Mar 19 2025)
+
+#### 🐛 Bug Fix
+
+- checking "broken" and "skipped" statuses moved out of executeTest() [#246](https://github.com/lamoda/gonkey/pull/246) (sergei.molotkov@am-intech.ru [@molotkovserguei](https://github.com/molotkovserguei))
+
+#### Authors: 2
+
+- Molotkov (sergei.molotkov@am-intech.ru)
+- Молотков Сергей ([@molotkovserguei](https://github.com/molotkovserguei))
+
+---
+
 # v1.21.7 (Wed Feb 05 2025)
 
 #### 🐛 Bug Fix
