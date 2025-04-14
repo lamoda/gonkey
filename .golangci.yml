@@ -1,70 +1,85 @@
+version: "2"
 run:
   tests: false
-
-issues:
-  exclude-files:
-    - ".*easyjson\\.go$"
-  exclude-dirs:
-    - allure
-    - mocks
-
-output:
-  print-issued-lines: false
-
-linters-settings:
-  lll:
-    line-length: 140
-  gocritic:
-    disabled-checks:
-      - hugeParam
-    enabled-tags:
-      - performance
-      - style
-      - experimental
-  gosec:
-    excludes:
-      - G204
-      - G306
-  stylecheck:
-    checks: ["all", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
-  revive:
-    rules:
-      # Should be enabled after fixing underscore package names.
-      - name: var-naming
-        disabled: true
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/lamoda/gonkey)
-    skip-generated: true
-    custom-order: false
-    no-lex-order: false
-
 linters:
+  disable:
+    - staticcheck
   enable:
     - bodyclose
     - goconst
     - gocritic
     - gocyclo
-    - goimports
-    - revive
     - goprintffuncname
     - gosec
-    - gosimple
-    - govet
-    - ineffassign
     - lll
     - misspell
     - nakedret
     - nlreturn
     - nolintlint
+    - revive
     - rowserrcheck
     - staticcheck
-    - stylecheck
-    - typecheck
     - unconvert
     - unparam
-    - unused
-    - gosec
+  settings:
+    gocritic:
+      disabled-checks:
+        - hugeParam
+      enabled-tags:
+        - performance
+        - style
+        - experimental
+    gosec:
+      excludes:
+        - G204
+        - G306
+    lll:
+      line-length: 140
+    revive:
+      rules:
+        - name: var-naming
+          disabled: true
+    staticcheck:
+      checks:
+        - -ST1003
+        - -ST1016
+        - -ST1020
+        - -ST1021
+        - -ST1022
+        - all
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - .*easyjson\.go$
+      - allure
+      - mocks
+      - third_party$
+      - builtin$
+      - examples$
+      - examples/.*
+formatters:
+  enable:
     - gci
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/lamoda/gonkey)
+      custom-order: false
+      no-lex-order: false
+  exclusions:
+    generated: lax
+    paths:
+      - .*easyjson\.go$
+      - allure
+      - mocks
+      - third_party$
+      - builtin$
+      - examples$
