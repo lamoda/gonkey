@@ -82,6 +82,10 @@ func (obj *Value) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	case float64:
 		obj.Type = TypeFloat
 		obj.Value = v
+	//nolint:gosec // TODO: need correct implementation (after change yaml lib)
+	case uint64:
+		obj.Type = TypeInt
+		obj.Value = int(v)
 	default:
 		return fmt.Errorf("unknown value type: %T", v)
 	}
