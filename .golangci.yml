@@ -65,7 +65,6 @@ linters:
 formatters:
   enable:
     - gci
-    - goimports
   settings:
     gci:
       sections:

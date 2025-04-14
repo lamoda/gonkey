@@ -27,3 +27,6 @@ test:
 
 lint:
 	docker run --rm -v $(PWD):/app -w /app golangci/golangci-lint:v2.1.1 golangci-lint run -v
+
+fmt:
+	docker run --rm -v $(PWD):/app -w /app golangci/golangci-lint:v2.1.1 golangci-lint fmt -v
