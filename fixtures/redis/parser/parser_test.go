@@ -1,10 +1,9 @@
 package parser
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestRedisFixtureParser_Load(t *testing.T) {
@@ -711,12 +710,8 @@ func TestRedisFixtureParser_Load(t *testing.T) {
 				t.Errorf("ParseFiles - unexpected error: %s", err)
 				return
 			}
-			if diff := cmp.Diff(test.want.fixtures, fixtures); diff != "" {
-				t.Errorf("ParseFiles - unexpected diff in fixtures: %s", diff)
-			}
-			if diff := cmp.Diff(test.want.ctx, ctx, cmp.AllowUnexported(Context{})); diff != "" {
-				t.Errorf("ParseFiles - unexpected diff in context: %s", diff)
-			}
+			assert.Equal(t, test.want.fixtures, fixtures)
+			assert.Equal(t, test.want.ctx, ctx)
 		})
 	}
 }
