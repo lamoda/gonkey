@@ -9,6 +9,7 @@ import (
 	"github.com/lamoda/gonkey/fixtures/aerospike"
 	"github.com/lamoda/gonkey/fixtures/mysql"
 	"github.com/lamoda/gonkey/fixtures/postgres"
+	"github.com/lamoda/gonkey/models"
 	aerospikeClient "github.com/lamoda/gonkey/storage/aerospike"
 )
 
@@ -40,6 +41,10 @@ type Config struct {
 
 type Loader interface {
 	Load(names []string) error
+}
+
+type LoaderMultiDb interface {
+	Load(fixtures models.FixturesMultiDb) error
 }
 
 func NewLoader(cfg *Config) Loader {

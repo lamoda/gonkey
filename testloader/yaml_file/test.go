@@ -102,6 +102,10 @@ func (t *Test) Fixtures() []string {
 	return t.FixtureFiles
 }
 
+func (t *Test) FixturesMultiDb() models.FixturesMultiDb {
+	return t.FixturesListMultiDb
+}
+
 func (t *Test) ServiceMocks() map[string]interface{} {
 	return t.MocksDefinition
 }

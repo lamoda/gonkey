@@ -1,0 +1,21 @@
+- name: "with-fixtures: simple"
+  method: POST
+  path: /dontcare
+  headers:
+    Content-Type: multipart/form-data; boundary=somebound
+  fixtures:
+    - path/fixture1.yaml
+    - path/fixture2.yaml
+
+- name: "with-fixtures: multidb"
+  method: POST
+  path: /dontcare
+  headers:
+    Content-Type: multipart/form-data; boundary=somebound
+  fixturesWithDb:
+    - dbName: conn1
+      files:
+        - path/fixture3.yaml
+    - dbName: conn2
+      files:
+        - path/fixture4.yaml
