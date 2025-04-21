@@ -33,6 +33,8 @@ type TestDefinition struct {
 }
 
 type CaseData struct {
+	Name                   string                         `json:"name" yaml:"name"`
+	Description            string                         `json:"description" yaml:"description"`
 	RequestArgs            map[string]interface{}         `json:"requestArgs" yaml:"requestArgs"`
 	ResponseArgs           map[int]map[string]interface{} `json:"responseArgs" yaml:"responseArgs"`
 	BeforeScriptArgs       map[string]interface{}         `json:"beforeScriptArgs" yaml:"beforeScriptArgs"`
@@ -40,7 +42,6 @@ type CaseData struct {
 	DbQueryArgs            map[string]interface{}         `json:"dbQueryArgs" yaml:"dbQueryArgs"`
 	DbResponseArgs         map[string]interface{}         `json:"dbResponseArgs" yaml:"dbResponseArgs"`
 	DbResponse             []string                       `json:"dbResponse" yaml:"dbResponse"`
-	Description            string                         `json:"description" yaml:"description"`
 	Variables              map[string]interface{}         `json:"variables" yaml:"variables"`
 }
 

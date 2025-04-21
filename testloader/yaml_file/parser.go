@@ -124,10 +124,16 @@ func makeTestFromDefinition(filePath string, testDefinition TestDefinition) ([]T
 	// produce as many tests as cases defined
 	for caseIdx, testCase := range testDefinition.Cases {
 		test := Test{TestDefinition: testDefinition, Filename: filePath}
-		test.Name = fmt.Sprintf("%s #%d", test.Name, caseIdx+1)
 
 		if testCase.Description != "" {
 			test.Description = testCase.Description
+		}
+
+		switch {
+		case testCase.Name != "":
+			test.Name = fmt.Sprintf("%s #%d (%s)", test.Name, caseIdx+1, testCase.Name)
+		default:
+			test.Name = fmt.Sprintf("%s #%d", test.Name, caseIdx+1)
 		}
 
 		// substitute RequestArgs to different parts of request
