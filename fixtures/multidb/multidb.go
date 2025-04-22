@@ -17,8 +17,8 @@ func New(loaders map[string]fixtures.Loader) *LoaderByMap {
 	}
 }
 
-func (l *LoaderByMap) Load(fixtures models.FixturesMultiDb) error {
-	for _, fixture := range fixtures {
+func (l *LoaderByMap) Load(fixturesList models.FixturesMultiDb) error {
+	for _, fixture := range fixturesList {
 		loader, ok := l.loaders[fixture.DbName]
 		if !ok {
 			return fmt.Errorf("loader %s not exists", fixture.DbName)

@@ -44,7 +44,7 @@ type Loader interface {
 }
 
 type LoaderMultiDb interface {
-	Load(fixtures models.FixturesMultiDb) error
+	Load(fixturesList models.FixturesMultiDb) error
 }
 
 func NewLoader(cfg *Config) Loader {

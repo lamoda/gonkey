@@ -11,6 +11,7 @@ import (
 
 	"github.com/lamoda/gonkey/checker"
 	"github.com/lamoda/gonkey/checker/response_body"
+	"github.com/lamoda/gonkey/checker/response_db"
 	"github.com/lamoda/gonkey/checker/response_header"
 	"github.com/lamoda/gonkey/fixtures"
 	"github.com/lamoda/gonkey/fixtures/multidb"
@@ -55,7 +56,7 @@ func RunWithMultiDb(t *testing.T, params *RunWithMultiDbParams) {
 		}
 	}
 
-	//Configure fixture loader
+	// Configure fixture loader
 	var fixturesLoader fixtures.LoaderMultiDb
 
 	if params.FixtureLoader == nil {
@@ -114,18 +115,21 @@ func RunWithMultiDb(t *testing.T, params *RunWithMultiDbParams) {
 
 	runner.AddCheckers(response_body.NewChecker())
 	runner.AddCheckers(response_header.NewChecker())
-
-	/*
-		//@todo - https://jira.lamoda.ru/browse/ORD-3954
-		if params.DB != nil {
-			runner.AddCheckers(response_db.NewChecker(params.DB))
-		}
-	*/
-
+	runner.AddCheckers(response_db.NewMultiDbChecker(getDbConnMap(params.DbMap)))
 	runner.AddCheckers(params.Checkers...)
 
 	err := runner.Run()
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func getDbConnMap(dbMap map[string]*DbMapInstance) map[string]*sql.DB {
+	result := make(map[string]*sql.DB, len(dbMap))
+
+	for dbName, conn := range dbMap {
+		result[dbName] = conn.DB
+	}
+
+	return result
 }

@@ -7,10 +7,12 @@ import (
 )
 
 type dbCheck struct {
+	dbName   string
 	query    string
 	response []string
 }
 
+func (c *dbCheck) DbNameString() string         { return c.dbName }
 func (c *dbCheck) DbQueryString() string        { return c.query }
 func (c *dbCheck) DbResponseJson() []string     { return c.response }
 func (c *dbCheck) SetDbQueryString(q string)    { c.query = q }
@@ -26,6 +28,7 @@ type Test struct {
 	ResponseHeaders    map[int]map[string]string
 	BeforeScript       string
 	AfterRequestScript string
+	DbName             string
 	DbQuery            string
 	DbResponse         []string
 
@@ -141,6 +144,10 @@ func (t *Test) Headers() map[string]string {
 // TODO: it might make sense to do support of case-insensitive checking
 func (t *Test) ContentType() string {
 	return t.HeadersVal["Content-Type"]
+}
+
+func (t *Test) DbNameString() string {
+	return t.DbName
 }
 
 func (t *Test) DbQueryString() string {

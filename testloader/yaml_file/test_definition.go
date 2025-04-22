@@ -46,6 +46,7 @@ type CaseData struct {
 }
 
 type DatabaseCheck struct {
+	DbName         string   `json:"dbName" yaml:"dbName"`
 	DbQueryTmpl    string   `json:"dbQuery" yaml:"dbQuery"`
 	DbResponseTmpl []string `json:"dbResponse" yaml:"dbResponse"`
 }

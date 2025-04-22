@@ -94,3 +94,14 @@ func TestParseTestsWithFixtures(t *testing.T) {
 	})
 	assert.Equal(t, expectedMultiDb, tests[1].FixturesMultiDb())
 }
+
+func TestParseTestsWithDbChecks(t *testing.T) {
+	tests, err := parseTestDefinitionFile("./testdata/with-db-checks.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, 2, len(tests))
+	assert.Equal(t, "", tests[0].GetDatabaseChecks()[0].DbNameString())
+	assert.Equal(t, "connection_name", tests[1].GetDatabaseChecks()[0].DbNameString())
+}

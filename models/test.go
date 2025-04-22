@@ -1,6 +1,7 @@
 package models
 
 type DatabaseCheck interface {
+	DbNameString() string
 	DbQueryString() string
 	DbResponseJson() []string
 
@@ -34,6 +35,7 @@ type TestInterface interface {
 	Headers() map[string]string
 	ContentType() string
 	GetForm() *Form
+	DbNameString() string
 	DbQueryString() string
 	DbResponseJson() []string
 	GetVariables() map[string]string

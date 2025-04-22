@@ -98,7 +98,11 @@ func makeTestFromDefinition(filePath string, testDefinition TestDefinition) ([]T
 
 		dbChecks := []models.DatabaseCheck{}
 		for _, check := range testDefinition.DatabaseChecks {
-			dbChecks = append(dbChecks, &dbCheck{query: check.DbQueryTmpl, response: check.DbResponseTmpl})
+			dbChecks = append(dbChecks, &dbCheck{
+				dbName:   check.DbName,
+				query:    check.DbQueryTmpl,
+				response: check.DbResponseTmpl,
+			})
 		}
 		test.DbChecks = dbChecks
 
