@@ -20,7 +20,8 @@ type LoaderMysql struct {
 	debug    bool
 }
 
-const errNoIDColumn = "Error 1054: Unknown column 'id' in 'where clause'"
+const errNoIDColumnCode = 1054
+const errNoIDColumnMessage = "Unknown column 'id'"
 
 type row map[string]interface{}
 
@@ -365,7 +366,8 @@ func (l *LoaderMysql) insertedRows(tx *sql.Tx, insertRes sql.Result, t string) (
 		// TODO: now we can take inserted rows only if they have column 'id'
 		//  later we can add possibility to specify name of PK column in fixture definition
 		//  Also, it's weak error check
-		if err.Error() == errNoIDColumn {
+		if strings.Contains(err.Error(), strconv.Itoa(errNoIDColumnCode)) &&
+			strings.Contains(err.Error(), errNoIDColumnMessage) {
 			return nil, nil
 		}
 
