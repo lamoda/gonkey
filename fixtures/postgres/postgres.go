@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"github.com/goccy/go-yaml"
 )
 
 type LoaderPostgres struct {
@@ -150,11 +150,10 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		if _, ok := ctx.refsDefinition[name]; ok {
 			return fmt.Errorf("unable to load template %s: duplicating ref name", name)
 		}
-		fields := template.Value.(yaml.MapSlice)
+		fields := template.Value.(map[string]interface{})
 		row := make(row, len(fields))
-		for _, field := range fields {
-			key := field.Key.(string)
-			row[key] = field.Value
+		for key, field := range fields {
+			row[key] = field
 		}
 		if base, ok := row["$extend"]; ok {
 			base := base.(string)
@@ -189,10 +188,10 @@ func (f *LoaderPostgres) loadYml(data []byte, ctx *loadContext) error {
 		}
 		rows := make(table, len(sourceRows))
 		for i := range sourceRows {
-			sourceFields := sourceRows[i].(yaml.MapSlice)
+			sourceFields := sourceRows[i].(map[string]interface{})
 			fields := make(row, len(sourceFields))
-			for j := range sourceFields {
-				fields[sourceFields[j].Key.(string)] = sourceFields[j].Value
+			for key, value := range sourceFields {
+				fields[key] = value
 			}
 			rows[i] = fields
 		}
@@ -513,6 +512,9 @@ func toDbValue(value interface{}) (string, error) {
 	}
 	if value, ok := value.(int); ok {
 		return strconv.Itoa(value), nil
+	}
+	if value, ok := value.(uint64); ok {
+		return strconv.FormatUint(value, 10), nil
 	}
 	if value, ok := value.(float64); ok {
 		return strconv.FormatFloat(value, 'g', -1, 64), nil

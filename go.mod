@@ -1,11 +1,12 @@
 module github.com/lamoda/gonkey
 
-go 1.21
+go 1.21.0
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/aerospike/aerospike-client-go/v5 v5.11.0
 	github.com/fatih/color v1.18.0
+	github.com/goccy/go-yaml v1.17.1
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kylelemons/godebug v1.1.0
@@ -15,8 +16,6 @@ require (
 	github.com/tidwall/gjson v1.18.0
 	golang.org/x/sync v0.10.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
-	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -41,4 +40,5 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
