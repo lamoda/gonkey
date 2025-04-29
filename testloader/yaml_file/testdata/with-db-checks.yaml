@@ -1,0 +1,22 @@
+- name: "with-db-checks: no named connection"
+  method: POST
+  path: /dontcare
+  headers:
+    Content-Type: multipart/form-data; boundary=somebound
+  dbChecks:
+    - dbQuery:
+        SELECT id FROM user WHERE id=22;
+      dbResponse:
+        - '{"id":22}'
+
+- name: "with-db-checks: with named connection"
+  method: POST
+  path: /dontcare
+  headers:
+    Content-Type: multipart/form-data; boundary=somebound
+  dbChecks:
+    - dbName: connection_name
+      dbQuery:
+        SELECT id FROM user WHERE id=22;
+      dbResponse:
+        - '{"id":22}'

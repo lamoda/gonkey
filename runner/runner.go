@@ -20,12 +20,13 @@ import (
 )
 
 type Config struct {
-	Host           string
-	FixturesLoader fixtures.Loader
-	Mocks          *mocks.Mocks
-	MocksLoader    *mocks.Loader
-	Variables      *variables.Variables
-	HTTPProxyURL   *url.URL
+	Host                  string
+	FixturesLoader        fixtures.Loader
+	FixturesLoaderMultiDb fixtures.LoaderMultiDb
+	Mocks                 *mocks.Mocks
+	MocksLoader           *mocks.Loader
+	Variables             *variables.Variables
+	HTTPProxyURL          *url.URL
 }
 
 type (
@@ -125,6 +126,12 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 	if r.config.FixturesLoader != nil && v.Fixtures() != nil {
 		if err := r.config.FixturesLoader.Load(v.Fixtures()); err != nil {
 			return nil, fmt.Errorf("unable to load fixtures [%s], error:\n%s", strings.Join(v.Fixtures(), ", "), err)
+		}
+	}
+
+	if r.config.FixturesLoaderMultiDb != nil && v.FixturesMultiDb() != nil {
+		if err := r.config.FixturesLoaderMultiDb.Load(v.FixturesMultiDb()); err != nil {
+			return nil, fmt.Errorf("unable to load fixtures with db, error:\n%s", err)
 		}
 	}
 

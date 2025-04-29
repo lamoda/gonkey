@@ -1,6 +1,7 @@
 package models
 
 type DatabaseCheck interface {
+	DbNameString() string
 	DbQueryString() string
 	DbResponseJson() []string
 
@@ -23,6 +24,7 @@ type TestInterface interface {
 	GetStatus() string
 	SetStatus(string)
 	Fixtures() []string
+	FixturesMultiDb() FixturesMultiDb
 	ServiceMocks() map[string]interface{}
 	Pause() int
 	BeforeScriptPath() string
@@ -33,6 +35,7 @@ type TestInterface interface {
 	Headers() map[string]string
 	ContentType() string
 	GetForm() *Form
+	DbNameString() string
 	DbQueryString() string
 	DbResponseJson() []string
 	GetVariables() map[string]string
@@ -76,3 +79,10 @@ type Summary struct {
 	Broken  int
 	Total   int
 }
+
+type Fixture struct {
+	DbName string   `json:"dbName" yaml:"dbName"`
+	Files  []string `json:"files" yaml:"files"`
+}
+
+type FixturesMultiDb []Fixture

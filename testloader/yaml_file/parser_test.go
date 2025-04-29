@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/lamoda/gonkey/models"
 )
 
 var testsYAMLData = `
@@ -71,4 +75,33 @@ func TestParseTestsWithCases(t *testing.T) {
 	if len(tests) != 2 {
 		t.Errorf("wait len(tests) == 2, got len(tests) == %d", len(tests))
 	}
+}
+
+func TestParseTestsWithFixtures(t *testing.T) {
+	tests, err := parseTestDefinitionFile("./testdata/with-fixtures.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, 2, len(tests))
+
+	expectedSimple := []string{"path/fixture1.yaml", "path/fixture2.yaml"}
+	assert.Equal(t, expectedSimple, tests[0].Fixtures())
+
+	expectedMultiDb := models.FixturesMultiDb([]models.Fixture{
+		{DbName: "conn1", Files: []string{"path/fixture3.yaml"}},
+		{DbName: "conn2", Files: []string{"path/fixture4.yaml"}},
+	})
+	assert.Equal(t, expectedMultiDb, tests[1].FixturesMultiDb())
+}
+
+func TestParseTestsWithDbChecks(t *testing.T) {
+	tests, err := parseTestDefinitionFile("./testdata/with-db-checks.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, 2, len(tests))
+	assert.Equal(t, "", tests[0].GetDatabaseChecks()[0].DbNameString())
+	assert.Equal(t, "connection_name", tests[1].GetDatabaseChecks()[0].DbNameString())
 }

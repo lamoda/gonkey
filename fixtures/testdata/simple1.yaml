@@ -1,0 +1,4 @@
+tables:
+  table1:
+    - field1: "value1"
+      field2: 2

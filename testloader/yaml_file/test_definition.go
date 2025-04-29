@@ -25,6 +25,7 @@ type TestDefinition struct {
 	Cases                    []CaseData                `json:"cases" yaml:"cases"`
 	ComparisonParams         compare.Params            `json:"comparisonParams" yaml:"comparisonParams"`
 	FixtureFiles             []string                  `json:"fixtures" yaml:"fixtures"`
+	FixturesListMultiDb      models.FixturesMultiDb    `json:"fixturesWithDb" yaml:"fixturesWithDb"`
 	MocksDefinition          map[string]interface{}    `json:"mocks" yaml:"mocks"`
 	PauseValue               int                       `json:"pause" yaml:"pause"`
 	DbQueryTmpl              string                    `json:"dbQuery" yaml:"dbQuery"`
@@ -46,6 +47,7 @@ type CaseData struct {
 }
 
 type DatabaseCheck struct {
+	DbName         string   `json:"dbName" yaml:"dbName"`
 	DbQueryTmpl    string   `json:"dbQuery" yaml:"dbQuery"`
 	DbResponseTmpl []string `json:"dbResponse" yaml:"dbResponse"`
 }

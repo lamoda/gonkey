@@ -58,6 +58,11 @@
           "description": "a list of strings, containing paths to database fixtures",
           "items": {"type":"string"}
         },
+        "fixturesWithDb":{
+          "type": "array",
+          "description": "a list of database fixtures objects",
+          "items": { "$ref": "#/$defs/fixture" }
+        },
         "comparisonParams":{
           "type":"object",
           "description": "Boolean switches to conrol response checks",
@@ -134,6 +139,7 @@
           "items": {
             "type":"object",
             "properties":{
+              "dbName": {"$ref": "#/$defs/dbName"},
               "dbQuery": {"$ref": "#/$defs/dbQuery"},
               "dbResponse": {"$ref": "#/$defs/dbResponse"}
             }
@@ -186,6 +192,22 @@
     "statusCode": {
       "type": "integer",
       "description": "HTTP-code of the response, the default value is 200"
+    },
+    "fixture":{
+      "type":"object",
+      "description": "Database fixture",
+      "properties": {
+        "dbName": { "type": "string", "description": "Name of database connection to use" },
+        "files": {
+          "type": "array",
+          "description": "a list of strings, containing paths to database fixtures",
+          "items": {"type":"string"}
+        }
+      }
+    },
+    "dbName":{
+      "type": "string",
+      "description": "an optional string that contains an name of DB connection"
     },
     "dbQuery":{
       "type": "string",
