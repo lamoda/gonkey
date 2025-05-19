@@ -32,7 +32,7 @@
           body: >
             {
               "value": {{ .request.Query "value" }},
-              "value-unused": {{ default 10 (.request.Query "test") }}
+              "value-unused": 10
             }
         - strategy: template
           requestConstraints:

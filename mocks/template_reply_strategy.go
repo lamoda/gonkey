@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"sync"
 	"text/template"
-
-	"github.com/Masterminds/sprig/v3"
 )
 
 type templateReply struct {
@@ -42,13 +40,13 @@ func (tr *templateRequest) Json() (map[string]interface{}, error) {
 }
 
 func newTemplateReply(content string, statusCode int, headers map[string]string) (ReplyStrategy, error) {
-	tmpl, err := template.New("").Funcs(sprig.GenericFuncMap()).Parse(content)
+	res, err := template.New("").Parse(content)
 	if err != nil {
 		return nil, fmt.Errorf("template syntax error: %w", err)
 	}
 
 	strategy := &templateReply{
-		replyBodyTemplate: tmpl,
+		replyBodyTemplate: res,
 		statusCode:        statusCode,
 		headers:           headers,
 	}
@@ -58,7 +56,7 @@ func newTemplateReply(content string, statusCode int, headers map[string]string)
 
 func (s *templateReply) executeResponseTemplate(r *http.Request) (string, error) {
 	ctx := map[string]*templateRequest{
-		"request": &templateRequest{r: r},
+		"request": {r: r},
 	}
 
 	reply := bytes.NewBuffer(nil)
