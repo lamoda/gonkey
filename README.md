@@ -1428,7 +1428,7 @@ Example:
       body: >
         {
           "value-from-query": {{ .request.Query "value" }},
-          "data-from-body": {{ default 10 .request.Json.data }}
+          "data-from-body": {{ .request.Json.data }}
         }
       statusCode: 200
     ...
