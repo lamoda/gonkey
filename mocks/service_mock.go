@@ -19,6 +19,9 @@ type ServiceMock struct {
 }
 
 func NewServiceMock(serviceName string, mock *Definition) *ServiceMock {
+	if mock != nil {
+		mock.SetServiceName(serviceName)
+	}
 	return &ServiceMock{
 		mock:              mock,
 		defaultDefinition: mock,
@@ -68,6 +71,9 @@ func (m *ServiceMock) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (m *ServiceMock) SetDefinition(newDefinition *Definition) {
 	m.Lock()
 	defer m.Unlock()
+	if newDefinition != nil {
+		newDefinition.SetServiceName(m.ServiceName)
+	}
 	m.mock = newDefinition
 }
 

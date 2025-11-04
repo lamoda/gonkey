@@ -46,6 +46,9 @@ type RunWithTestingParams struct {
 	OutputFunc    output.OutputInterface
 	Checkers      []checker.CheckerInterface
 	FixtureLoader fixtures.Loader
+	// TestIT labels: can be overridden by test-level labels
+	AllurePackage   string
+	AllureTestClass string
 }
 
 func registerMocksEnvironment(m *mocks.Mocks) {
@@ -102,10 +105,25 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 		runner.AddOutput(testingOutput.NewOutput())
 	}
 
-	if os.Getenv("GONKEY_ALLURE_DIR") != "" {
-		allureOutput := allure_report.NewOutput("Gonkey", os.Getenv("GONKEY_ALLURE_DIR"))
-		defer allureOutput.Finalize()
-		runner.AddOutput(allureOutput)
+	if allureDir := os.Getenv("GONKEY_ALLURE_DIR"); allureDir != "" {
+		allureFormat := os.Getenv("GONKEY_ALLURE_FORMAT")
+		if allureFormat == "" {
+			allureFormat = "v2"
+		}
+
+		switch allureFormat {
+		case "v1", "xml":
+			allureOutput := allure_report.NewOutput("Gonkey", allureDir)
+			defer allureOutput.Finalize()
+			runner.AddOutput(allureOutput)
+		case "v2", "json":
+			allureOutput := allure_report.NewAllure2Output(allureDir).
+				WithDefaultLabels(params.AllurePackage, params.AllureTestClass)
+			defer allureOutput.Finalize()
+			runner.AddOutput(allureOutput)
+		default:
+			t.Fatalf("unknown GONKEY_ALLURE_FORMAT: %s (supported: v1, v2, xml, json)", allureFormat)
+		}
 	}
 
 	addCheckers(runner, params)

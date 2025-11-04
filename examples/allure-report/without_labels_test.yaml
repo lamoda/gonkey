@@ -1,0 +1,24 @@
+# Test without package and testClass labels - will use defaults from RunWithTestingParams
+
+- name: "Get user by ID"
+  description: "Retrieve user information - demonstrates using default labels from RunWithTestingParams"
+
+  # Minimal Allure metadata WITHOUT package and testClass labels
+  # package and testClass will be filled from AllurePackage and AllureTestClass in RunWithTestingParams
+  allure:
+    links:
+      - name: "PROJECT-456"
+        url: "https://testit.example.com/projects/PROJECT/tests/456"
+        type: "tms"
+    # Note: NO package or testClass labels here - they will use defaults from RunWithTestingParams
+
+  method: GET
+  path: /api/users/123
+
+  response:
+    200: |
+      {
+        "id": "$matchRegexp(^[0-9]+$)",
+        "username": "$matchRegexp(^[a-z]+$)",
+        "email": "$matchRegexp(^[^@]+@[^@]+$)"
+      }

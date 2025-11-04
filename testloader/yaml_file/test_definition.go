@@ -31,6 +31,9 @@ type TestDefinition struct {
 	DbQueryTmpl              string                    `json:"dbQuery" yaml:"dbQuery"`
 	DbResponseTmpl           []string                  `json:"dbResponse" yaml:"dbResponse"`
 	DatabaseChecks           []DatabaseCheck           `json:"dbChecks" yaml:"dbChecks"`
+
+	// Allure metadata (for TMS integration: TestIT, Allure TestOps, etc.)
+	Allure *models.AllureMetadata `json:"allure" yaml:"allure"`
 }
 
 type CaseData struct {

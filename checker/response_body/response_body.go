@@ -2,7 +2,6 @@ package response_body
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -21,10 +20,8 @@ func NewChecker() checker.CheckerInterface {
 func (c *ResponseBodyChecker) Check(t models.TestInterface, result *models.Result) ([]error, error) {
 	var errs []error
 	var foundResponse bool
-	// test response with the expected response body
 	if expectedBody, ok := t.GetResponse(result.ResponseStatusCode); ok {
 		foundResponse = true
-		// is the response JSON document?
 		switch {
 		case strings.Contains(result.ResponseContentType, "json") && expectedBody != "":
 			checkErrs, err := compareJsonBody(t, expectedBody, result)
@@ -39,20 +36,32 @@ func (c *ResponseBodyChecker) Check(t models.TestInterface, result *models.Resul
 			}
 			errs = append(errs, checkErrs...)
 		default:
-			errs = append(errs, compare.Compare(expectedBody, result.ResponseBody, compare.Params{})...)
+			compareErrs := compare.Compare(expectedBody, result.ResponseBody, compare.Params{})
+			for _, err := range compareErrs {
+				errs = append(errs, models.NewBodyErrorWithCause(err, err.Error()))
+			}
 		}
 
 	}
 	if !foundResponse {
-		err := fmt.Errorf("server responded with status %d", result.ResponseStatusCode)
+		expectedCodes := getExpectedStatusCodes(t.GetResponses())
+		err := models.NewStatusCodeError(expectedCodes[0], result.ResponseStatusCode)
 		errs = append(errs, err)
 	}
 
 	return errs, nil
 }
 
+func getExpectedStatusCodes(responses map[int]string) []int {
+	codes := make([]int, 0, len(responses))
+	for code := range responses {
+		codes = append(codes, code)
+	}
+
+	return codes
+}
+
 func compareJsonBody(t models.TestInterface, expectedBody string, result *models.Result) ([]error, error) {
-	// decode expected body
 	var expected interface{}
 	if err := json.Unmarshal([]byte(expectedBody), &expected); err != nil {
 		return nil, fmt.Errorf(
@@ -63,10 +72,9 @@ func compareJsonBody(t models.TestInterface, expectedBody string, result *models
 		)
 	}
 
-	// decode actual body
 	var actual interface{}
 	if err := json.Unmarshal([]byte(result.ResponseBody), &actual); err != nil {
-		return []error{errors.New("could not parse response")}, nil
+		return []error{models.NewBodyErrorWithCause(err, "could not parse response")}, nil
 	}
 
 	params := compare.Params{
@@ -75,11 +83,16 @@ func compareJsonBody(t models.TestInterface, expectedBody string, result *models
 		DisallowExtraFields:  t.DisallowExtraFields(),
 	}
 
-	return compare.Compare(expected, actual, params), nil
+	compareErrs := compare.Compare(expected, actual, params)
+	errs := make([]error, 0, len(compareErrs))
+	for _, err := range compareErrs {
+		errs = append(errs, models.NewBodyErrorWithCause(err, err.Error()))
+	}
+
+	return errs, nil
 }
 
 func compareXmlBody(t models.TestInterface, expectedBody string, result *models.Result) ([]error, error) {
-	// decode expected body
 	expected, err := xmlparsing.Parse(expectedBody)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -90,10 +103,9 @@ func compareXmlBody(t models.TestInterface, expectedBody string, result *models.
 		)
 	}
 
-	// decode actual body
 	actual, err := xmlparsing.Parse(result.ResponseBody)
 	if err != nil {
-		return []error{errors.New("could not parse response")}, nil
+		return []error{models.NewBodyErrorWithCause(err, "could not parse response")}, nil
 	}
 	params := compare.Params{
 		IgnoreValues:         !t.NeedsCheckingValues(),
@@ -101,5 +113,11 @@ func compareXmlBody(t models.TestInterface, expectedBody string, result *models.
 		DisallowExtraFields:  t.DisallowExtraFields(),
 	}
 
-	return compare.Compare(expected, actual, params), nil
+	compareErrs := compare.Compare(expected, actual, params)
+	errs := make([]error, 0, len(compareErrs))
+	for _, err := range compareErrs {
+		errs = append(errs, models.NewBodyErrorWithCause(err, err.Error()))
+	}
+
+	return errs, nil
 }

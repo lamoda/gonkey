@@ -9,7 +9,7 @@ Gonkey протестирует ваши сервисы, используя их
 - заполнение БД сервиса данными из фикстур (поддерживается PostgreSQL, MySQL, Aerospike, Redis)
 - моки для имитации внешних сервисов
 - можно подключить к проекту как библиотеку и запускать вместе с юнит-тестами
-- запись результата тестов в виде отчета [Allure](http://allure.qatools.ru/)
+- запись результата тестов в виде отчета [Allure](http://allure.qatools.ru/) с поддержкой интеграции с TMS (TestIT, Allure TestOps)
 - имеется [JSON-schema](#json-schema) для автодополнения и валидации YAML-файлов Gonkey
 
 ## Содержание
@@ -93,6 +93,7 @@ Gonkey протестирует ваши сервисы, используя их
 - `-redis_url <...>` при использовании Redis - адрес для подключения к Redis, например `redis://user:password@localhost:6789/1?dial_timeout=1&db=1&read_timeout=6s&max_retries=2`
 - `-fixtures <...>` директория с вашими фикстурами
 - `-allure` генерировать allure-отчет
+- `-allure-format <...>` формат отчета Allure: `v2`/`json` (современный JSON, по умолчанию) или `v1`/`xml` (legacy XML)
 - `-v` подробный вывод
 - `-debug` отладочный вывод
 
@@ -140,6 +141,10 @@ func TestFuncCases(t *testing.T) {
   srv := server.NewServer()
   defer srv.Close()
 
+  // Опционально: настройка Allure через переменные окружения
+  // os.Setenv("GONKEY_ALLURE_DIR", "./allure-results")      // директория для отчетов
+  // os.Setenv("GONKEY_ALLURE_FORMAT", "v2")                 // формат: v2 (JSON, по умолчанию) или v1 (XML)
+
   // запустите выполнение тестов из директории cases с записью в отчет Allure
   runner.RunWithTesting(t, &runner.RunWithTestingParams{
     Server:   srv,
@@ -154,6 +159,10 @@ func TestFuncCases(t *testing.T) {
     // Если в параметр DB не пустой, а данный параметр не назначен, будет использоваться тип бд fixtures.Postgresql
     DbType:      fixtures.Postgres,
     FixturesDir: "fixtures",
+    // Опционально: интеграция с TestIT - метки package и testClass по умолчанию для всех тестов
+    // Могут быть переопределены в отдельных YAML-тестах
+    AllurePackage:   "api",           // например, "api", "cron", "consumer"
+    AllureTestClass: "UserHandler",   // например, имя обработчика или метода
   })
 }
 ```
@@ -336,6 +345,66 @@ responseHeaders:
 - `broken` - такой тест не будет запущен, в отчете будет отмечен как `broken`
 - `skipped` - такой тест не будет запущен, в отчете будет отмечен как `skipped`
 - `focus` - если у теста выставлен такой статус, все остальные тесты в suite у которых не проставлен статус, будут отмечены как `skipped` и будут запущены только тесты с статусом `focus`
+
+## Метаданные Allure для интеграции с TMS
+
+Вы можете добавить метаданные Allure к тестам для интеграции с системами управления тестированием (TestIT, Allure TestOps и др.). Метаданные добавляются в секции `allure`:
+
+```yaml
+- name: "Проверка создания пользователя"
+  description: "Тест проверяет успешное создание пользователя с валидными данными"
+
+  allure:
+    links:                               # Ссылки на TMS, issue, stories и т.д.
+      - name: "PROJECT-123"
+        url: "https://testit.example.com/projects/PROJECT/tests/123"
+        type: "tms"                      # Ссылка на TMS для интеграции с TestIT, Allure TestOps
+      - name: "User Story"
+        url: "https://jira.example.com/RU-456"
+        type: "issue"
+    labels:                              # Метки для категоризации
+      - name: "severity"
+        value: "critical"
+      - name: "feature"
+        value: "user-management"
+      - name: "tag"
+        value: "smoke"
+      # Метки для интеграции с TestIT (опционально, можно задать глобально через RunWithTestingParams)
+      - name: "package"                  # например, "api", "cron", "consumer"
+        value: "api"
+      - name: "testClass"                # например, имя обработчика или метода
+        value: "UserHandler"
+    parameters:                          # Параметры для отображения
+      - name: "environment"
+        value: "staging"
+
+  method: POST
+  path: /api/users
+  ...
+```
+
+По умолчанию gonkey генерирует отчеты в современном формате Allure 2 (JSON). Для использования legacy формата XML (Allure 1.x) укажите `-allure-format=v1` или `GONKEY_ALLURE_FORMAT=v1`.
+
+### Глобальные метки TestIT (RunWithTestingParams)
+
+При использовании gonkey как библиотеки, вы можете задать метки `package` и `testClass` по умолчанию глобально через `RunWithTestingParams`:
+
+```go
+runner.RunWithTesting(t, &runner.RunWithTestingParams{
+    Server:          srv,
+    TestsDir:        "cases",
+    AllurePackage:   "api",           // Метка package по умолчанию для всех тестов
+    AllureTestClass: "UserHandler",   // Метка testClass по умолчанию для всех тестов
+})
+```
+
+Эти метки используются для интеграции с TestIT и помогают организовать тесты по компонентам (`package`) и классам реализации (`testClass`). Типичные значения:
+- `AllurePackage`: "api", "cron", "consumer", "scheduler"
+- `AllureTestClass`: имя обработчика или метода, например, "OrdersHandler", "CreateUser"
+
+**Приоритет**: Метки на уровне теста (заданные в YAML) всегда переопределяют эти глобальные значения. Это позволяет:
+1. Задать общие метки один раз в настройках тестов
+2. Переопределить их для конкретных тестов при необходимости
 
 ## HTTP-запрос
 

@@ -13,7 +13,7 @@ type ResponseMultiDbChecker struct {
 }
 
 type MultiDBCheckerInstance interface {
-	check(testName string, ignoreOrdering bool, t models.DatabaseCheck, result *models.Result) ([]error, error)
+	check(testName string, ignoreOrdering bool, t models.DatabaseCheck, result *models.Result, queryIndex int) ([]error, error)
 }
 
 func NewMultiDbChecker(dbMap map[string]*sql.DB) checker.CheckerInterface {
@@ -36,7 +36,8 @@ func (c *ResponseMultiDbChecker) Check(t models.TestInterface, result *models.Re
 			return nil, fmt.Errorf("DB name %s not mapped not found for test \"%s\"", dbCheck.DbNameString(), t.GetName())
 		}
 
-		errs, err := dbChecker.check(t.GetName(), t.IgnoreDbOrdering(), dbCheck, result)
+		queryIndex := len(result.DatabaseResult)
+		errs, err := dbChecker.check(t.GetName(), t.IgnoreDbOrdering(), dbCheck, result, queryIndex)
 		if err != nil {
 			return nil, err
 		}
