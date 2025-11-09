@@ -78,14 +78,12 @@ func (a *Allure) CreateStep(name string, stepFunc func()) {
 }
 
 func (a *Allure) StartStep(stepName string, start time.Time) {
-	var (
-		// FIXME: step is overwritten below
-		step  = beans.NewStep(stepName, start)
-		suite = a.GetCurrentSuite()
-	)
-	step = currentStep[suite]
-	step.Parent.AddStep(step)
-	currentStep[suite] = step
+	suite := a.GetCurrentSuite()
+	parentStep := currentStep[suite]
+	newStep := beans.NewStep(stepName, start)
+	newStep.Parent = parentStep
+	parentStep.AddStep(newStep)
+	currentStep[suite] = newStep
 }
 
 func (a *Allure) EndStep(status string, end time.Time) {

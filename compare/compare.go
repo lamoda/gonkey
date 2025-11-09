@@ -260,7 +260,11 @@ func getUnmatchedArrays(expected, actual []interface{}, params *Params) (expecte
 		if !found {
 			expectedError = append(expectedError, expectedElem)
 			if params.failFast {
-				return expectedError, actual[0:1]
+				if len(actual) > 0 {
+					return expectedError, actual[0:1]
+				}
+
+				return expectedError, actual
 			}
 		}
 	}
