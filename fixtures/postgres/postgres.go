@@ -435,7 +435,7 @@ func (f *LoaderPostgres) buildInsertQuery(ctx *loadContext, t tableName, rows ta
 // - $eval()               - executes an SQL expression, e.g. $eval(CURRENT_DATE)
 // - $recordName.fieldName - using value of previously inserted named record
 func (f *LoaderPostgres) resolveExpression(expr string, ctx *loadContext) (string, error) {
-	if len(expr) >= 5 && expr[:5] == "$eval" {
+	if strings.HasPrefix(expr, "$eval") {
 		re := regexp.MustCompile(`^\$eval\((.+)\)$`)
 		if matches := re.FindStringSubmatch(expr); matches != nil {
 			return "(" + matches[1] + ")", nil
