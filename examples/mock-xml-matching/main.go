@@ -47,6 +47,8 @@ func BackendPost() error {
 	if err != nil {
 		return err
 	}
+	defer res.Body.Close()
+
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("backend response status code %d", res.StatusCode)
 	}
