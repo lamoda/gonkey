@@ -10,7 +10,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.17.2
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.18.0
 	golang.org/x/sync v0.19.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
