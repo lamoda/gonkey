@@ -38,7 +38,7 @@ func (c *ResponseBodyChecker) Check(t models.TestInterface, result *models.Resul
 		default:
 			compareErrs := compare.Compare(expectedBody, result.ResponseBody, compare.Params{})
 			for _, err := range compareErrs {
-				errs = append(errs, models.NewBodyErrorWithCause(err, err.Error()))
+				errs = append(errs, models.NewBodyErrorWithCause(err, "%s", err))
 			}
 		}
 
@@ -86,7 +86,7 @@ func compareJsonBody(t models.TestInterface, expectedBody string, result *models
 	compareErrs := compare.Compare(expected, actual, params)
 	errs := make([]error, 0, len(compareErrs))
 	for _, err := range compareErrs {
-		errs = append(errs, models.NewBodyErrorWithCause(err, err.Error()))
+		errs = append(errs, models.NewBodyErrorWithCause(err, "%s", err))
 	}
 
 	return errs, nil
@@ -116,7 +116,7 @@ func compareXmlBody(t models.TestInterface, expectedBody string, result *models.
 	compareErrs := compare.Compare(expected, actual, params)
 	errs := make([]error, 0, len(compareErrs))
 	for _, err := range compareErrs {
-		errs = append(errs, models.NewBodyErrorWithCause(err, err.Error()))
+		errs = append(errs, models.NewBodyErrorWithCause(err, "%s", err))
 	}
 
 	return errs, nil
