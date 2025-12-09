@@ -232,3 +232,7 @@ func (t *Test) SetDbResponseJson(responses []string) {
 func (t *Test) SetStatus(status string) {
 	t.Status = status
 }
+
+func (t *Test) GetAllureMetadata() *models.AllureMetadata {
+	return t.Allure
+}

@@ -35,6 +35,7 @@ type config struct {
 	FixturesLocation string
 	EnvFile          string
 	Allure           bool
+	AllureFormat     string
 	Verbose          bool
 	Debug            bool
 	DbType           string
@@ -66,10 +67,23 @@ func main() {
 
 	addCheckers(testsRunner, storages.db)
 
-	var allureOutput *allure_report.AllureReportOutput
+	// Setup Allure reporting based on format
+	var allureOutputV1 *allure_report.AllureReportOutput
+	var allureOutputV2 *allure_report.Allure2Output
+
 	if cfg.Allure {
-		allureOutput = allure_report.NewOutput("Gonkey", "./allure-results")
-		testsRunner.AddOutput(allureOutput)
+		switch cfg.AllureFormat {
+		case "v1", "xml":
+			// Legacy XML format (Allure 1.x)
+			allureOutputV1 = allure_report.NewOutput("Gonkey", "./allure-results")
+			testsRunner.AddOutput(allureOutputV1)
+		case "v2", "json", "":
+			// Modern JSON format (Allure 2.x) - default
+			allureOutputV2 = allure_report.NewAllure2Output("./allure-results")
+			testsRunner.AddOutput(allureOutputV2)
+		default:
+			log.Fatalf("unknown allure format: %s (supported: v1, v2, xml, json)", cfg.AllureFormat)
+		}
 	}
 
 	err = testsRunner.Run()
@@ -77,8 +91,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if allureOutput != nil {
-		allureOutput.Finalize()
+	// Finalize Allure reports
+	if allureOutputV1 != nil {
+		allureOutputV1.Finalize()
+	}
+	if allureOutputV2 != nil {
+		allureOutputV2.Finalize()
 	}
 
 	summary := testHandler.Summary()
@@ -218,6 +236,7 @@ func getConfig() config {
 	flag.StringVar(&cfg.FixturesLocation, "fixtures", "", "Path to fixtures directory")
 	flag.StringVar(&cfg.EnvFile, "env-file", "", "Path to env-file")
 	flag.BoolVar(&cfg.Allure, "allure", true, "Make Allure report")
+	flag.StringVar(&cfg.AllureFormat, "allure-format", "v2", "Allure report format: v1/xml (legacy) or v2/json (default)")
 	flag.BoolVar(&cfg.Verbose, "v", false, "Verbose output")
 	flag.BoolVar(&cfg.Debug, "debug", false, "Debug output")
 	flag.StringVar(
@@ -228,6 +247,11 @@ func getConfig() config {
 	)
 
 	flag.Parse()
+
+	// Allow overriding allure format via environment variable
+	if envFormat := os.Getenv("GONKEY_ALLURE_FORMAT"); envFormat != "" {
+		cfg.AllureFormat = envFormat
+	}
 
 	return cfg
 }

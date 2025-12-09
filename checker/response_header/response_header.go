@@ -1,7 +1,6 @@
 package response_header
 
 import (
-	"fmt"
 	"net/textproto"
 
 	"github.com/lamoda/gonkey/checker"
@@ -16,7 +15,6 @@ func NewChecker() checker.CheckerInterface {
 }
 
 func (c *ResponseHeaderChecker) Check(t models.TestInterface, result *models.Result) ([]error, error) {
-	// test response headers with the expected headers
 	expectedHeaders, ok := t.GetResponseHeaders(result.ResponseStatusCode)
 	if !ok || len(expectedHeaders) == 0 {
 		return nil, nil
@@ -27,7 +25,7 @@ func (c *ResponseHeaderChecker) Check(t models.TestInterface, result *models.Res
 		k = textproto.CanonicalMIMEHeaderKey(k)
 		actualValues, ok := result.ResponseHeaders[k]
 		if !ok {
-			errs = append(errs, fmt.Errorf("response does not include expected header %s", k))
+			errs = append(errs, models.NewHeaderError("response does not include expected header %s", k))
 
 			continue
 		}
@@ -39,7 +37,7 @@ func (c *ResponseHeaderChecker) Check(t models.TestInterface, result *models.Res
 			}
 		}
 		if !found {
-			errs = append(errs, fmt.Errorf("response header %s value does not match expected %s", k, v))
+			errs = append(errs, models.NewHeaderError("response header %s value does not match expected %s", k, v))
 		}
 	}
 

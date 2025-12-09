@@ -1,0 +1,64 @@
+# Simple API test example with Allure 2 metadata
+
+- name: "Create new user"
+  description: "Verify API creates user with valid credentials - demonstrates all Allure 2 metadata features"
+
+  # Full Allure 2 metadata example with links, parameters, and labels
+  allure:
+    # Links to external resources (including TMS links for TestIT, Jira, etc.)
+    links:
+      - name: "PROJECT-123"
+        url: "https://testit.example.com/projects/PROJECT/tests/123"
+        type: "tms"
+      - name: "User Story"
+        url: "https://jira.example.com/browse/US-456"
+        type: "issue"
+      - name: "Requirements Doc"
+        url: "https://wiki.example.com/auth-requirements"
+        type: "link"
+
+    # Labels for categorization and filtering
+    labels:
+      - name: "severity"
+        value: "critical"
+      - name: "feature"
+        value: "authentication"
+      - name: "epic"
+        value: "user-management"
+      - name: "owner"
+        value: "team-api"
+      - name: "tag"
+        value: "smoke"
+      # TestIT integration labels - override defaults from RunWithTestingParams
+      # If not specified here, values from AllurePackage and AllureTestClass will be used
+      - name: "package"
+        value: "api"
+      - name: "testClass"
+        value: "CreateUserHandler"
+
+    # Test parameters (displayed in Allure report)
+    parameters:
+      - name: "environment"
+        value: "staging"
+      - name: "api_version"
+        value: "v2"
+
+  method: POST
+  path: /api/users
+
+  headers:
+    Content-Type: application/json
+
+  request: |
+    {
+      "username": "newuser",
+      "email": "user@example.com"
+    }
+
+  response:
+    201: |
+      {
+        "id": "$matchRegexp(^[0-9]+$)",
+        "username": "newuser",
+        "email": "user@example.com"
+      }
