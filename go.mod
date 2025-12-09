@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/aerospike/aerospike-client-go/v5 v5.11.0
 	github.com/fatih/color v1.18.0
+	github.com/goccy/go-yaml v1.19.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kylelemons/godebug v1.1.0
@@ -14,8 +15,6 @@ require (
 	github.com/tidwall/gjson v1.18.0
 	golang.org/x/sync v0.19.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
-	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -29,4 +28,5 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	golang.org/x/sys v0.39.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

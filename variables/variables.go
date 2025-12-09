@@ -107,7 +107,7 @@ func (vs *Variables) perform(str string) string {
 }
 
 func (vs *Variables) performInterface(value interface{}) {
-	if mapValue, ok := value.(map[interface{}]interface{}); ok {
+	if mapValue, ok := value.(map[string]interface{}); ok {
 		for key := range mapValue {
 			if strValue, ok := mapValue[key].(string); ok {
 				mapValue[key] = vs.perform(strValue)
