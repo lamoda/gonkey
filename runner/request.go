@@ -170,6 +170,7 @@ func newCommonRequest(host string, test models.TestInterface) (*http.Request, er
 	return req, nil
 }
 
+// nolint: gosec: request using when testing
 func request(test models.TestInterface, b *bytes.Buffer, host string) (*http.Request, error) {
 	req, err := http.NewRequest(
 		strings.ToUpper(test.GetMethod()),

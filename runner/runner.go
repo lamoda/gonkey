@@ -168,7 +168,7 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 		return nil, err
 	}
 
-	resp, err := r.client.Do(req)
+	resp, err := r.client.Do(req) // nolint: gosec: request using when testing
 	if err != nil {
 		return nil, err
 	}
