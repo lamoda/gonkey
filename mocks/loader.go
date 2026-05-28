@@ -13,6 +13,20 @@ type Loader struct {
 	mocks *Mocks
 }
 
+// goccy/go-yaml decodes positive integers as uint64.
+func toInt(v interface{}) (int, bool) {
+	switch n := v.(type) {
+	case int:
+		return n, true
+	case int64:
+		return int(n), true
+	case uint64:
+		return int(n), true
+	}
+
+	return 0, false
+}
+
 func NewLoader(mocks *Mocks) *Loader {
 	return &Loader{
 		mocks: mocks,
@@ -79,8 +93,8 @@ func (l *Loader) loadDefinition(path string, rawDef interface{}) (*Definition, e
 	}
 
 	callsConstraint := CallsNoConstraint
-	if _, ok = def["calls"]; ok {
-		if value, ok := def["calls"].(int); ok {
+	if v, ok := def["calls"]; ok {
+		if value, ok := toInt(v); ok {
 			callsConstraint = value
 		}
 	}
@@ -179,7 +193,9 @@ func (l *Loader) loadFileStrategy(path string, def map[string]interface{}) (Repl
 
 	statusCode := http.StatusOK
 	if c, ok := def["statusCode"]; ok {
-		statusCode = c.(int)
+		if n, ok := toInt(c); ok {
+			statusCode = n
+		}
 	}
 
 	headers, err := l.loadHeaders(def)
@@ -200,7 +216,9 @@ func (l *Loader) loadConstantStrategy(path string, def map[string]interface{}) (
 	}
 	statusCode := http.StatusOK
 	if c, ok := def["statusCode"]; ok {
-		statusCode = int(c.(uint64))
+		if n, ok := toInt(c); ok {
+			statusCode = n
+		}
 	}
 	headers, err := l.loadHeaders(def)
 	if err != nil {
@@ -224,7 +242,9 @@ func (l *Loader) loadTemplateStrategy(path string, def map[string]interface{}) (
 	}
 	statusCode := http.StatusOK
 	if c, ok := def["statusCode"]; ok {
-		statusCode = c.(int)
+		if n, ok := toInt(c); ok {
+			statusCode = n
+		}
 	}
 	headers, err := l.loadHeaders(def)
 	if err != nil {
