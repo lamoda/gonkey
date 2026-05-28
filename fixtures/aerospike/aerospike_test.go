@@ -33,11 +33,11 @@ func TestLoaderAerospike_loadYml(t *testing.T) {
 						data: set{
 							"key1": {
 								"bin1": "value1",
-								"bin2": 1,
+								"bin2": uint64(1),
 							},
 							"key2": {
 								"bin1": "value2",
-								"bin2": 2,
+								"bin2": uint64(2),
 								"bin3": 2.569947773654566473,
 							},
 						},
@@ -52,7 +52,7 @@ func TestLoaderAerospike_loadYml(t *testing.T) {
 							},
 							"key2": {
 								"bin1": "'",
-								"bin5": []interface{}{1, "2"},
+								"bin5": []interface{}{uint64(1), "2"},
 							},
 						},
 					},

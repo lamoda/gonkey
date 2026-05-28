@@ -6,7 +6,7 @@ gonkey
 _vendor*
 Gopkg.lock
 tmpfile*
-/allure-results
+**/allure-result*/
 .DS_Store
 
 # debug

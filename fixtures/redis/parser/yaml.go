@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 type redisYamlParser struct {
@@ -473,19 +473,19 @@ func (p *redisYamlParser) Parse(ctx *Context, filename string) (*Fixture, error)
 
 	var fixture Fixture
 	if err := yaml.Unmarshal(data, &fixture); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("yaml unmarshal: %w", err)
 	}
 
 	for _, parentFixture := range fixture.Inherits {
 		_, err := p.fileParser.ParseFiles(ctx, []string{parentFixture})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("parse files: %w", err)
 		}
 	}
 
 	err = p.buildTemplate(ctx, fixture)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build template: %w", err)
 	}
 
 	for _, databaseData := range fixture.Databases {

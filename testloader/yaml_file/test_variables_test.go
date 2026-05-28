@@ -129,7 +129,7 @@ func checkApplied(t *testing.T, test models.TestInterface, combined bool) {
 
 	raw, ok := test.ServiceMocks()["server"]
 	assert.True(t, ok)
-	mockMap, ok := raw.(map[interface{}]interface{})
+	mockMap, ok := raw.(map[string]interface{})
 	assert.True(t, ok)
 	mockBody, ok := mockMap["body"]
 	assert.True(t, ok)

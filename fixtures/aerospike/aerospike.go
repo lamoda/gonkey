@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v2"
+	"github.com/goccy/go-yaml"
 )
 
 type aerospikeClient interface {
@@ -125,7 +125,7 @@ func (l *LoaderAerospike) loadYml(data []byte, ctx *loadContext) error {
 			return fmt.Errorf("unable to load template %s: duplicating ref name", name)
 		}
 
-		binMap, err := binMapFromYaml(template)
+		binMap, err := binMapFromValue(template)
 		if err != nil {
 			return err
 		}
@@ -172,15 +172,14 @@ func (l *LoaderAerospike) loadYml(data []byte, ctx *loadContext) error {
 }
 
 func setFromYaml(mapItem yaml.MapItem) (set, error) {
-	entries, ok := mapItem.Value.(yaml.MapSlice)
+	entries, ok := mapItem.Value.(map[string]interface{})
 	if !ok {
 		return nil, errors.New("expected map/array as set")
 	}
 
 	set := make(set, len(entries))
-	for _, e := range entries {
-		key := e.Key.(string)
-		binmap, err := binMapFromYaml(e)
+	for key, value := range entries {
+		binmap, err := binMapFromValue(value)
 		if err != nil {
 			return nil, err
 		}
@@ -190,15 +189,26 @@ func setFromYaml(mapItem yaml.MapItem) (set, error) {
 	return set, nil
 }
 
-func binMapFromYaml(mapItem yaml.MapItem) (binMap, error) {
-	bins, ok := mapItem.Value.(yaml.MapSlice)
-	if !ok {
+func binMapFromValue(mapItemValue interface{}) (binMap, error) {
+	var bins map[string]interface{}
+
+	switch v := mapItemValue.(type) {
+	case map[string]interface{}:
+		bins = v
+	case yaml.MapItem:
+		value, ok := v.Value.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("expected map/array as binmap")
+		}
+
+		bins = value
+	default:
 		return nil, errors.New("expected map/array as binmap")
 	}
 
 	binmap := make(binMap, len(bins))
-	for j := range bins {
-		binmap[bins[j].Key.(string)] = bins[j].Value
+	for k, v := range bins {
+		binmap[k] = v
 	}
 
 	return binmap, nil

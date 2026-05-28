@@ -172,6 +172,7 @@ func newCommonRequest(host string, test models.TestInterface) (*http.Request, er
 	return req, nil
 }
 
+//nolint:gosec // G704: URL is controlled by test cases (gonkey), not user input
 func request(test models.TestInterface, b *bytes.Buffer, host string) (*http.Request, error) {
 	req, err := http.NewRequest(
 		strings.ToUpper(test.GetMethod()),

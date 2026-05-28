@@ -2,6 +2,8 @@ package console_colored
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"text/template"
 
 	"github.com/fatih/color"
@@ -87,9 +89,7 @@ Response:
      Result: {{ danger "ERRORS!" }}
 
 Errors:
-{{ range $i, $e := .Errors }}
-{{ inc $i }}) {{ $e.Error }}
-{{ end }}
+{{ formatErrors .Errors }}
 {{ else }}
      Result: {{ success "OK" }}
 {{ end }}
@@ -106,13 +106,42 @@ Errors:
 
 func templateFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"green":   color.GreenString,
-		"cyan":    color.CyanString,
-		"yellow":  color.YellowString,
-		"danger":  color.New(color.FgHiWhite, color.BgRed).Sprint,
-		"success": color.New(color.FgHiWhite, color.BgGreen).Sprint,
-		"inc":     func(i int) int { return i + 1 },
+		"green":        color.GreenString,
+		"cyan":         color.CyanString,
+		"yellow":       color.YellowString,
+		"danger":       color.New(color.FgHiWhite, color.BgRed).Sprint,
+		"success":      color.New(color.FgHiWhite, color.BgGreen).Sprint,
+		"inc":          func(i int) int { return i + 1 },
+		"formatErrors": formatErrorsWithCategories,
 	}
+}
+
+func formatErrorsWithCategories(errs []error) string {
+	if len(errs) == 0 {
+		return ""
+	}
+
+	result := ""
+	var prevCategory models.ErrorCategory
+
+	for i, err := range errs {
+		var checkErr *models.CheckError
+		currentCategory := models.ErrorCategory("")
+
+		if errors.As(err, &checkErr) {
+			currentCategory = checkErr.GetCategory()
+		}
+
+		// Add empty line between different error categories
+		if i > 0 && prevCategory != "" && currentCategory != prevCategory {
+			result += "\n"
+		}
+
+		result += fmt.Sprintf("%d) %s\n", i+1, err.Error())
+		prevCategory = currentCategory
+	}
+
+	return result
 }
 
 func (o *ConsoleColoredOutput) ShowSummary(summary *models.Summary) {

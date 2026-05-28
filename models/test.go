@@ -65,6 +65,9 @@ type TestInterface interface {
 
 	// Clone returns copy of current object
 	Clone() TestInterface
+
+	// Allure metadata for TMS integration
+	GetAllureMetadata() *AllureMetadata
 }
 
 type Form struct {

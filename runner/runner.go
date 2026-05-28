@@ -168,7 +168,7 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 		return nil, err
 	}
 
-	resp, err := r.client.Do(req)
+	resp, err := r.client.Do(req) //nolint:gosec // G704: URL is controlled by test cases (gonkey), not user input
 	if err != nil {
 		return nil, err
 	}

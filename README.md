@@ -11,7 +11,7 @@ Capabilities:
 - seeds the DB with fixtures data (supports PostgreSQL, MySQL, Aerospike, Redis)
 - provides mocks for external services
 - can be used as a library and ran together with unit-tests
-- stores the results as an [Allure](http://allure.qatools.ru/) report
+- stores the results as an [Allure](http://allure.qatools.ru/) report with TMS integration support (TestIT, Allure TestOps)
 - there is a [JSON-schema](#json-schema) to add autocomletion and validation for gonkey YAML files
 
 ## Table of contents
@@ -95,6 +95,7 @@ To test a service located on a remote host, use gonkey as a console util.
 - `-db_dsn <...>` DSN for the test DB (the DB will be cleared before seeding!), supports only PostgreSQL
 - `-fixtures <...>` fixtures directory
 - `-allure` generate an Allure-report
+- `-allure-format <...>` Allure report format: `v2`/`json` (modern JSON, default) or `v1`/`xml` (legacy XML)
 - `-v` verbose output
 - `-debug` debug output
 
@@ -142,6 +143,10 @@ func TestFuncCases(t *testing.T) {
   srv := server.NewServer()
   defer srv.Close()
 
+  // Optional: configure Allure via environment variables
+  // os.Setenv("GONKEY_ALLURE_DIR", "./allure-results")      // directory for reports
+  // os.Setenv("GONKEY_ALLURE_FORMAT", "v2")                 // format: v2 (JSON, default) or v1 (XML)
+
   // run test cases from your dir with Allure report generation
   runner.RunWithTesting(t, &runner.RunWithTestingParams{
     Server:   srv,
@@ -156,6 +161,10 @@ func TestFuncCases(t *testing.T) {
     // if DB parameter present, by default uses fixtures.Postgres database type
     DbType:      fixtures.Postgres,
     FixturesDir: "fixtures",
+    // Optional: TestIT integration - set default package and testClass labels for all tests
+    // These can be overridden by individual test YAML definitions
+    AllurePackage:   "api",           // e.g., "api", "cron", "consumer"
+    AllureTestClass: "UserHandler",   // e.g., handler or method name
   })
 }
 ```
@@ -339,6 +348,66 @@ Also, "?" in query is optional
 - `broken` - do not run test, only mark it as broken
 - `skipped` - do not run test, skip it
 - `focus` - run only this specific test, and mark all other tests with unset status as `skipped`
+
+## Allure Metadata for TMS Integration
+
+You can add Allure metadata to tests for integration with Test Management Systems (TestIT, Allure TestOps, etc.). Metadata is added in the `allure` section:
+
+```yaml
+- name: "Create user test"
+  description: "Test verifies successful user creation with valid data"
+
+  allure:
+    links:                               # Links to TMS, issues, stories, etc.
+      - name: "PROJECT-123"
+        url: "https://testit.example.com/projects/PROJECT/tests/123"
+        type: "tms"                      # TMS link for TestIT, Allure TestOps integration
+      - name: "User Story"
+        url: "https://jira.example.com/US-456"
+        type: "issue"
+    labels:                              # Labels for categorization
+      - name: "severity"
+        value: "critical"
+      - name: "feature"
+        value: "user-management"
+      - name: "tag"
+        value: "smoke"
+      # TestIT integration labels (optional, can be set globally via RunWithTestingParams)
+      - name: "package"                  # e.g., "api", "cron", "consumer"
+        value: "api"
+      - name: "testClass"                # e.g., handler or method name
+        value: "UserHandler"
+    parameters:                          # Parameters for display
+      - name: "environment"
+        value: "staging"
+
+  method: POST
+  path: /api/users
+  ...
+```
+
+By default, gonkey generates reports in modern Allure 2 format (JSON). To use legacy XML format (Allure 1.x), specify `-allure-format=v1` or `GONKEY_ALLURE_FORMAT=v1`.
+
+### Global TestIT Labels (RunWithTestingParams)
+
+When using gonkey as a library, you can set default `package` and `testClass` labels globally via `RunWithTestingParams`:
+
+```go
+runner.RunWithTesting(t, &runner.RunWithTestingParams{
+    Server:          srv,
+    TestsDir:        "cases",
+    AllurePackage:   "api",           // Default package label for all tests
+    AllureTestClass: "UserHandler",   // Default testClass label for all tests
+})
+```
+
+These labels are used for TestIT integration and help organize tests by component (`package`) and implementation class (`testClass`). Typical values:
+- `AllurePackage`: "api", "cron", "consumer", "scheduler"
+- `AllureTestClass`: handler or method name, e.g., "OrdersHandler", "CreateUser"
+
+**Priority**: Test-level labels (defined in YAML) always override these global defaults. This allows you to:
+1. Set common labels once in your test setup
+2. Override them for specific tests when needed
 
 ## HTTP-request
 

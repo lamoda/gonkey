@@ -13,6 +13,7 @@ type Definition struct {
 	path               string
 	requestConstraints []verifier
 	replyStrategy      ReplyStrategy
+	serviceName        string // Optional: set by ServiceMock for better error messages
 	sync.Mutex
 	calls           int
 	callsConstraint int
@@ -25,6 +26,10 @@ func NewDefinition(path string, constraints []verifier, strategy ReplyStrategy, 
 		replyStrategy:      strategy,
 		callsConstraint:    callsConstraint,
 	}
+}
+
+func (d *Definition) SetServiceName(serviceName string) {
+	d.serviceName = serviceName
 }
 
 func (d *Definition) Execute(w http.ResponseWriter, r *http.Request) []error {
@@ -45,6 +50,7 @@ func (d *Definition) Execute(w http.ResponseWriter, r *http.Request) []error {
 					error:       e,
 					Constraint:  c,
 					RequestDump: requestDump,
+					Endpoint:    d.path,
 				})
 			}
 		}
@@ -72,14 +78,17 @@ func (d *Definition) EndRunningContext() []error {
 		errs = s.EndRunningContext()
 	}
 	if d.callsConstraint != CallsNoConstraint && d.calls != d.callsConstraint {
-		err := fmt.Errorf("at path %s: number of calls does not match: expected %d, actual %d",
-			d.path, d.callsConstraint, d.calls)
-		errs = append(errs, err)
+		errs = append(errs, &CallsMismatchError{
+			Path:        d.path,
+			Expected:    d.callsConstraint,
+			Actual:      d.calls,
+			ServiceName: d.serviceName,
+		})
 	}
 	return errs
 }
 
-func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) []error {
+func verifyRequestConstraints(requestConstraints []verifier, r *http.Request, endpoint string) []error {
 	var errors []error
 	if len(requestConstraints) > 0 {
 		requestDump, err := httputil.DumpRequest(r, true)
@@ -93,6 +102,7 @@ func verifyRequestConstraints(requestConstraints []verifier, r *http.Request) []
 					error:       e,
 					Constraint:  c,
 					RequestDump: requestDump,
+					Endpoint:    endpoint,
 				})
 			}
 		}

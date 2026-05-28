@@ -58,8 +58,23 @@ func (r *Result) AllureStatus() (string, error) {
 
 	if len(testErrors) != 0 {
 		errText := ""
-		for _, err := range testErrors {
+		var prevCategory ErrorCategory
+
+		for i, err := range testErrors {
+			var checkErr *CheckError
+			currentCategory := ErrorCategory("")
+
+			if errors.As(err, &checkErr) {
+				currentCategory = checkErr.GetCategory()
+			}
+
+			// Add empty line between different error categories
+			if i > 0 && prevCategory != "" && currentCategory != prevCategory {
+				errText += "\n"
+			}
+
 			errText = errText + err.Error() + "\n"
+			prevCategory = currentCategory
 		}
 
 		return status, errors.New(errText)

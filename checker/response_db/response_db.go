@@ -26,14 +26,16 @@ func NewChecker(dbConnect *sql.DB) checker.CheckerInterface {
 
 func (c *ResponseDbChecker) Check(t models.TestInterface, result *models.Result) ([]error, error) {
 	var errors []error
-	errs, err := c.check(t.GetName(), t.IgnoreDbOrdering(), t, result)
+	queryIndex := len(result.DatabaseResult)
+	errs, err := c.check(t.GetName(), t.IgnoreDbOrdering(), t, result, queryIndex)
 	if err != nil {
 		return nil, err
 	}
 	errors = append(errors, errs...)
 
 	for _, dbCheck := range t.GetDatabaseChecks() {
-		errs, err := c.check(t.GetName(), t.IgnoreDbOrdering(), dbCheck, result)
+		queryIndex = len(result.DatabaseResult)
+		errs, err := c.check(t.GetName(), t.IgnoreDbOrdering(), dbCheck, result, queryIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -48,25 +50,22 @@ func (c *ResponseDbChecker) check(
 	ignoreOrdering bool,
 	t models.DatabaseCheck,
 	result *models.Result,
+	queryIndex int,
 ) ([]error, error) {
 	var errors []error
 
-	// don't check if there are no data for db test
 	if t.DbQueryString() == "" && t.DbResponseJson() == nil {
 		return errors, nil
 	}
 
-	// check expected db query exist
 	if t.DbQueryString() == "" {
 		return nil, fmt.Errorf("DB query not found for test \"%s\"", testName)
 	}
 
-	// check expected response exist
 	if t.DbResponseJson() == nil {
 		return nil, fmt.Errorf("expected DB response not found for test \"%s\"", testName)
 	}
 
-	// get DB response
 	actualDbResponse, err := newQuery(t.DbQueryString(), c.db)
 	if err != nil {
 		return nil, err
@@ -77,13 +76,11 @@ func (c *ResponseDbChecker) check(
 		models.DatabaseResult{Query: t.DbQueryString(), Response: actualDbResponse},
 	)
 
-	// compare responses length
 	if err := compareDbResponseLength(t.DbResponseJson(), actualDbResponse, t.DbQueryString()); err != nil {
-		errors = append(errors, err)
+		errors = append(errors, models.NewDatabaseErrorWithIdentifier(queryIndex, "%s", err.Error()))
 
 		return errors, nil
 	}
-	// compare responses as json lists
 	expectedItems, err := toJSONArray(t.DbResponseJson(), "expected", testName)
 	if err != nil {
 		return nil, err
@@ -97,7 +94,9 @@ func (c *ResponseDbChecker) check(
 		IgnoreArraysOrdering: ignoreOrdering,
 	})
 
-	errors = append(errors, errs...)
+	for _, err := range errs {
+		errors = append(errors, models.NewDatabaseErrorWithIdentifier(queryIndex, "%s", err.Error()))
+	}
 
 	return errors, nil
 }

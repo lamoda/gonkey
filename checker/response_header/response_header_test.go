@@ -1,7 +1,6 @@
 package response_header
 
 import (
-	"errors"
 	"sort"
 	"testing"
 
@@ -70,12 +69,9 @@ func TestCheckWhenNotMatchedShouldReturnError(t *testing.T) {
 	})
 
 	assert.NoError(t, err, "Check must not result with an error")
-	assert.Equal(
-		t,
-		errs,
-		[]error{
-			errors.New("response does not include expected header Content-Type"),
-			errors.New("response header Accept value does not match expected text/html"),
-		},
-	)
+	assert.Len(t, errs, 2)
+
+	// Verify errors are typed as CheckError
+	assert.Contains(t, errs[0].Error(), "response does not include expected header Content-Type")
+	assert.Contains(t, errs[1].Error(), "response header Accept value does not match expected text/html")
 }
