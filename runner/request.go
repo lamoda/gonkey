@@ -18,9 +18,11 @@ import (
 )
 
 func newClient(proxyURL *url.URL) *http.Client {
+	// Idle keep-alive readLoops block testing/synctest bubble exit on real I/O.
 	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // Client is only used for testing.
-		Proxy:           http.ProxyURL(proxyURL),
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // Client is only used for testing.
+		Proxy:             http.ProxyURL(proxyURL),
+		DisableKeepAlives: true,
 	}
 
 	return &http.Client{

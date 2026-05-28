@@ -46,6 +46,9 @@ type RunWithTestingParams struct {
 	OutputFunc    output.OutputInterface
 	Checkers      []checker.CheckerInterface
 	FixtureLoader fixtures.Loader
+
+	// NoSubtests skips the per-case t.Run wrapper. Required inside testing/synctest.Test.
+	NoSubtests bool
 }
 
 func registerMocksEnvironment(m *mocks.Mocks) {
@@ -126,7 +129,7 @@ func initRunner(
 	yamlLoader := yaml_file.NewLoader(params.TestsDir)
 	yamlLoader.SetFileFilter(os.Getenv("GONKEY_FILE_FILTER"))
 
-	handler := testingHandler{t}
+	handler := testingHandler{t: t, noSubtests: params.NoSubtests}
 	runner := New(
 		&Config{
 			Host:           params.Server.URL,
@@ -155,26 +158,34 @@ func addCheckers(runner *Runner, params *RunWithTestingParams) {
 }
 
 type testingHandler struct {
-	t *testing.T
+	t          *testing.T
+	noSubtests bool
 }
 
 func (h testingHandler) HandleTest(test models.TestInterface, executeTest testExecutor) error {
 	var returnErr error
-	h.t.Run(test.GetName(), func(t *testing.T) {
+	runCase := func(t *testing.T) {
 		result, err := executeTest(test)
 		if err != nil {
 			if errors.Is(err, errTestSkipped) || errors.Is(err, errTestBroken) {
 				t.Skip()
-			} else {
-				returnErr = err
-				t.Fatal(err)
+				return
 			}
+			returnErr = err
+			t.Fatal(err)
+			return
 		}
 
 		if !result.Passed() {
 			t.Fail()
 		}
-	})
+	}
 
+	if h.noSubtests {
+		runCase(h.t)
+		return returnErr
+	}
+
+	h.t.Run(test.GetName(), runCase)
 	return returnErr
 }
