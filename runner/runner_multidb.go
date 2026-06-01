@@ -39,6 +39,9 @@ type RunWithMultiDbParams struct {
 	OutputFunc    output.OutputInterface
 	Checkers      []checker.CheckerInterface
 	FixtureLoader fixtures.LoaderMultiDb
+
+	// NoSubtests skips the per-case t.Run wrapper. Required inside testing/synctest.Test.
+	NoSubtests bool
 }
 
 // RunWithMultiDb is a helper function the wraps the common Run and provides simple way
@@ -87,7 +90,7 @@ func RunWithMultiDb(t *testing.T, params *RunWithMultiDbParams) {
 	yamlLoader := yaml_file.NewLoader(params.TestsDir)
 	yamlLoader.SetFileFilter(os.Getenv("GONKEY_FILE_FILTER"))
 
-	handler := testingHandler{t}
+	handler := testingHandler{t: t, noSubtests: params.NoSubtests}
 	runner := New(
 		&Config{
 			Host:                  params.Server.URL,
