@@ -13,7 +13,7 @@ require (
 	github.com/redis/go-redis/v9 v9.19.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.18.0
-	golang.org/x/sync v0.20.0
+	golang.org/x/sync v0.21.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 )
 
