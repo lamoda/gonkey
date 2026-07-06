@@ -29,6 +29,7 @@ Capabilities:
       - [In the description of the test](#in-the-description-of-the-test)
       - [From the response of the previous test](#from-the-response-of-the-previous-test)
       - [From the response of currently running test](#from-the-response-of-currently-running-test)
+      - [From a request caught by a mock](#from-a-request-caught-by-a-mock)
       - [From environment variables or from env-file](#from-environment-variables-or-from-env-file)
       - [From cases](#from-cases)
   - [multipart/form-data requests](#multipartform-data-requests)
@@ -474,6 +475,7 @@ You can assign values to variables in the following ways (priorities are from to
 - in the description of the test
 - from the response of the previous test
 - from the response of currently running test
+- from a request caught by a mock of the previous test
 - from environment variables or from env-file
 
 ### Assignment
@@ -543,6 +545,49 @@ Example:
   dbResponse:
     - '{"id": {{ $golang_id}}, "name": "golang"}'
 ```
+
+#### From a request caught by a mock
+
+A mock can capture values of the request it receives into variables. Variables become available *after* the test finishes, so they can be used in subsequent tests.
+
+Use `variablesToSet` on the mock definition (at the same level as `strategy`). The values are templates that read the incoming request using the same syntax as the [template reply strategy](#template): `{{ .request.Json }}`, `{{ .request.Query "name" }}` and `{{ .request.Header "name" }}`.
+
+Short form:
+
+```yaml
+- name: "create user"
+  ...
+  mocks:
+    backend:
+      strategy: constant
+      body: '{"ok": true}'
+      variablesToSet:
+        capturedUserId: '{{ .request.Json.user.id }}'
+        capturedPage:   '{{ .request.Query "page" }}'
+        capturedToken:  '{{ .request.Header "X-Auth-Token" }}'
+
+- name: "next test can use captured values"
+  ...
+  request: '{"user_id": "{{ $capturedUserId }}"}'
+```
+
+If the mock (more precisely, the definition holding `variablesToSet`) is called several times within one test, the value of the last call is stored by default. Use the full form with `fromCall` to keep the value of the first call instead:
+
+```yaml
+      variablesToSet:
+        capturedUserId:
+          template: '{{ .request.Json.user.id }}'
+          fromCall: first    # first | last (default)
+```
+
+Notes:
+
+- unlike the response-based `variables_to_set`, the values are template strings, not field paths, and the map is flat (a request has no status code);
+- `variablesToSet` can be attached to nested definitions of composite strategies (`uriVary`, `methodVary`, `sequence`, `basedOnRequest`) — e.g. in `sequence` each element captures its own call, which lets you capture a specific call by number;
+- variables are captured only from requests that passed `requestConstraints`; a missing JSON field is reported as a test error;
+- give each captured variable a unique name — if two mock definitions capture into the same name, which value wins is not guaranteed and the test may become flaky;
+- with truly concurrent calls to the same definition "first/last" means the order in which the mock processed the requests;
+- if the same name is also assigned via the response-based `variables_to_set` of the same test, the response value wins.
 
 #### From environment variables or from env-file
 
@@ -1497,6 +1542,7 @@ Example:
       body: >
         {
           "value-from-query": {{ .request.Query "value" }},
+          "value-from-header": "{{ .request.Header "X-Some-Header" }}",
           "data-from-body": {{ .request.Json.data }}
         }
       statusCode: 200

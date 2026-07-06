@@ -1,0 +1,28 @@
+- name: sequence mock captures each call separately
+  description: >
+    Each element of a `sequence` strategy captures its own call,
+    which allows capturing a specific call by number.
+  method: POST
+  path: /transfer
+  request: '{"from": "acc-1", "to": "acc-2"}'
+  mocks:
+    backend:
+      strategy: sequence
+      sequence:
+        - strategy: constant
+          body: '{"ok": true}'
+          variablesToSet:
+            debitAccount: '{{ .request.Json.account }}'
+        - strategy: constant
+          body: '{"ok": true}'
+          variablesToSet:
+            creditAccount: '{{ .request.Json.account }}'
+  response:
+    200: '{"ok": true}'
+
+- name: variables from both sequence calls are available
+  method: POST
+  path: /echo
+  request: '{"debit": "{{ $debitAccount }}", "credit": "{{ $creditAccount }}"}'
+  response:
+    200: '{"debit": "acc-1", "credit": "acc-2"}'

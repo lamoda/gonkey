@@ -1,0 +1,27 @@
+- name: mock captures variables from the incoming request
+  description: >
+    Basic happy path: the mock captures values from the JSON body and
+    the request header (short form) and from the query string (full form
+    with fromCall), the next test uses them via {{ $varName }}.
+  method: POST
+  path: /register
+  request: '{"user_id": "user-42"}'
+  mocks:
+    backend:
+      strategy: constant
+      body: '{"ok": true}'
+      variablesToSet:
+        capturedUserId: '{{ .request.Json.user.id }}'
+        capturedRequestId: '{{ .request.Header "X-Request-Id" }}'
+        capturedSource:
+          template: '{{ .request.Query "source" }}'
+          fromCall: first
+  response:
+    200: '{"ok": true}'
+
+- name: next test uses variables captured by the mock
+  method: POST
+  path: /echo
+  request: '{"user_id": "{{ $capturedUserId }}", "source": "{{ $capturedSource }}", "request_id": "{{ $capturedRequestId }}"}'
+  response:
+    200: '{"user_id": "user-42", "source": "gonkey", "request_id": "req-100500"}'

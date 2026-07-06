@@ -72,10 +72,16 @@ func (l *Loader) loadDefinition(path string, rawDef interface{}) (*Definition, e
 		}
 	}
 
+	variablesToSet, err := l.loadVariablesToSet(path, def)
+	if err != nil {
+		return nil, err
+	}
+
 	ak := []string{
 		"requestConstraints",
 		"strategy",
 		"calls",
+		"variablesToSet",
 	}
 
 	// load reply strategy
@@ -103,7 +109,53 @@ func (l *Loader) loadDefinition(path string, rawDef interface{}) (*Definition, e
 		return nil, err
 	}
 
-	return NewDefinition(path, requestConstraints, replyStrategy, callsConstraint), nil
+	definition := NewDefinition(path, requestConstraints, replyStrategy, callsConstraint)
+	definition.variablesToSet = variablesToSet
+	return definition, nil
+}
+
+func (l *Loader) loadVariablesToSet(path string, def map[string]interface{}) ([]*variableExtractor, error) {
+	rawVars, ok := def["variablesToSet"]
+	if !ok {
+		return nil, nil
+	}
+	varsMap, ok := rawVars.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("at path %s: `variablesToSet` requires map", path)
+	}
+
+	extractors := make([]*variableExtractor, 0, len(varsMap))
+	for name, rawSpec := range varsMap {
+		var tmpl, fromCall string
+		switch spec := rawSpec.(type) {
+		case string:
+			tmpl = spec
+		case map[string]interface{}:
+			if err := validateMapKeys(spec, "template", "fromCall"); err != nil {
+				return nil, fmt.Errorf("at path %s: unable to load variable %s: %v", path, name, err)
+			}
+			tmplValue, ok := spec["template"].(string)
+			if !ok {
+				return nil, fmt.Errorf("at path %s: variable %s requires `template` string key", path, name)
+			}
+			tmpl = tmplValue
+			if f, ok := spec["fromCall"]; ok {
+				fromCall, ok = f.(string)
+				if !ok {
+					return nil, fmt.Errorf("at path %s: variable %s: `fromCall` must be string", path, name)
+				}
+			}
+		default:
+			return nil, fmt.Errorf("at path %s: variable %s must be a template string or a map", path, name)
+		}
+
+		extractor, err := newVariableExtractor(name, tmpl, fromCall)
+		if err != nil {
+			return nil, fmt.Errorf("at path %s: %v", path, err)
+		}
+		extractors = append(extractors, extractor)
+	}
+	return extractors, nil
 }
 
 func (l *Loader) loadStrategy(path, strategyName string, definition map[string]interface{}, ak *[]string) (ReplyStrategy, error) {

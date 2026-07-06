@@ -205,6 +205,8 @@ func (r *Runner) executeTest(v models.TestInterface) (*models.Result, error) {
 	if r.config.Mocks != nil {
 		errs := r.config.Mocks.EndRunningContext()
 		result.Errors = append(result.Errors, errs...)
+		// load before setVariablesFromResponse below, so response vars win on name collision
+		r.config.Variables.Load(r.config.Mocks.CapturedVariables())
 	}
 
 	if err := r.setVariablesFromResponse(v, result.ResponseContentType, bodyStr, resp.StatusCode); err != nil {

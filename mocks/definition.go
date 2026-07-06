@@ -13,10 +13,12 @@ type Definition struct {
 	path               string
 	requestConstraints []verifier
 	replyStrategy      ReplyStrategy
+	variablesToSet     []*variableExtractor
 	serviceName        string // Optional: set by ServiceMock for better error messages
 	sync.Mutex
 	calls           int
 	callsConstraint int
+	captured        map[string]string
 }
 
 func NewDefinition(path string, constraints []verifier, strategy ReplyStrategy, callsConstraint int) *Definition {
@@ -55,6 +57,10 @@ func (d *Definition) Execute(w http.ResponseWriter, r *http.Request) []error {
 			}
 		}
 	}
+	// capture variables only from requests that passed the constraints
+	if len(errors) == 0 {
+		errors = append(errors, d.captureVariables(r)...)
+	}
 	if d.replyStrategy != nil {
 		errors = append(errors, d.replyStrategy.HandleRequest(w, r)...)
 	}
@@ -67,6 +73,7 @@ func (d *Definition) ResetRunningContext() {
 	}
 	d.Lock()
 	d.calls = 0
+	d.captured = nil
 	d.Unlock()
 }
 
@@ -113,10 +120,10 @@ func (d *Definition) ExecuteWithoutVerifying(w http.ResponseWriter, r *http.Requ
 	d.Lock()
 	d.calls++
 	d.Unlock()
+	// constraints are already verified by the caller
+	errors := d.captureVariables(r)
 	if d.replyStrategy != nil {
-		return d.replyStrategy.HandleRequest(w, r)
+		return append(errors, d.replyStrategy.HandleRequest(w, r)...)
 	}
-	return []error{
-		fmt.Errorf("reply strategy undefined"),
-	}
+	return append(errors, fmt.Errorf("reply strategy undefined"))
 }
