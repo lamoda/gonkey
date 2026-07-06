@@ -90,6 +90,13 @@ func (m *ServiceMock) ResetRunningContext() {
 	m.mock.ResetRunningContext()
 }
 
+func (m *ServiceMock) CapturedVariables() map[string]string {
+	m.RLock()
+	defer m.RUnlock()
+
+	return m.mock.CapturedVariables()
+}
+
 func (m *ServiceMock) EndRunningContext() []error {
 	m.RLock()
 	defer m.RUnlock()
