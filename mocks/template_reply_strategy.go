@@ -26,6 +26,10 @@ func (tr *templateRequest) Query(key string) string {
 	return tr.r.URL.Query().Get(key)
 }
 
+func (tr *templateRequest) Header(key string) string {
+	return tr.r.Header.Get(key)
+}
+
 func (tr *templateRequest) Json() (map[string]interface{}, error) {
 	var err error
 	tr.jsonOnce.Do(func() {

@@ -1,0 +1,25 @@
+- name: response variables_to_set wins over mock capture on name collision
+  description: >
+    On a name collision, `variables_to_set` of the test response
+    must take precedence over the value captured by the mock.
+  method: POST
+  path: /register-collision
+  request: '{"user_id": "from-mock"}'
+  mocks:
+    backend:
+      strategy: constant
+      body: '{"ok": true}'
+      variablesToSet:
+        collidingId: '{{ .request.Json.user.id }}'
+  variables_to_set:
+    200:
+      collidingId: "id"
+  response:
+    200: '{"id": "from-response"}'
+
+- name: colliding variable resolves to the response value
+  method: POST
+  path: /echo
+  request: '{"value": "{{ $collidingId }}"}'
+  response:
+    200: '{"value": "from-response"}'

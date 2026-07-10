@@ -91,6 +91,16 @@ func (m *Mocks) EndRunningContext() []error {
 	return errors
 }
 
+// CapturedVariables returns variables captured by all services
+// from requests since the last ResetRunningContext call.
+func (m *Mocks) CapturedVariables() map[string]string {
+	res := make(map[string]string)
+	for _, v := range m.mocks {
+		mergeVariables(res, v.CapturedVariables())
+	}
+	return res
+}
+
 func (m *Mocks) GetNames() []string {
 	names := []string{}
 	for n := range m.mocks {

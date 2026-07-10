@@ -131,6 +131,14 @@ func (s *uriVaryReply) EndRunningContext() []error {
 	return errs
 }
 
+func (s *uriVaryReply) CapturedVariables() map[string]string {
+	res := make(map[string]string)
+	for _, def := range s.variants {
+		mergeVariables(res, def.CapturedVariables())
+	}
+	return res
+}
+
 type methodVaryReply struct {
 	variants map[string]*Definition
 }
@@ -164,6 +172,14 @@ func (s *methodVaryReply) EndRunningContext() []error {
 	return errs
 }
 
+func (s *methodVaryReply) CapturedVariables() map[string]string {
+	res := make(map[string]string)
+	for _, def := range s.variants {
+		mergeVariables(res, def.CapturedVariables())
+	}
+	return res
+}
+
 func NewSequentialReply(strategies []*Definition) ReplyStrategy {
 	return &sequentialReply{
 		sequence: strategies,
@@ -191,6 +207,14 @@ func (s *sequentialReply) EndRunningContext() []error {
 		errs = append(errs, def.EndRunningContext()...)
 	}
 	return errs
+}
+
+func (s *sequentialReply) CapturedVariables() map[string]string {
+	res := make(map[string]string)
+	for _, def := range s.sequence {
+		mergeVariables(res, def.CapturedVariables())
+	}
+	return res
 }
 
 func (s *sequentialReply) HandleRequest(w http.ResponseWriter, r *http.Request) []error {
@@ -243,4 +267,12 @@ func (s *basedOnRequestReply) EndRunningContext() []error {
 		errs = append(errs, def.EndRunningContext()...)
 	}
 	return errs
+}
+
+func (s *basedOnRequestReply) CapturedVariables() map[string]string {
+	res := make(map[string]string)
+	for _, def := range s.variants {
+		mergeVariables(res, def.CapturedVariables())
+	}
+	return res
 }
