@@ -15,9 +15,10 @@ import (
 )
 
 type LoaderPostgres struct {
-	db       *sql.DB
-	location string
-	debug    bool
+	db              *sql.DB
+	location        string
+	debug           bool
+	resetWithDelete bool
 }
 
 type row map[string]interface{}
@@ -67,12 +68,35 @@ type loadContext struct {
 	refsInserted   rowsDict
 }
 
-func New(db *sql.DB, location string, debug bool) *LoaderPostgres {
-	return &LoaderPostgres{
+// Option configures optional LoaderPostgres behaviour.
+type Option func(*LoaderPostgres)
+
+// WithDeleteReset makes the loader clear tables with DELETE FROM under
+// session_replication_role = replica instead of TRUNCATE ... CASCADE.
+//
+// For the small, mostly-empty tables typical of fixtures this avoids the
+// relfilenode churn and ACCESS EXCLUSIVE locks of TRUNCATE and can be
+// noticeably faster. It requires the connection role to be allowed to set
+// session_replication_role (superuser or a role with bypassrls) and is meant
+// for ephemeral test databases. Sequences are not reset here — fixtures use
+// explicit ids and fixSequences realigns sequences after load.
+func WithDeleteReset() Option {
+	return func(l *LoaderPostgres) {
+		l.resetWithDelete = true
+	}
+}
+
+func New(db *sql.DB, location string, debug bool, opts ...Option) *LoaderPostgres {
+	l := &LoaderPostgres{
 		db:       db,
 		location: location,
 		debug:    debug,
 	}
+	for _, opt := range opts {
+		opt(l)
+	}
+
+	return l
 }
 
 func (f *LoaderPostgres) Load(names []string) error {
@@ -249,6 +273,10 @@ func (f *LoaderPostgres) truncateTables(tx *sql.Tx, tables ...loadedTable) error
 		set[tableName] = struct{}{}
 	}
 
+	if f.resetWithDelete {
+		return f.deleteTables(tx, tablesToTruncate)
+	}
+
 	query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", strings.Join(tablesToTruncate, ","))
 	if f.debug {
 		fmt.Println("Issuing SQL:", query)
@@ -259,6 +287,31 @@ func (f *LoaderPostgres) truncateTables(tx *sql.Tx, tables ...loadedTable) error
 	}
 
 	return nil
+}
+
+// deleteTables clears the given tables with DELETE FROM instead of TRUNCATE.
+// session_replication_role = replica (scoped to the transaction) disables FK
+// triggers so tables can be cleared in any order without CASCADE; the role is
+// then restored so the subsequent inserts still enforce foreign keys.
+func (f *LoaderPostgres) deleteTables(tx *sql.Tx, tables []string) error {
+	if _, err := tx.Exec("SET LOCAL session_replication_role = replica"); err != nil {
+		return err
+	}
+
+	for _, table := range tables {
+		//nolint:gosec // Table names come from fixture definitions, not user input.
+		query := fmt.Sprintf("DELETE FROM %s", table)
+		if f.debug {
+			fmt.Println("Issuing SQL:", query)
+		}
+		if _, err := tx.Exec(query); err != nil {
+			return err
+		}
+	}
+
+	_, err := tx.Exec("SET LOCAL session_replication_role = DEFAULT")
+
+	return err
 }
 
 func (f *LoaderPostgres) loadTable(ctx *loadContext, tx *sql.Tx, t tableName, rows table) error {

@@ -165,6 +165,76 @@ func TestLoadTablesShouldResolveRefs(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestLoadTablesWithDeleteResetShouldUseDelete(t *testing.T) {
+	yml, err := os.ReadFile("../testdata/sql_refs.yaml")
+	require.NoError(t, err)
+
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	defer func() { _ = db.Close() }()
+
+	ctx := loadContext{
+		refsDefinition: make(map[string]row),
+		refsInserted:   make(map[string]row),
+	}
+
+	l := New(db, "", true, WithDeleteReset())
+
+	err = l.loadYml(yml, &ctx)
+	require.NoError(t, err)
+
+	mock.ExpectBegin()
+
+	mock.ExpectExec("^SET LOCAL session_replication_role = replica$").
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(`^DELETE FROM "public"\."table1"$`).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(`^DELETE FROM "public"\."table2"$`).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(`^DELETE FROM "public"\."table3"$`).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec("^SET LOCAL session_replication_role = DEFAULT$").
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	q := `^INSERT INTO "public"."table1" AS row \("f1", "f2"\) VALUES ` +
+		`\('value1', 'value2'\) ` +
+		`RETURNING row_to_json\(row\)$`
+	mock.ExpectQuery(q).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"json"}).
+				AddRow("{\"f1\":\"value1\",\"f2\":\"value2\"}"),
+		)
+
+	q = `^INSERT INTO "public"."table2" AS row \("f1", "f2"\) VALUES ` +
+		`\('value2', 'value1'\) ` +
+		`RETURNING row_to_json\(row\)$`
+	mock.ExpectQuery(q).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"json"}).
+				AddRow("{\"f1\":\"value2\",\"f2\":\"value1\"}"),
+		)
+
+	q = `^INSERT INTO "public"."table3" AS row \("f1", "f2"\) VALUES ` +
+		`\('value1', 'value2'\) ` +
+		`RETURNING row_to_json\(row\)$`
+	mock.ExpectQuery(q).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"json"}).
+				AddRow("{\"f1\":\"value1\",\"f2\":\"value2\"}"),
+		)
+
+	mock.ExpectExec("^DO").
+		WillReturnResult(sqlmock.NewResult(0, 0))
+
+	mock.ExpectCommit()
+
+	err = l.loadTables(&ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
+}
+
 func TestLoadTablesShouldExtendRows(t *testing.T) {
 	yml, err := os.ReadFile("../testdata/sql_extend.yaml")
 	require.NoError(t, err)
