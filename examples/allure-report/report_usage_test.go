@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/lamoda/gonkey/models"
 	"github.com/lamoda/gonkey/runner"
 )
 
@@ -122,5 +123,33 @@ func TestAPIWithAllure2_TestITLabels(t *testing.T) {
 		TestsDir:        "without_labels_test.yaml",
 		AllurePackage:   "api",
 		AllureTestClass: "UsersHandler",
+	})
+}
+
+func TestAPIWithAllure2_CustomDefaultLabels(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if r.URL.Path == "/api/users/123" && r.Method == "GET" {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"id": 123, "username": "testuser", "email": "test@example.com"}`))
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	os.Setenv("GONKEY_ALLURE_DIR", "./allure-results-custom-labels")
+	os.Setenv("GONKEY_ALLURE_FORMAT", "v2")
+
+	runner.RunWithTesting(t, &runner.RunWithTestingParams{
+		Server:          srv,
+		TestsDir:        "without_labels_test.yaml",
+		AllurePackage:   "api",
+		AllureTestClass: "UsersHandler",
+		AllureDefaultLabels: []models.AllureLabel{
+			{Name: "layer", Value: "Integration"},
+			{Name: "package", Value: "cron"},
+		},
 	})
 }
