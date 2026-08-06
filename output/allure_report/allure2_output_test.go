@@ -10,6 +10,64 @@ import (
 	"github.com/lamoda/gonkey/models"
 )
 
+func TestDefaultLabelsToApply(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		presentLabels map[string]bool
+		defaults      []models.AllureLabel
+		want          []models.AllureLabel
+	}{
+		{
+			name:          "apply all defaults when test has no labels",
+			presentLabels: map[string]bool{},
+			defaults: []models.AllureLabel{
+				{Name: "layer", Value: "Integration"},
+				{Name: "team", Value: "Orders shipment"},
+			},
+			want: []models.AllureLabel{
+				{Name: "layer", Value: "Integration"},
+				{Name: "team", Value: "Orders shipment"},
+			},
+		},
+		{
+			name: "skip defaults overridden by test labels",
+			presentLabels: map[string]bool{
+				"layer": true,
+			},
+			defaults: []models.AllureLabel{
+				{Name: "layer", Value: "Integration"},
+				{Name: "team", Value: "Orders shipment"},
+			},
+			want: []models.AllureLabel{
+				{Name: "team", Value: "Orders shipment"},
+			},
+		},
+		{
+			name:          "skip empty defaults",
+			presentLabels: map[string]bool{},
+			defaults: []models.AllureLabel{
+				{Name: "layer", Value: ""},
+				{Name: "", Value: "Integration"},
+				{Name: "team", Value: "Orders shipment"},
+			},
+			want: []models.AllureLabel{
+				{Name: "team", Value: "Orders shipment"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := defaultLabelsToApply(tt.presentLabels, tt.defaults)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestGroupErrorsByEndpoint(t *testing.T) {
 	t.Parallel()
 

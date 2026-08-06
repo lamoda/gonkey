@@ -17,9 +17,8 @@ import (
 
 // Allure2Output generates Allure 2 JSON format reports
 type Allure2Output struct {
-	reportLocation   string
-	defaultPackage   string
-	defaultTestClass string
+	reportLocation string
+	defaultLabels  []models.AllureLabel
 }
 
 // NewAllure2Output creates a new Allure 2 output handler
@@ -32,10 +31,22 @@ func NewAllure2Output(reportLocation string) *Allure2Output {
 	}
 }
 
+// WithDefaultAllureLabels sets default labels for tests without matching labels.
+func (o *Allure2Output) WithDefaultAllureLabels(labels []models.AllureLabel) *Allure2Output {
+	o.defaultLabels = labels
+	return o
+}
+
 // WithDefaultLabels sets default package and testClass labels
 func (o *Allure2Output) WithDefaultLabels(packageLabel, testClassLabel string) *Allure2Output {
-	o.defaultPackage = packageLabel
-	o.defaultTestClass = testClassLabel
+	labels := make([]models.AllureLabel, 0, 2)
+	if packageLabel != "" {
+		labels = append(labels, models.AllureLabel{Name: "package", Value: packageLabel})
+	}
+	if testClassLabel != "" {
+		labels = append(labels, models.AllureLabel{Name: "testClass", Value: testClassLabel})
+	}
+	o.defaultLabels = labels
 	return o
 }
 
@@ -53,18 +64,12 @@ func (o *Allure2Output) Process(t models.TestInterface, result *models.Result) e
 		allureResult.WithStatusDetails(err.Error(), "")
 	}
 
-	hasPackageLabel := false
-	hasTestClassLabel := false
+	presentLabels := make(map[string]bool)
 
 	if metadata := t.GetAllureMetadata(); metadata != nil {
 		for _, label := range metadata.Labels {
 			allureResult.AddLabel(label.Name, label.Value)
-			if label.Name == "package" {
-				hasPackageLabel = true
-			}
-			if label.Name == "testClass" {
-				hasTestClassLabel = true
-			}
+			presentLabels[label.Name] = true
 		}
 
 		for _, link := range metadata.Links {
@@ -76,11 +81,8 @@ func (o *Allure2Output) Process(t models.TestInterface, result *models.Result) e
 		}
 	}
 
-	if !hasPackageLabel && o.defaultPackage != "" {
-		allureResult.AddLabel("package", o.defaultPackage)
-	}
-	if !hasTestClassLabel && o.defaultTestClass != "" {
-		allureResult.AddLabel("testClass", o.defaultTestClass)
+	for _, label := range defaultLabelsToApply(presentLabels, o.defaultLabels) {
+		allureResult.AddLabel(label.Name, label.Value)
 	}
 
 	allureResult.AddLabel(allure2.LabelFramework, "gonkey")
@@ -443,6 +445,20 @@ func categorizeErrors(errs []error) map[models.ErrorCategory]ErrorsByIdentifier 
 }
 
 func (o *Allure2Output) Finalize() {
+}
+
+func defaultLabelsToApply(presentLabels map[string]bool, defaults []models.AllureLabel) []models.AllureLabel {
+	applied := make([]models.AllureLabel, 0, len(defaults))
+	for _, label := range defaults {
+		if label.Name == "" || label.Value == "" {
+			continue
+		}
+		if presentLabels[label.Name] {
+			continue
+		}
+		applied = append(applied, label)
+	}
+	return applied
 }
 
 func groupErrorsByEndpoint(errs []error) map[string][]error {

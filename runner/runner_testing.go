@@ -53,6 +53,8 @@ type RunWithTestingParams struct {
 	// TestIT labels: can be overridden by test-level labels
 	AllurePackage   string
 	AllureTestClass string
+	// AllureDefaultLabels are default labels; AllurePackage/AllureTestClass override package/testClass.
+	AllureDefaultLabels []models.AllureLabel
 }
 
 func registerMocksEnvironment(m *mocks.Mocks) {
@@ -122,7 +124,7 @@ func RunWithTesting(t *testing.T, params *RunWithTestingParams) {
 			runner.AddOutput(allureOutput)
 		case "v2", "json":
 			allureOutput := allure_report.NewAllure2Output(allureDir).
-				WithDefaultLabels(params.AllurePackage, params.AllureTestClass)
+				WithDefaultAllureLabels(buildAllureDefaultLabels(params))
 			defer allureOutput.Finalize()
 			runner.AddOutput(allureOutput)
 		default:
@@ -163,6 +165,36 @@ func initRunner(
 	)
 
 	return runner
+}
+
+func buildAllureDefaultLabels(params *RunWithTestingParams) []models.AllureLabel {
+	var labels []models.AllureLabel
+	for _, label := range params.AllureDefaultLabels {
+		if label.Name == "" || label.Value == "" {
+			continue
+		}
+		labels = upsertAllureLabel(labels, label.Name, label.Value)
+	}
+	if params.AllurePackage != "" {
+		labels = upsertAllureLabel(labels, "package", params.AllurePackage)
+	}
+	if params.AllureTestClass != "" {
+		labels = upsertAllureLabel(labels, "testClass", params.AllureTestClass)
+	}
+
+	return labels
+}
+
+func upsertAllureLabel(labels []models.AllureLabel, name, value string) []models.AllureLabel {
+	for i := range labels {
+		if labels[i].Name == name {
+			labels[i].Value = value
+
+			return labels
+		}
+	}
+
+	return append(labels, models.AllureLabel{Name: name, Value: value})
 }
 
 func addCheckers(runner *Runner, params *RunWithTestingParams) {
